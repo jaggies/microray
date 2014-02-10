@@ -1,3 +1,5 @@
+SubDir TOP src ;
+
 Main microray : 
 	hit.c
 	main.c
