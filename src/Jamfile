@@ -1,4 +1,5 @@
 Main microray : 
+	hit.c
 	main.c
 	raymath.c
 	sphere.c

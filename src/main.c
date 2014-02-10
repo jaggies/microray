@@ -7,17 +7,14 @@
 
 #include <stdio.h>
 #include "sphere.h"
+#include "hit.h"
 
 #define XRES 20
 #define YRES 10
 
 void createRay(float u, float v, Ray* ray) {
-    ray->point.x = u;
-    ray->point.y = v;
-    ray->point.z = 1;
-    ray->dir.x = 0;
-    ray->dir.y = 0;
-    ray->dir.z = -1.0f;
+    makeVec3(u, v, 1, &ray->point);
+    makeVec3(0, 0, -1, &ray->dir);
     normalize(&ray->dir);
 }
 
@@ -33,15 +30,15 @@ int main(int argc, char **argv)
     for (int h = 0; h < YRES; h++, v += dv) {
         float u = -0.5f + du * 0.5f;
         for (int w = 0; w < XRES; w++, u += du) {
-            float t = 1.0e7;
+            Hit hit;
+            clearHit(&hit);
             createRay(u, v, &ray);
-            int hit = 0;
             for (int s = 0; s < n; s++) {
-                if (shapes[s]->op.intersect(shapes[s], &ray, &t)) {
-                    hit++;
+                if (shapes[s]->op.intersect(shapes[s], &ray, &hit.t)) {
+                    hit.best = shapes[s];
                 }
             }
-            fputc(hit ? '.' : ' ', stdout);
+            fputc(hit.best ? '.' : ' ', stdout);
         }
         fputc('\n', stdout);
     }

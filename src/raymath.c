@@ -48,4 +48,10 @@ void copy(Vec3* a, Vec3* result) {
     result->z = a->z;
 }
 
+void makeVec3(float x, float y, float z, Vec3* result) {
+    result->x = x;
+    result->y = y;
+    result->z = z;
+}
+
 
