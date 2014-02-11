@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "sphere.h"
+#include "hit.h"
 
 static
 int intersect(struct Shape* shape, Ray* ray, float *tmax) {
@@ -36,12 +37,9 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 }
 
 static
-void normal(struct Shape* shape, Ray* ray, float t, Vec3 *n) {
+void normal(struct Shape* shape, Ray* ray, Hit* hit, Vec3 *n) {
     Sphere* sphere = (Sphere*) shape;
-    Vec3 point;
-    mult(&ray->dir, t, &point);
-    add(&point, &ray->point, &point);
-    sub(&point, &sphere->position, n);
+    sub(&hit->point, &sphere->position, n);
     normalize(n);
 }
 

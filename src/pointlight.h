@@ -16,6 +16,6 @@ typedef struct PointLight {
     Vec3 color;
 } PointLight;
 
-extern PointLight* createPointLight(Vec3* position, Vec3* color);
+extern Light* createPointLight(Vec3* position, Vec3* color);
 
 #endif /* POINTLIGHT_H_ */

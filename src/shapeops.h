@@ -11,9 +11,10 @@
 #include "ray.h"
 
 struct Shape;
+struct Hit;
 typedef struct ShapeOps {
     int (*intersect)(struct Shape* shape, Ray* ray, float *tmax);
-    void (*normal)(struct Shape* shape, Ray* ray, float t, Vec3 *n);
+    void (*normal)(struct Shape* shape, Ray* ray, struct Hit* hit, Vec3 *n);
 } ShapeOps;
 
 #endif /* SHAPEOPS_H_ */
