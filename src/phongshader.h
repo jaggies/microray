@@ -19,8 +19,11 @@ typedef struct PhongShader {
     struct Vec3 ambient;
     float exponent; // specular exponent
     float index; // index of refraction
+    float reflect; // amount of reflection
+    float transmit; // amount of transmission
 } PhongShader;
 
-Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index);
+extern Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent,
+        float index, float reflect, float transmit);
 
 #endif /* PHONESHADER_H_ */

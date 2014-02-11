@@ -14,6 +14,9 @@ struct Vec3;
 
 typedef struct ShaderOps {
     void (*evaluate)(struct Shader*, struct Hit* hit, struct Vec3* color);
+    float (*getReflectionAmount)(struct Shader* shader);
+    float (*getTransmissionAmount)(struct Shader* shader);
+    float (*getIndexOfRefraction)(struct Shader* shader);
 } ShaderOps;
 
 typedef struct Shader {

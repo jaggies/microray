@@ -34,13 +34,31 @@ static void evaluate(struct Shader* sh, Hit* hit, Vec3* color) {
     add(&shader->ambient, color, color);
 }
 
-Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index) {
+static float getReflectionAmount(struct Shader* sh) {
+    return ((PhongShader*) sh)->reflect;
+}
+
+static float getTransmissionAmount(struct Shader* sh) {
+    return ((PhongShader*) sh)->transmit;
+}
+
+static float getIndexOfRefraction(struct Shader* sh) {
+    return ((PhongShader*) sh)->index;
+}
+
+Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index,
+        float reflect, float transmit) {
     PhongShader* shader = (PhongShader*) malloc(sizeof(PhongShader));
     shader->op.evaluate = evaluate;
+    shader->op.getReflectionAmount = getReflectionAmount;
+    shader->op.getTransmissionAmount = getTransmissionAmount;
+    shader->op.getIndexOfRefraction = getIndexOfRefraction;
     copy(diffuse, &shader->diffuse);
     copy(specular, &shader->specular);
     copy(ambient, &shader->ambient);
     shader->exponent = exponent;
     shader->index = index;
+    shader->reflect = reflect;
+    shader->transmit = transmit;
     return (Shader*) shader;
 }
