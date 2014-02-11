@@ -9,6 +9,7 @@
 #include "sphere.h"
 #include "pointlight.h"
 #include "hit.h"
+#include "phongshader.h"
 
 #define XRES 80
 #define YRES (XRES/2)
@@ -24,9 +25,14 @@ typedef struct World {
 
 World* createWorld() {
     World* world = (World*) malloc(sizeof(World));
+    Vec3 diffuse, specular, ambient;
+    makeVec3(0.5,0,0,&diffuse);
+    makeVec3(0.5,0.5,0.5,&specular);
+    makeVec3(0,0,0,&ambient);
+    Shader* shader = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f);
     world->nShapes = 0;
     world->nLights = 0;
-    world->shapes[world->nShapes++] = createSphere(0, 0, 0, 0.5);
+    world->shapes[world->nShapes++] = createSphere(0, 0, 0, 0.5, shader);
     Vec3 point, color;
     makeVec3(5,5,5,&point);
     makeVec3(1,1,1, &color);
@@ -45,13 +51,15 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color) {
         mult(&ray->dir, hit->t, &hit->point);
         add(&hit->point, &ray->point, &hit->point);
         hit->best->op.normal(hit->best, ray, hit, &hit->normal);
+        reflectionDirection(&ray->dir, &hit->normal, &hit->reflect);
+        makeVec3(0,0,0, color);
         for (int i = 0; i < world->nLights; i++) {
+            Vec3 tmpColor;
             Light* light = world->lights[i];
-            Ray lightRay;
-            light->op.makeRay(light, &hit->point, &lightRay);
-            float kd = dot(&lightRay.dir, &hit->normal);
-            makeVec3(1, 1, 1, color);
-            mult(color, kd > 0 ? kd : 0, color);
+            light->op.makeRay(light, &hit->point, &hit->lightRay);
+            Shader* shader = hit->best->op.shader;
+            shader->op.evaluate(shader, hit, &tmpColor);
+            add(&tmpColor, color, color);
         }
     } else {
         makeVec3(0, 0, 0, color);

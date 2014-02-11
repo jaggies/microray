@@ -54,4 +54,27 @@ void makeVec3(float x, float y, float z, Vec3* result) {
     result->z = z;
 }
 
+void reflectionDirection(Vec3* incident, Vec3* normal, Vec3* result)
+{
+    mult(normal, 2.0f * dot(incident, normal), result);
+    sub(incident, result, result);
+}
+
+int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, Vec3* transmission,
+        Vec3* result)
+{
+    // Heckbert's method (T = eta*I + (eta * costheta1 - sqrt(costheta2sq)) * N)
+    float eta = eta1/eta2;
+    float costheta1 = -dot(incident, normal);
+    float costheta2sq = 1.0 - eta*eta * (1.0 - costheta1 * costheta1);
+    if (costheta2sq >= 0.0f) {
+        mult(incident, eta, result);
+        Vec3 tmp;
+        mult(normal, (eta * costheta1 - sqrt(costheta2sq)), &tmp);
+        add(&tmp, result, result);
+        return 1;
+    }
+    return 0; // total internal reflection
+}
+
 

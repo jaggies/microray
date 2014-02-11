@@ -16,6 +16,6 @@ typedef struct Sphere {
     float radius2;
 } Sphere;
 
-extern Shape* createSphere(float x, float y, float z, float radius);
+extern Shape* createSphere(float x, float y, float z, float radius, struct Shader* shader);
 
 #endif /* SPHERE_H_ */

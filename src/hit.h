@@ -16,6 +16,8 @@ typedef struct Hit {
     Vec3 point;
     Vec3 normal;
     Vec3 uv;
+    Ray  lightRay;
+    Vec3 reflect; // reflected ray direction
     Shape* best;
 } Hit;
 

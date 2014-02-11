@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "sphere.h"
+#include "shader.h"
 #include "hit.h"
 
 static
@@ -43,10 +44,11 @@ void normal(struct Shape* shape, Ray* ray, Hit* hit, Vec3 *n) {
     normalize(n);
 }
 
-Shape* createSphere(float x, float y, float z, float r) {
+Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
     Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
     sphere->op.intersect = intersect;
     sphere->op.normal = normal;
+    sphere->op.shader = shader;
     sphere->position.x = x;
     sphere->position.y = y;
     sphere->position.z = z;

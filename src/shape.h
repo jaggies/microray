@@ -11,12 +11,15 @@
 #include <stdlib.h>
 #include "ray.h"
 
-struct Shape;
+
 struct Hit;
+struct Shape;
+struct Shader;
 
 typedef struct ShapeOps {
     int (*intersect)(struct Shape* shape, Ray* ray, float *tmax);
     void (*normal)(struct Shape* shape, Ray* ray, struct Hit* hit, Vec3 *n);
+    struct Shader* shader; // TODO: find some other way to inherit this
 } ShapeOps;
 
 typedef struct Shape {
