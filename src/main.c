@@ -6,13 +6,14 @@
  */
 
 #include <stdio.h>
+#include <assert.h>
 #include "sphere.h"
 #include "pointlight.h"
 #include "hit.h"
 #include "phongshader.h"
 
-#define XRES 80
-#define YRES (XRES/2)
+#define XRES 1024
+#define YRES XRES
 #define MAXSHAPES 10
 #define MAXLIGHTS 8
 
@@ -26,7 +27,7 @@ typedef struct World {
 World* createWorld() {
     World* world = (World*) malloc(sizeof(World));
     Vec3 diffuse, specular, ambient;
-    makeVec3(0.5,0,0,&diffuse);
+    makeVec3(0.5,0.0,0.0,&diffuse);
     makeVec3(0.5,0.5,0.5,&specular);
     makeVec3(0,0,0,&ambient);
     Shader* shader = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f);
@@ -79,6 +80,29 @@ void trace(Ray* ray, World* world, Vec3* color) {
     shade(ray, world, &hit, color);
 }
 
+int min(int a, int b) {
+    return a < b ? a : b;
+}
+
+int max(int a, int b) {
+    return a > b ? a : b;
+}
+
+void putPixel(int x, int y, Vec3* color) {
+    static FILE *fp = 0;
+    if (!fp) {
+        fp = fopen("out.ppm", "w");
+        fprintf(fp, "P6 %d %d 255\n", XRES, YRES);
+        assert(fp != 0);
+    }
+    int r = min(255, max(0, round(color->x * 255)));
+    int g = min(255, max(0, round(color->y * 255)));
+    int b = min(255, max(0, round(color->z * 255)));
+    fputc(r, fp);
+    fputc(g, fp);
+    fputc(b, fp);
+}
+
 int main(int argc, char **argv)
 {
     int n = 0;
@@ -92,9 +116,8 @@ int main(int argc, char **argv)
             createRay(u, v, &ray);
             Vec3 color;
             trace(&ray, world, &color);
-            fputc('0' + color.x * 10, stdout);
+            putPixel(w, h, &color);
         }
-        fputc('\n', stdout);
     }
 }
 
