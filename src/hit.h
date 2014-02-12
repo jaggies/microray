@@ -13,6 +13,7 @@
 
 typedef struct Hit {
     float t;
+    int  inShadow;
     Vec3 point;
     Vec3 normal;
     Vec3 uv;

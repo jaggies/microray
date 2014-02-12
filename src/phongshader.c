@@ -13,25 +13,23 @@ static float _threshold = 0.01f; // minimum factor before we'll call pow
 static void evaluate(struct Shader* sh, Hit* hit, Vec3* color) {
     PhongShader* shader = (PhongShader*) sh;
 
+    // Ambient
+    copy(&shader->ambient, color);
+
+    if (hit->inShadow) return;
+
     // Diffuse
     float cosAlpha = dot(&hit->normal, &hit->lightRay.dir);
     if (cosAlpha > 0) {
-        mult(&shader->diffuse, cosAlpha, color);
-    } else {
-        makeVec3(0,0,0,color);
+        addscaled(color, cosAlpha, &shader->diffuse, color);
     }
 
     // Specular
     float cosBeta = dot(&hit->reflect, &hit->lightRay.dir);
     if (cosBeta > _threshold) {
         float ks = pow(cosBeta, shader->exponent);
-        Vec3 specular;
-        mult(&shader->specular, ks, &specular);
-        add(&specular, color, color);
+        addscaled(color, ks, &shader->specular, color);
     }
-
-    // Ambient
-    add(&shader->ambient, color, color);
 }
 
 static float getReflectionAmount(struct Shader* sh) {

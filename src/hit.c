@@ -10,4 +10,5 @@
 void clearHit(Hit* hit) {
     hit->t = 1.0e7;
     hit->best = 0;
+    hit->inShadow = 0;
 }
