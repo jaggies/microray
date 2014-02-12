@@ -13,13 +13,13 @@
 
 typedef struct Hit {
     float t;
-    int  inShadow;
-    Vec3 point;
-    Vec3 normal;
-    Vec3 uv;
-    Ray  lightRay;
-    Vec3 reflect; // reflected ray direction
-    Shape* best;
+    int  inShadow;  // whether this hit was in shadow (used by shade())
+    Vec3 point;     // point of intersection
+    Vec3 normal;    // normal at intersection
+    Vec3 uv;        // uv at intersection
+    Ray  lightRay;  // lightRay from intersection to current light
+    Vec3 reflect;   // reflected ray direction
+    Shape* best;    // tracks closest object
 } Hit;
 
 extern void clearHit(Hit* hit);
