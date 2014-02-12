@@ -13,6 +13,12 @@ void add(Vec3* a, Vec3* b, Vec3* result) {
     result->z = a->z + b->z;
 }
 
+void addscaled(Vec3* a, float s, Vec3* b, Vec3* result) {
+    result->x = a->x + s * b->x;
+    result->y = a->y + s * b->y;
+    result->z = a->z + s * b->z;
+}
+
 void sub(Vec3* a, Vec3* b, Vec3* result) {
     result->x = a->x - b->x;
     result->y = a->y - b->y;
@@ -27,9 +33,9 @@ void mult(Vec3* a, float t, Vec3* result) {
 
 void cross(Vec3* a, Vec3* b, Vec3* result) {
     Vec3 tmp;
-    tmp.x = a->y * b->z - a->z*b->y;
-    tmp.y = a->z * b->x - a->x*b->z;
-    tmp.z = a->x * b->y - a->y*b->x;
+    tmp.x = a->y * b->z - a->z * b->y;
+    tmp.y = a->z * b->x - a->x * b->z;
+    tmp.z = a->x * b->y - a->y * b->x;
     copy(&tmp, result);
 }
 

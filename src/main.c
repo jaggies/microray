@@ -17,23 +17,27 @@
 #define MAXSHAPES 10
 #define MAXLIGHTS 8
 #define MAXDEPTH 1 // max number of reflected rays
+#define RAY_EPSILON 1.0e-5f
 
 typedef struct World {
     Shape* shapes[MAXSHAPES];
     Light* lights[MAXLIGHTS];
     int nShapes;
     int nLights;
+    Vec3 background; // background colors
+    float epsilon; // intersection slop
 } World;
 
 World* createWorld() {
     World* world = (World*) malloc(sizeof(World));
+    world->epsilon = RAY_EPSILON;
     Vec3 diffuse, specular, ambient;
     makeVec3(0.5,0.5,0.5,&specular);
     makeVec3(0.1,0.1,0.1,&ambient);
     makeVec3(0.5,0.0,0.0,&diffuse);
-    Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
+    Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 1.0f, 0.5f);
     makeVec3(0.0,0.0,0.5,&diffuse);
-    Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
+    Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 1.0f, 0.5f);
     world->nShapes = 0;
     world->nLights = 0;
     world->shapes[world->nShapes++] = createSphere(0.25, 0, 0, 0.25, red);
@@ -42,6 +46,7 @@ World* createWorld() {
     makeVec3(5,5,5,&point);
     makeVec3(1,1,1, &color);
     world->lights[world->nLights++] = createPointLight(&point, &color);
+    makeVec3(0.2, 0.3, 0.7, &world->background);
     return world;
 }
 
@@ -74,13 +79,15 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             Ray reflected;
             copy(&hit->point, &reflected.point);
             copy(&hit->reflect, &reflected.dir);
+            // nudge the point to avoid self-intersection
+            addscaled(&reflected.point, world->epsilon, &reflected.dir, &reflected.point);
             negate(&reflected.dir); // TODO: is this correct?
             trace(&reflected, world, &reflectColor, maxdepth - 1);
             mult(&reflectColor, kr, &reflectColor);
             add(&reflectColor, color, color);
         }
     } else {
-        makeVec3(0, 0, 0, color);
+        copy(&world->background, color);
     }
     return color;
 }

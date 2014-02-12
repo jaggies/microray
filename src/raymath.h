@@ -12,6 +12,7 @@
 #include "vec3.h"
 
 extern void add(Vec3* a, Vec3* b, Vec3* result);
+extern void addscaled(Vec3* a, float s, Vec3* b, Vec3* result);
 extern void sub(Vec3* a, Vec3* b, Vec3* result);
 extern void mult(Vec3* a, float t, Vec3* result);
 extern void cross(Vec3* a, Vec3* b, Vec3* result);
