@@ -43,11 +43,11 @@ World* createWorld() {
     makeVec3(0.5,0.5,0.5,&specular);
     makeVec3(0.1,0.1,0.1,&ambient);
     makeVec3(0.5,0.0,0.0,&diffuse);
-    Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 1.0f, 0.5f);
+    Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
     makeVec3(0.0,0.0,0.5,&diffuse);
-    Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 1.0f, 0.5f);
+    Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
     makeVec3(0.5,0.5,0.5,&diffuse);
-    Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.4, 1.0f, 0.0f);
+    Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 1.0f, 1.4, 0.3f, 0.0f);
     world->shapes[world->nShapes++] = createSphere(0.25, 0, 0, 0.25, red);
     world->shapes[world->nShapes++] = createSphere(-0.25, 0, 0, 0.25, blu);
     float plane[][3] = { {-1, -0.25, -1}, {1, -0.25, -1}, {1, -0.25, 1}, {-1, -0.25, 1} };
