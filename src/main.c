@@ -80,11 +80,10 @@ extern void trace(Ray* ray, World* world, Vec3* color, int maxdepth);
 
 Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     if (hit->best) {
-        mult(&ray->dir, hit->t, &hit->point);
-        add(&hit->point, &ray->point, &hit->point);
-        hit->best->op.normal(hit->best, ray, hit, &hit->normal);
-        reflectionDirection(&ray->dir, &hit->normal, &hit->reflect);
         makeVec3(0,0,0, color);
+        addscaled(&ray->point, hit->t, &ray->dir, &hit->point);
+        hit->best->op.normal(hit->best, hit, &hit->normal);
+        reflectionDirection(&ray->dir, &hit->normal, &hit->reflect);
         Shader* shader = hit->best->op.shader;
         for (int i = 0; i < world->nLights; i++) {
             Vec3 tmpColor;
@@ -99,9 +98,9 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             Ray reflected;
             copy(&hit->point, &reflected.point);
             copy(&hit->reflect, &reflected.dir);
+            negate(&reflected.dir); // TODO: is this correct?
             // nudge the point to avoid self-intersection
             addscaled(&reflected.point, world->epsilon, &reflected.dir, &reflected.point);
-            negate(&reflected.dir); // TODO: is this correct?
             trace(&reflected, world, &reflectColor, maxdepth - 1);
             mult(&reflectColor, kr, &reflectColor);
             add(&reflectColor, color, color);

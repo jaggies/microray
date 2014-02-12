@@ -38,7 +38,7 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 }
 
 static
-void normal(struct Shape* shape, Ray* ray, Hit* hit, Vec3 *n) {
+void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
     Sphere* sphere = (Sphere*) shape;
     sub(&hit->point, &sphere->position, n);
     normalize(n);

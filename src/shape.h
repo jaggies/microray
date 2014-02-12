@@ -18,7 +18,7 @@ struct Shader;
 
 typedef struct ShapeOps {
     int (*intersect)(struct Shape* shape, Ray* ray, float *tmax);
-    void (*normal)(struct Shape* shape, Ray* ray, struct Hit* hit, Vec3 *n);
+    void (*normal)(struct Shape* shape, struct Hit* hit, Vec3 *n);
     struct Shader* shader; // TODO: find some other way to inherit this
 } ShapeOps;
 

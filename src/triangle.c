@@ -49,7 +49,7 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 }
 
 static
-void normal(struct Shape* shape, Ray* ray, Hit* hit, Vec3 *n) {
+void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
     copy(&((Triangle*) shape)->normal0, n);
 }
 
