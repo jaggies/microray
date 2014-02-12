@@ -1,0 +1,4 @@
+- implement uv calculation for triangles and spheres
+- add checkerboard shader
+- calculate Hit info only for shaders that need it (e.g. reflected ray)
+- create input scene format
