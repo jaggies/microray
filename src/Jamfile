@@ -7,4 +7,5 @@ Main microray :
 	pointlight.c
 	raymath.c
 	sphere.c
+	triangle.c
 	;
