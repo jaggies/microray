@@ -5,6 +5,7 @@
  *      Author: jmiller
  */
 
+#include <math.h>
 #include "raymath.h"
 
 void add(Vec3* a, Vec3* b, Vec3* result) {
@@ -89,4 +90,10 @@ int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, V
     return 0; // total internal reflection
 }
 
+float Radians(float degrees) {
+    return M_PI * degrees / 180.0f;
+}
 
+float Degrees(float radians) {
+    return 180.0f * radians / M_PI;
+}
