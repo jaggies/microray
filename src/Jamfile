@@ -3,6 +3,7 @@ SubDir TOP src ;
 Main microray : 
 	hit.c
 	main.c
+	perspectivecamera.c
 	phongshader.c
 	pointlight.c
 	raymath.c
