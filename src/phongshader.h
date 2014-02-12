@@ -13,7 +13,6 @@
 
 typedef struct PhongShader {
     ShaderOps op;
-    void (*evaluate)(struct Shader* shader, struct Hit* hit, struct Vec3* color);
     struct Vec3 diffuse;
     struct Vec3 specular;
     struct Vec3 ambient;
