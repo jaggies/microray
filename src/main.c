@@ -64,7 +64,7 @@ World* createWorld() {
 }
 
 Camera* makeCamera() {
-    Vec3 from; makeVec3(1, 1, 1, &from);
+    Vec3 from; makeVec3(-1, 1, 1, &from);
     Vec3 at; makeVec3(0, 0, 0, &at);
     Vec3 up; makeVec3(0, 1, 0, &up);
     float aspect =  (float) XRES / YRES;
@@ -78,6 +78,7 @@ void createRay(float u, float v, Ray* ray) {
 }
 
 extern void trace(Ray* ray, World* world, Vec3* color, int maxdepth);
+extern int shadow(Ray* ray, World* world);
 
 Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     if (hit->best) {
@@ -90,8 +91,11 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             Vec3 tmpColor;
             Light* light = world->lights[i];
             light->op.makeRay(light, &hit->point, &hit->lightRay);
-            shader->op.evaluate(shader, hit, &tmpColor);
-            add(&tmpColor, color, color);
+            addscaled(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
+            if (!shadow(&hit->lightRay, world)) {
+                shader->op.evaluate(shader, hit, &tmpColor);
+                add(&tmpColor, color, color);
+            }
         }
         float kr = shader->op.getReflectionAmount(shader);
         if (kr > 0.0f && maxdepth) {
@@ -121,6 +125,18 @@ void trace(Ray* ray, World* world, Vec3* color, int maxdepth) {
         }
     }
     shade(ray, world, &hit, color, maxdepth);
+}
+
+int shadow(Ray* ray, World* world) {
+    Hit hit;
+    clearHit(&hit);
+    for (int s = 0; s < world->nShapes; s++) {
+        Shape* shape = world->shapes[s];
+        if (shape->op.intersect(shape, ray, &hit.t)) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int min(int a, int b) {
