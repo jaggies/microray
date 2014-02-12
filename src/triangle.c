@@ -22,7 +22,7 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
     Triangle* triangle = (Triangle*) shape;
 
     Vec3 s1; cross(&ray->dir, &triangle->edge2, &s1);
-    float div = dot(&s1, &triangle->edge2);
+    float div = dot(&s1, &triangle->edge1);
     if (div == 0.0f) return 0;  // ray parallel to plane.
 
     float invDiv = 1.0f / div;
@@ -38,6 +38,7 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
     if ((beta < 0.0f) || ((alpha + beta) > 1.0f)) return 0;
 
     float t = dot(&triangle->edge2, &s2) * invDiv;
+
     if ((t > tmin) && (t < *tmax)) {
         *tmax = t;
         hitData.alpha = alpha;
