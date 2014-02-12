@@ -10,6 +10,8 @@
 #include "shader.h"
 #include "hit.h"
 
+static float tmin = 0.0f;
+
 static
 int intersect(struct Shape* shape, Ray* ray, float *tmax) {
     Sphere* sphere = (Sphere*) shape;
@@ -24,12 +26,12 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
     if (disc >= 0.0f) {
         disc = sqrt(disc);
         float t2 = b + disc;   // farthest point
-        if (t2 < *tmax) {
+        if (t2 > tmin && t2 < *tmax) {
             *tmax = t2;
             hit++;
         }
         float t1 = b - disc;   // nearest point
-        if (t1 < *tmax) {
+        if (t1 > tmin && t1 < *tmax) {
             *tmax = t1;
             hit++;
         }

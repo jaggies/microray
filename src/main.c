@@ -46,6 +46,7 @@ World* createWorld() {
     Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 1.0f, 0.5f);
     makeVec3(0.0,0.0,0.5,&diffuse);
     Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 1.0f, 0.5f);
+    makeVec3(0.5,0.5,0.5,&diffuse);
     Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.4, 1.0f, 0.0f);
     world->shapes[world->nShapes++] = createSphere(0.25, 0, 0, 0.25, red);
     world->shapes[world->nShapes++] = createSphere(-0.25, 0, 0, 0.25, blu);
@@ -98,7 +99,6 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             Ray reflected;
             copy(&hit->point, &reflected.point);
             copy(&hit->reflect, &reflected.dir);
-            negate(&reflected.dir); // TODO: is this correct?
             // nudge the point to avoid self-intersection
             addscaled(&reflected.point, world->epsilon, &reflected.dir, &reflected.point);
             trace(&reflected, world, &reflectColor, maxdepth - 1);
