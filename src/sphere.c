@@ -18,9 +18,9 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 
     // Distance from center to perpendicular plane
     Vec3 dir;
-    sub(&sphere->position, &ray->point, &dir);
-    float b = dot(&ray->dir, &dir);
-    float disc = b*b - dot(&dir, &dir) + sphere->radius2;
+    sub3(&sphere->position, &ray->point, &dir);
+    float b = dot3(&ray->dir, &dir);
+    float disc = b*b - dot3(&dir, &dir) + sphere->radius2;
 
     int hit = 0;
     if (disc >= 0.0f) {
@@ -42,14 +42,20 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 static
 void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
     Sphere* sphere = (Sphere*) shape;
-    sub(&hit->point, &sphere->position, n);
-    normalize(n);
+    sub3(&hit->point, &sphere->position, n);
+    normalize3(n);
+}
+
+static
+void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
+    uv->x = uv->y = 0.0f; // TODO
 }
 
 Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
     Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
     sphere->op.intersect = intersect;
     sphere->op.normal = normal;
+    sphere->op.uv = uv;
     sphere->op.shader = shader;
     sphere->position.x = x;
     sphere->position.y = y;

@@ -1,6 +1,7 @@
 SubDir TOP src ;
 
 Main microray : 
+	checkerboardshader.c
 	hit.c
 	main.c
 	perspectivecamera.c
@@ -9,4 +10,6 @@ Main microray :
 	raymath.c
 	sphere.c
 	triangle.c
+	vec2.c
+	vec3.c
 	;

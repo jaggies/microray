@@ -14,21 +14,22 @@ static void evaluate(struct Shader* sh, Hit* hit, Vec3* color) {
     PhongShader* shader = (PhongShader*) sh;
 
     // Ambient
-    copy(&shader->ambient, color);
+    copy3(&shader->ambient, color);
 
     if (hit->inShadow) return;
 
     // Diffuse
-    float cosAlpha = dot(&hit->normal, &hit->lightRay.dir);
+    float cosAlpha = dot3(&hit->normal, &hit->lightRay.dir);
+    cosAlpha = fabs(cosAlpha);
     if (cosAlpha > 0) {
-        addscaled(color, cosAlpha, &shader->diffuse, color);
+        addscaled3(color, cosAlpha, &shader->diffuse, color);
     }
 
     // Specular
-    float cosBeta = dot(&hit->reflect, &hit->lightRay.dir);
+    float cosBeta = dot3(&hit->reflect, &hit->lightRay.dir);
     if (cosBeta > _threshold) {
         float ks = pow(cosBeta, shader->exponent);
-        addscaled(color, ks, &shader->specular, color);
+        addscaled3(color, ks, &shader->specular, color);
     }
 }
 
@@ -51,9 +52,9 @@ Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float ex
     shader->op.getReflectionAmount = getReflectionAmount;
     shader->op.getTransmissionAmount = getTransmissionAmount;
     shader->op.getIndexOfRefraction = getIndexOfRefraction;
-    copy(diffuse, &shader->diffuse);
-    copy(specular, &shader->specular);
-    copy(ambient, &shader->ambient);
+    copy3(diffuse, &shader->diffuse);
+    copy3(specular, &shader->specular);
+    copy3(ambient, &shader->ambient);
     shader->exponent = exponent;
     shader->index = index;
     shader->reflect = reflect;

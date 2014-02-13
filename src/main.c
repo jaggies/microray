@@ -12,6 +12,7 @@
 #include "pointlight.h"
 #include "hit.h"
 #include "phongshader.h"
+#include "checkerboardshader.h"
 #include "perspectivecamera.h"
 
 #define XRES 1024
@@ -40,41 +41,51 @@ World* createWorld() {
     world->nLights = 0;
     world->camera = makeCamera();
     Vec3 diffuse, specular, ambient;
-    makeVec3(0.5,0.5,0.5,&specular);
-    makeVec3(0.1,0.1,0.1,&ambient);
-    makeVec3(0.5,0.0,0.0,&diffuse);
+    vec3(0.5,0.5,0.5,&specular);
+    vec3(0.1,0.1,0.1,&ambient);
+    vec3(0.5,0.0,0.0,&diffuse);
     Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
-    makeVec3(0.0,0.0,0.5,&diffuse);
+    vec3(0.0,0.0,0.5,&diffuse);
     Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
-    makeVec3(0.5,0.5,0.5,&diffuse);
-    Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 1.0f, 1.4, 0.3f, 0.0f);
+    vec3(0.5,0.5,0.5,&diffuse);
+    Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
+    Vec3 check1; vec3(1,0,0, &check1);
+    Vec3 check2; vec3(0,1,0, &check2);
+    Vec2 scale; vec2(10,10,&scale);
+    Vec2 bias; vec2(0,0,&bias);
+    Shader* checker = createCheckerboardShader(&check1, &check2, &scale, &bias, mirror, &((PhongShader*)mirror)->diffuse);
     world->shapes[world->nShapes++] = createSphere(0.25, 0, 0, 0.25, red);
     world->shapes[world->nShapes++] = createSphere(-0.25, 0, 0, 0.25, blu);
     float plane[][3] = { {-1, -0.25, -1}, {1, -0.25, -1}, {1, -0.25, 1}, {-1, -0.25, 1} };
-    world->shapes[world->nShapes++] = createTriangle((Vec3*) plane[0], (Vec3*) plane[1],
-            (Vec3*) plane[2], mirror);
-    world->shapes[world->nShapes++] = createTriangle((Vec3*) plane[2], (Vec3*) plane[3],
-            (Vec3*) plane[0], mirror);
+    float uv[][2] = { {0,0}, {1,0}, {1,1}, {0,1} };
+    world->shapes[world->nShapes++] = createTriangle(
+            (Vec3*) plane[0], (Vec3*) plane[1], (Vec3*) plane[2],
+            (Vec2*) uv[0], (Vec2*) uv[1], (Vec2*) uv[2],
+            checker);
+    world->shapes[world->nShapes++] = createTriangle(
+            (Vec3*) plane[2], (Vec3*) plane[3], (Vec3*) plane[0],
+            (Vec2*) uv[2], (Vec2*) uv[3], (Vec2*) uv[0],
+            checker);
     Vec3 point, color;
-    makeVec3(5,5,5, &point);
-    makeVec3(1,1,1, &color);
+    vec3(5,5,5, &point);
+    vec3(1,1,1, &color);
     world->lights[world->nLights++] = createPointLight(&point, &color);
-    makeVec3(0.2, 0.3, 0.7, &world->background);
+    vec3(0.2, 0.3, 0.7, &world->background);
     return world;
 }
 
 Camera* makeCamera() {
-    Vec3 from; makeVec3(-1, 1, 1, &from);
-    Vec3 at; makeVec3(0, 0, 0, &at);
-    Vec3 up; makeVec3(0, 1, 0, &up);
+    Vec3 from; vec3(-1, 1, 1, &from);
+    Vec3 at; vec3(0, 0, 0, &at);
+    Vec3 up; vec3(0, 1, 0, &up);
     float aspect =  (float) XRES / YRES;
     return (Camera*) createPerspectiveCamera(&from, &at, &up, 45.0f, aspect);
 }
 
 void createRay(float u, float v, Ray* ray) {
-    makeVec3(u, v, 1, &ray->point);
-    makeVec3(0, 0, -1, &ray->dir);
-    normalize(&ray->dir);
+    vec3(u, v, 1, &ray->point);
+    vec3(0, 0, -1, &ray->dir);
+    normalize3(&ray->dir);
 }
 
 extern void trace(Ray* ray, World* world, Vec3* color, int maxdepth);
@@ -82,34 +93,35 @@ extern int shadow(Ray* ray, World* world);
 
 Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     if (hit->best) {
-        makeVec3(0,0,0, color);
-        addscaled(&ray->point, hit->t, &ray->dir, &hit->point);
+        vec3(0,0,0, color);
+        addscaled3(&ray->point, hit->t, &ray->dir, &hit->point);
         hit->best->op.normal(hit->best, hit, &hit->normal);
+        hit->best->op.uv(hit->best, hit, &hit->uv);
         reflectionDirection(&ray->dir, &hit->normal, &hit->reflect);
         Shader* shader = hit->best->op.shader;
         for (int i = 0; i < world->nLights; i++) {
             Vec3 tmpColor;
             Light* light = world->lights[i];
             light->op.makeRay(light, &hit->point, &hit->lightRay);
-            addscaled(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
+            addscaled3(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
             hit->inShadow = shadow(&hit->lightRay, world);
             shader->op.evaluate(shader, hit, &tmpColor);
-            add(&tmpColor, color, color); // TODO: multiply by Light's ambient color
+            add3(&tmpColor, color, color); // TODO: multiply by Light's ambient color
         }
         float kr = shader->op.getReflectionAmount(shader);
-        if (kr > 0.0f && maxdepth) {
+        if ((kr > 0.0f) && (maxdepth > 0)) {
             Vec3 reflectColor;
             Ray reflected;
-            copy(&hit->point, &reflected.point);
-            copy(&hit->reflect, &reflected.dir);
+            copy3(&hit->point, &reflected.point);
+            copy3(&hit->reflect, &reflected.dir);
             // nudge the point to avoid self-intersection
-            addscaled(&reflected.point, world->epsilon, &reflected.dir, &reflected.point);
+            addscaled3(&reflected.point, world->epsilon, &reflected.dir, &reflected.point);
             trace(&reflected, world, &reflectColor, maxdepth - 1);
-            mult(&reflectColor, kr, &reflectColor);
-            add(&reflectColor, color, color);
+            mult3(&reflectColor, kr, &reflectColor);
+            add3(&reflectColor, color, color);
         }
     } else {
-        copy(&world->background, color);
+        copy3(&world->background, color);
     }
     return color;
 }
