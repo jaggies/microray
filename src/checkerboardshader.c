@@ -40,7 +40,7 @@ Shader* createCheckerboardShader(Vec3* color1, Vec3* color2, Vec2* scale, Vec2* 
     shader->op.evaluate = evaluate;
     shader->op.getIndexOfRefraction = getIndexOfRefraction;
     shader->op.getReflectionAmount = getReflectionAmount;
-    shader->op.getTransmissionAmount = target->op.getTransmissionAmount;
+    shader->op.getTransmissionAmount = getTransmissionAmount;
     copy2(scale, &shader->scale);
     copy2(bias, &shader->bias);
     copy3(color1, &shader->color1);
