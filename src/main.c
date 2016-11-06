@@ -19,7 +19,7 @@
 #define YRES XRES
 #define MAXSHAPES 10
 #define MAXLIGHTS 8
-#define MAXDEPTH 2 // max number of reflected rays
+#define MAXDEPTH 4 // max number of reflected rays
 #define RAY_EPSILON 1.0e-5f
 
 typedef struct World {
@@ -42,11 +42,11 @@ World* createWorld() {
     world->camera = makeCamera();
     Vec3 diffuse, specular, ambient;
     vec3(0.5,0.5,0.5,&specular);
-    vec3(0.1,0.1,0.1,&ambient);
-    vec3(0.5,0.0,0.0,&diffuse);
-    Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
-    vec3(0.0,0.0,0.5,&diffuse);
-    Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.4f, 0.5f, 0.5f);
+    vec3(0.0,0.0,0.0,&ambient);
+    vec3(0.0,0.0,0.0,&diffuse);
+    Shader* red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
+    vec3(0.0,0.0,0.0,&diffuse);
+    Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
     vec3(0.5,0.5,0.5,&diffuse);
     Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
     Vec3 check1; vec3(1,0,0, &check1);
@@ -82,12 +82,6 @@ Camera* makeCamera() {
     return (Camera*) createPerspectiveCamera(&from, &at, &up, 45.0f, aspect);
 }
 
-void createRay(float u, float v, Ray* ray) {
-    vec3(u, v, 1, &ray->point);
-    vec3(0, 0, -1, &ray->dir);
-    normalize3(&ray->dir);
-}
-
 extern void trace(Ray* ray, World* world, Vec3* color, int maxdepth);
 extern int shadow(Ray* ray, World* world);
 
@@ -97,7 +91,10 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
         addscaled3(&ray->point, hit->t, &ray->dir, &hit->point);
         hit->best->op.normal(hit->best, hit, &hit->normal);
         hit->best->op.uv(hit->best, hit, &hit->uv);
-        reflectionDirection(&ray->dir, &hit->normal, &hit->reflect);
+        Vec3 I, N;
+        copy3(&hit->normal, &N);
+        copy3(&ray->dir, &I);
+        reflectionDirection(&I, &N, &hit->reflect);
         Shader* shader = hit->best->op.shader;
         for (int i = 0; i < world->nLights; i++) {
             Vec3 tmpColor;
@@ -111,14 +108,30 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
         float kr = shader->op.getReflectionAmount(shader);
         if ((kr > 0.0f) && (maxdepth > 0)) {
             Vec3 reflectColor;
-            Ray reflected;
-            copy3(&hit->point, &reflected.point);
-            copy3(&hit->reflect, &reflected.dir);
+            Ray reflectedRay;
+            copy3(&hit->point, &reflectedRay.point);
+            copy3(&hit->reflect, &reflectedRay.dir);
             // nudge the point to avoid self-intersection
-            addscaled3(&reflected.point, world->epsilon, &reflected.dir, &reflected.point);
-            trace(&reflected, world, &reflectColor, maxdepth - 1);
-            mult3(&reflectColor, kr, &reflectColor);
-            add3(&reflectColor, color, color);
+            addscaled3(&reflectedRay.point, world->epsilon, &reflectedRay.dir, &reflectedRay.point);
+            trace(&reflectedRay, world, &reflectColor, maxdepth - 1);
+            addscaled3(color, kr, &reflectColor, color);
+        }
+        float kt = shader->op.getTransmissionAmount(shader);
+        if ((kt > 0.0f) && (maxdepth > 0)) {
+            Vec3 refractedColor;
+            Ray refractedRay;
+            copy3(&hit->point, &refractedRay.point);
+            float i1 = 1.0f;
+            float i2 = shader->op.getIndexOfRefraction(shader);
+            if (dot3(&I, &N) >= 0.0) { // entering
+                negate3(&N);
+                float tmp = i1; i1 = i2; i2 = tmp;
+            }
+            int tir = transmisionDirection(i1, i2, &ray->dir, &N, &refractedRay.dir);
+            // nudge the point to avoid self-intersection
+            addscaled3(&refractedRay.point, world->epsilon, &refractedRay.dir, &refractedRay.point);
+            trace(&refractedRay, world, &refractedColor, maxdepth - 1);
+            addscaled3(color, kt, &refractedColor, color);
         }
     } else {
         copy3(&world->background, color);

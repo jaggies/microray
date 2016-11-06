@@ -14,8 +14,7 @@ void reflectionDirection(Vec3* incident, Vec3* normal, Vec3* result)
     sub3(incident, result, result);
 }
 
-int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, Vec3* transmission,
-        Vec3* result)
+int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, Vec3* result)
 {
     // Heckbert's method (T = eta*I + (eta * costheta1 - sqrt(costheta2sq)) * N)
     float eta = eta1/eta2;

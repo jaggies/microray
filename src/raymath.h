@@ -13,8 +13,7 @@
 #include "vec3.h"
 
 extern void reflectionDirection(Vec3* incident, Vec3* normal, Vec3* result);
-extern int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal,
-        Vec3* transmission, Vec3* result);
+extern int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, Vec3* result);
 
 extern float Radians(float degrees);
 extern float Degrees(float radians);

@@ -18,6 +18,7 @@ typedef struct Hit {
     Vec3 point;     // point of intersection
     Vec3 normal;    // normal at intersection
     Vec2 uv;        // uv at intersection
+    float index;    // index of refraction of current medium
     Ray  lightRay;  // lightRay from intersection to current light
     Vec3 reflect;   // reflected ray direction
     Shape* best;    // tracks closest object
