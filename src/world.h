@@ -4,15 +4,20 @@
 #include <shape.h>
 #include <light.h>
 #include <camera.h>
+#include <shader.h>
 
-#define MAXSHAPES 10
-#define MAXLIGHTS 2
+#define MAXSHAPES 100
+#define MAXSHADERS 20
+#define MAXLIGHTS 8
 
 typedef struct World {
     Shape* shapes[MAXSHAPES];
+    Shader* shaders[MAXSHADERS];
+	const char* shaderNames[MAXSHADERS];
     Light* lights[MAXLIGHTS];
     Camera* camera;
     int nShapes;
+	int nShaders;
     int nLights;
     Vec3 background; // background colors
     float epsilon; // intersection slop

@@ -54,6 +54,18 @@ int main(int argc, char **argv)
 	} else {
 		world = testLoad(XRES, YRES);
 	}
+	if (world->nShapes == 0) {
+		printf("World contains no shapes, exiting\n");
+		return 0;
+	}
+	if (world->nLights == 0) {
+		printf("World contains no lights, exiting\n");
+		return 0;
+	}
+	if (!world->camera) {
+		printf("World contains no camera, exiting\n");
+		return 0;
+	}
 	world->width = XRES; // TODO: get from cmdline
 	world->height = YRES;
 
