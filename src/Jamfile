@@ -3,13 +3,17 @@ SubDir TOP src ;
 Main microray : 
 	checkerboardshader.c
 	hit.c
+	loader.c
 	main.c
 	perspectivecamera.c
 	phongshader.c
 	pointlight.c
 	raymath.c
+	raytrace.c
 	sphere.c
+	testload.c
 	triangle.c
 	vec2.c
 	vec3.c
+	world.c
 	;
