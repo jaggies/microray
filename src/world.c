@@ -1,7 +1,7 @@
 #include <string.h>
 #include "world.h"
 
-#define RAY_EPSILON 1.0e-5f
+#define RAY_EPSILON 1.0e-8f
 
 World* createWorld() {
 	World* world = (World*) malloc(sizeof(World));

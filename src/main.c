@@ -77,7 +77,7 @@ int main(int argc, char **argv)
             Ray ray;
             Vec3 color;
             world->camera->op.makeRay(world->camera, u, 1.0f-v, &ray);
-            trace(&ray, world, &color, MAXDEPTH);
+            trace(&ray, 0 /* ignore */, world, &color, MAXDEPTH);
             putPixel(w, h, &color);
         }
     }

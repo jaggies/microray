@@ -29,7 +29,7 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             Light* light = world->lights[i];
             light->op.makeRay(light, &hit->point, &hit->lightRay);
             addscaled3(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
-            hit->inShadow = shadow(&hit->lightRay, world);
+            hit->inShadow = shadow(&hit->lightRay, hit->best, world);
             shader->op.evaluate(shader, hit, &tmpColor);
             add3(&tmpColor, color, color); // TODO: multiply by Light's ambient color
         }
@@ -41,7 +41,7 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             copy3(&hit->reflect, &reflectedRay.dir);
             // nudge the point to avoid self-intersection
             addscaled3(&reflectedRay.point, world->epsilon, &reflectedRay.dir, &reflectedRay.point);
-            trace(&reflectedRay, world, &reflectColor, maxdepth - 1);
+            trace(&reflectedRay, hit->best, world, &reflectColor, maxdepth - 1);
             addscaled3(color, kr, &reflectColor, color);
         }
         float kt = shader->op.getTransmissionAmount(shader);
@@ -58,7 +58,7 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             int tir = transmisionDirection(i1, i2, &ray->dir, &N, &refractedRay.dir);
             // nudge the point to avoid self-intersection
             addscaled3(&refractedRay.point, world->epsilon, &refractedRay.dir, &refractedRay.point);
-            trace(&refractedRay, world, &refractedColor, maxdepth - 1);
+            trace(&refractedRay, 0 /* ignore */, world, &refractedColor, maxdepth - 1);
             addscaled3(color, kt, &refractedColor, color);
         }
     } else {
@@ -67,30 +67,27 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     return color;
 }
 
-void trace(Ray* ray, World* world, Vec3* color, int maxdepth) {
+void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdepth) {
     Hit hit;
     clearHit(&hit);
     for (int s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
-        if (shape->op.intersect(shape, ray, &hit.t)) {
+        if (shape != ignore && shape->op.intersect(shape, ray, &hit.t)) {
             hit.best = shape;
         }
     }
     shade(ray, world, &hit, color, maxdepth);
 }
 
-int shadow(Ray* ray, World* world) {
+int shadow(Ray* ray, const Shape* ignore, World* world) {
     Hit hit;
     clearHit(&hit);
     for (int s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
-        if (shape->op.intersect(shape, ray, &hit.t)) {
+        if (shape != ignore && shape->op.intersect(shape, ray, &hit.t)) {
             return 1;
         }
     }
     return 0;
 }
-
-
-
 

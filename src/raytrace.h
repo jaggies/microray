@@ -9,7 +9,7 @@
 #define RAYTRACE_H_
 
 extern Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth);
-extern void trace(Ray* ray, World* world, Vec3* color, int maxdepth);
-extern int shadow(Ray* ray, World* world);
+extern void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdepth);
+extern int shadow(Ray* ray, const Shape* ignore, World* world);
 
 #endif /* RAYTRACE_H_ */
