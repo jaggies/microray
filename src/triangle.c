@@ -53,6 +53,10 @@ void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
     copy3(&((Triangle*) shape)->normal[0], n);
 }
 
+static void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
+    // TODO
+}
+
 static
 void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
     Triangle* triangle = (Triangle*) shape;
@@ -62,15 +66,21 @@ void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
     addscaled2(uv, hitData.beta, &edge20, uv);
 }
 
+static ShapeOps _triangleOps;
+
 Shape* createTriangle(
         Vec3* p0, Vec3* p1, Vec3* p2,
         Vec2* uv0, Vec2* uv1, Vec2* uv2,
         struct Shader* shader) {
+    if (!_triangleOps.intersect) {
+        _triangleOps.intersect = intersect;
+        _triangleOps.normal = normal;
+        _triangleOps.uv = uv;
+        _triangleOps.bounds = bounds;
+    }
     Triangle* triangle = (Triangle*) malloc(sizeof(Triangle));
-    triangle->op.intersect = intersect;
-    triangle->op.normal = normal;
-    triangle->op.uv = uv;
-    triangle->op.shader = shader;
+    triangle->op = &_triangleOps;
+    triangle->shader = shader;
     copy3(p0, &triangle->point[0]);
     sub3(p1, p0, &triangle->edge[0]);
     sub3(p2, p0, &triangle->edge[1]);

@@ -17,7 +17,7 @@ typedef struct LightOps {
 } LightOps;
 
 typedef struct Light {
-    LightOps op;
+    LightOps* op;
 } Light;
 
 #endif /* LIGHT_H_ */

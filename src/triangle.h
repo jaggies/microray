@@ -11,7 +11,8 @@
 #include "shape.h"
 
 typedef struct Triangle {
-    ShapeOps op;
+    ShapeOps* op;
+    Shader* shader;
     Vec3  point[1];
     Vec3  normal[1];
     Vec3  edge[2];

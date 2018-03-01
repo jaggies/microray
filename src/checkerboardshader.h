@@ -13,7 +13,7 @@
 #include "vec3.h"
 
 typedef struct CheckerboardShader {
-    ShaderOps op;
+    ShaderOps* op;
     Vec3 color1;
     Vec3 color2;
     Vec2 scale;

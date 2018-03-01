@@ -45,13 +45,18 @@ static float getIndexOfRefraction(struct Shader* sh) {
     return ((PhongShader*) sh)->index;
 }
 
+static ShaderOps _phongOps;
+
 Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index,
         float reflect, float transmit) {
+    if (!_phongOps.evaluate) {
+        _phongOps.evaluate = evaluate;
+        _phongOps.getReflectionAmount = getReflectionAmount;
+        _phongOps.getTransmissionAmount = getTransmissionAmount;
+        _phongOps.getIndexOfRefraction = getIndexOfRefraction;
+    }
     PhongShader* shader = (PhongShader*) malloc(sizeof(PhongShader));
-    shader->op.evaluate = evaluate;
-    shader->op.getReflectionAmount = getReflectionAmount;
-    shader->op.getTransmissionAmount = getTransmissionAmount;
-    shader->op.getIndexOfRefraction = getIndexOfRefraction;
+    shader->op = &_phongOps;
     copy3(diffuse, &shader->diffuse);
     copy3(specular, &shader->specular);
     copy3(ambient, &shader->ambient);

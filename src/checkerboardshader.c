@@ -16,31 +16,36 @@ static void evaluate(struct Shader* sh, Hit* hit, Vec3* color)
     int u = ((int) floorf(p.x)) & 1;
     int v = ((int) floorf(p.y)) & 1;
     copy3((u^v) ? &shader->color1 : &shader->color2, shader->targetField);
-    shader->target->op.evaluate(shader->target, hit, color);
+    shader->target->op->evaluate(shader->target, hit, color);
 }
 
 float getReflectionAmount(struct Shader* sh) {
     CheckerboardShader* shader = (CheckerboardShader*) sh;
-    return shader->target->op.getReflectionAmount(shader->target);
+    return shader->target->op->getReflectionAmount(shader->target);
 }
 
 float getTransmissionAmount(struct Shader* sh) {
     CheckerboardShader* shader = (CheckerboardShader*) sh;
-    return shader->target->op.getTransmissionAmount(shader->target);
+    return shader->target->op->getTransmissionAmount(shader->target);
 }
 
 float getIndexOfRefraction(struct Shader* sh) {
     CheckerboardShader* shader = (CheckerboardShader*) sh;
-    return shader->target->op.getIndexOfRefraction(shader->target);
+    return shader->target->op->getIndexOfRefraction(shader->target);
 }
+
+static ShaderOps _checkerOps;
 
 Shader* createCheckerboardShader(Vec3* color1, Vec3* color2, Vec2* scale, Vec2* bias, Shader* target,
         Vec3* targetField) {
+    if (!_checkerOps.evaluate) {
+    	_checkerOps.evaluate = evaluate;
+    	_checkerOps.getIndexOfRefraction = getIndexOfRefraction;
+    	_checkerOps.getReflectionAmount = getReflectionAmount;
+    	_checkerOps.getTransmissionAmount = getTransmissionAmount;
+    }
     CheckerboardShader* shader = (CheckerboardShader*) malloc(sizeof(CheckerboardShader));
-    shader->op.evaluate = evaluate;
-    shader->op.getIndexOfRefraction = getIndexOfRefraction;
-    shader->op.getReflectionAmount = getReflectionAmount;
-    shader->op.getTransmissionAmount = getTransmissionAmount;
+    shader->op = &_checkerOps;
     copy2(scale, &shader->scale);
     copy2(bias, &shader->bias);
     copy3(color1, &shader->color1);

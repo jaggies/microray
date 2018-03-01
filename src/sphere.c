@@ -51,15 +51,33 @@ void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
     uv->x = uv->y = 0.0f; // TODO
 }
 
+static
+void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
+    Sphere* sphere = (Sphere*) shape;
+	min->x = sphere->position.x - sphere->radius;
+	min->y = sphere->position.y - sphere->radius;
+	min->z = sphere->position.z - sphere->radius;
+	max->x = sphere->position.x + sphere->radius;
+	max->y = sphere->position.y + sphere->radius;
+	max->z = sphere->position.z + sphere->radius;
+}
+
+static ShapeOps _sphereOps;
+
 Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
+    if (!_sphereOps.intersect) {
+        _sphereOps.intersect = intersect;
+        _sphereOps.normal = normal;
+        _sphereOps.uv = uv;
+        _sphereOps.bounds = bounds;
+    }
     Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
-    sphere->op.intersect = intersect;
-    sphere->op.normal = normal;
-    sphere->op.uv = uv;
-    sphere->op.shader = shader;
+    sphere->op = &_sphereOps;
+    sphere->shader = shader;
     sphere->position.x = x;
     sphere->position.y = y;
     sphere->position.z = z;
+    sphere->radius = r;
     sphere->radius2 = r * r;
     return (Shape*) sphere;
 }

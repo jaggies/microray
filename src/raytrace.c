@@ -17,23 +17,23 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     if (hit->best) {
         vec3(0,0,0, color);
         addscaled3(&ray->point, hit->t, &ray->dir, &hit->point);
-        hit->best->op.normal(hit->best, hit, &hit->normal);
-        hit->best->op.uv(hit->best, hit, &hit->uv);
+        hit->best->op->normal(hit->best, hit, &hit->normal);
+        hit->best->op->uv(hit->best, hit, &hit->uv);
         Vec3 I, N;
         copy3(&hit->normal, &N);
         copy3(&ray->dir, &I);
         reflectionDirection(&I, &N, &hit->reflect);
-        Shader* shader = hit->best->op.shader;
+        Shader* shader = hit->best->shader;
         for (int i = 0; i < world->nLights; i++) {
             Vec3 tmpColor;
             Light* light = world->lights[i];
-            light->op.makeRay(light, &hit->point, &hit->lightRay);
+            light->op->makeRay(light, &hit->point, &hit->lightRay);
             addscaled3(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
             hit->inShadow = shadow(&hit->lightRay, hit->best, world);
-            shader->op.evaluate(shader, hit, &tmpColor);
+            shader->op->evaluate(shader, hit, &tmpColor);
             add3(&tmpColor, color, color); // TODO: multiply by Light's ambient color
         }
-        float kr = shader->op.getReflectionAmount(shader);
+        float kr = shader->op->getReflectionAmount(shader);
         if ((kr > 0.0f) && (maxdepth > 0)) {
             Vec3 reflectColor;
             Ray reflectedRay;
@@ -44,13 +44,13 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             trace(&reflectedRay, hit->best, world, &reflectColor, maxdepth - 1);
             addscaled3(color, kr, &reflectColor, color);
         }
-        float kt = shader->op.getTransmissionAmount(shader);
+        float kt = shader->op->getTransmissionAmount(shader);
         if ((kt > 0.0f) && (maxdepth > 0)) {
             Vec3 refractedColor;
             Ray refractedRay;
             copy3(&hit->point, &refractedRay.point);
             float i1 = 1.0f;
-            float i2 = shader->op.getIndexOfRefraction(shader);
+            float i2 = shader->op->getIndexOfRefraction(shader);
             if (dot3(&I, &N) >= 0.0) { // entering
                 negate3(&N);
                 float tmp = i1; i1 = i2; i2 = tmp;
@@ -72,7 +72,7 @@ void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdept
     clearHit(&hit);
     for (int s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
-        if (shape != ignore && shape->op.intersect(shape, ray, &hit.t)) {
+        if (shape != ignore && shape->op->intersect(shape, ray, &hit.t)) {
             hit.best = shape;
         }
     }
@@ -84,7 +84,7 @@ int shadow(Ray* ray, const Shape* ignore, World* world) {
     clearHit(&hit);
     for (int s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
-        if (shape != ignore && shape->op.intersect(shape, ray, &hit.t)) {
+        if (shape != ignore && shape->op->intersect(shape, ray, &hit.t)) {
             return 1;
         }
     }

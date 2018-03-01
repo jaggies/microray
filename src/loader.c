@@ -182,6 +182,5 @@ World* loadFile(char* fromPath)
 			}
 		}
 	}
-	printf("done\n");
 	return world;
 }

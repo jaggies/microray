@@ -16,12 +16,17 @@ static void makeRay(Light* l, Vec3* point, Ray* ray)
     normalize3(&ray->dir);
 }
 
+static LightOps _pointLightOps;
+
 Light* createPointLight(Vec3* position, Vec3* color)
 {
+    if (!_pointLightOps.makeRay) {
+	_pointLightOps.makeRay = makeRay;
+    }
     PointLight* light = (PointLight*) malloc(sizeof(PointLight));
     copy3(position, &light->point);
     copy3(color, &light->color);
-    light->op.makeRay = makeRay;
+    light->op = &_pointLightOps;
     return (Light*) light;
 }
 

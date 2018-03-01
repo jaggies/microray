@@ -20,7 +20,7 @@ typedef struct ShaderOps {
 } ShaderOps;
 
 typedef struct Shader {
-    ShaderOps op;
+    ShaderOps* op; // these must be first in all "inherited" classes
 } Shader;
 
 #endif /* SHADER_H_ */

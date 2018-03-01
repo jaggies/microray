@@ -11,8 +11,10 @@
 #include "shape.h"
 
 typedef struct Sphere {
-    ShapeOps op;
+    ShapeOps* op; // these must be first
+    Shader* shader;
     Vec3 position;
+    float radius; // used for bounds calculation
     float radius2;
 } Sphere;
 

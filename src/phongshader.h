@@ -12,7 +12,7 @@
 #include "vec3.h"
 
 typedef struct PhongShader {
-    ShaderOps op;
+    ShaderOps* op;
     struct Vec3 diffuse;
     struct Vec3 specular;
     struct Vec3 ambient;
