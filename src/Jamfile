@@ -5,6 +5,7 @@ Main microray :
 	hit.c
 	loader.c
 	main.c
+	netpbm.c
 	perspectivecamera.c
 	phongshader.c
 	pointlight.c
