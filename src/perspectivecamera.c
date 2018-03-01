@@ -16,9 +16,14 @@ static void makeRay(struct Camera* cam, float u, float v, Ray* ray) {
     normalize3(&ray->dir);
 }
 
+static CameraOps _perspCameraOps;
+
 Camera* createPerspectiveCamera(Vec3* from, Vec3* at, Vec3* up, float fov, float aspect) {
+    if (!_perspCameraOps.makeRay) {
+        _perspCameraOps.makeRay = makeRay;
+    }
     PerspectiveCamera* camera = (PerspectiveCamera*) malloc(sizeof(PerspectiveCamera));
-    camera->op.makeRay = makeRay;
+    camera->op = &_perspCameraOps;
     float tanfov2 = 2.0f * tan(Radians(fov / 2.0f));
     Vec3 dir; sub3(at, from, &dir); normalize3(&dir);
     Vec3 upNormalized; copy3(up, &upNormalized); normalize3(&upNormalized);

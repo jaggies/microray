@@ -13,7 +13,7 @@
 #include "ray.h"
 
 typedef struct PerspectiveCamera {
-    struct CameraOps op;
+    struct CameraOps* op;
     Vec3 du, dv; // orthogonal vectors define the camera plane
     Ray baseray; // ray originating at uv(0,0) pointing to lower left
 } PerspectiveCamera;

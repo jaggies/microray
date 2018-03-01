@@ -16,7 +16,7 @@ typedef struct CameraOps {
 } CameraOps;
 
 typedef struct Camera {
-    struct CameraOps op;
+    struct CameraOps* op;
 } Camera;
 
 #endif /* CAMERA_H_ */

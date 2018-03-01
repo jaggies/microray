@@ -24,7 +24,7 @@ typedef struct ShapeOps {
 } ShapeOps;
 
 typedef struct Shape {
-    ShapeOps *op;
+    ShapeOps *op; // These must be first in all "subclasses"
     Shader* shader; 
 } Shape;
 
