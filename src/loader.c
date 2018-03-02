@@ -2,8 +2,10 @@
 #include <string.h>
 #include "vec3.h"
 #include "phongshader.h"
+#include "checkerboardshader.h"
 #include "shape.h"
 #include "sphere.h"
+#include "triangle.h"
 #include "pointlight.h"
 #include "perspectivecamera.h"
 #include "world.h"
@@ -81,12 +83,37 @@ static Shader* loadPhongShader(const char* args, const char** outname) {
 	return createPhongShader(&diffuse, &specular, &ambient, exponent, index, reflect, transmit);
 }
 
+static Shader* loadCheckerboardShader(World* world, const char* args, const char** outname) {
+	char name[MAXNAME];
+	char oddName[MAXNAME];
+	char evenName[MAXNAME];
+	Vec2 scale;
+	Vec2 bias;
+ 	sscanf(args, "%s %s %s %f %f %f %f", name, oddName, evenName, &scale.x, &scale.y, &bias.x, &bias.y);
+	*outname = strdup(name);
+	return createCheckerboardShader(getShader(world, oddName), getShader(world, evenName), &scale, &bias);
+}
+
 static Shape* loadSphere(World* world, const char* args) {
 	char material[MAXNAME];
 	float x, y, z, r;
 	sscanf(args, "%s %f %f %f %f", material, &x, &y, &z, &r);
 	//printf("Got sphere: <%f,%f,%f> r=%f with material '%s'\n", x, y, z, r, material);
 	return createSphere(x, y, z, r, getShader(world, material));
+}
+
+static Shape* loadTriangle(World* world, const char* args) {
+	char material[MAXNAME];
+	Vec3 p1, p2, p3;
+	Vec2 uv1, uv2, uv3;
+	sscanf(args, "%s %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f ", material, 
+		&p1.x, &p1.y, &p1.z,
+		&p2.x, &p2.y, &p2.z,
+		&p3.x, &p3.y, &p3.z,
+		&uv1.x, &uv1.y,
+		&uv2.x, &uv2.y,
+		&uv3.x, &uv3.y);
+	return createTriangle(&p1, &p2, &p3, &uv1, &uv2, &uv3, getShader(world, material));
 }
 
 static Shader* loadPhong(const char* args) {
@@ -176,6 +203,13 @@ World* loadFile(char* fromPath)
 					break;
 				case BACKGROUND:
 					world->background = loadBackground(ptr);
+					break;
+				case TRIANGLE:
+				        addShape(world, loadTriangle(world, ptr));
+					break;
+				case CHECKERBOARD:
+				        shader = loadCheckerboardShader(world, ptr, &name);
+					addShader(world, name, shader);
 					break;
 				default:
 					printf("Unimplemented token %s, args:%s", tokens[foundToken], ptr);

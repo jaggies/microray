@@ -34,11 +34,13 @@ World* testLoad(int xres, int yres) {
     Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
     vec3(0.5,0.5,0.5,&diffuse);
     Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
-    Vec3 check1; vec3(1,0,0, &check1);
-    Vec3 check2; vec3(0,1,0, &check2);
+    vec3(1.0,0.0,0.0, &diffuse);
+    Shader* odd = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
+    vec3(0.0,1.0,0.0, &diffuse);
+    Shader* even = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
     Vec2 scale; vec2(10,10,&scale);
     Vec2 bias; vec2(0,0,&bias);
-    Shader* checker = createCheckerboardShader(&check1, &check2, &scale, &bias, mirror, &((PhongShader*)mirror)->diffuse);
+    Shader* checker = createCheckerboardShader(odd, even, &scale, &bias);
     world->shapes[world->nShapes++] = createSphere(0.25, 0, 0, 0.25, red);
     world->shapes[world->nShapes++] = createSphere(-0.25, 0, 0, 0.25, blu);
     float plane[][3] = { {-1, -0.25, -1}, {1, -0.25, -1}, {1, -0.25, 1}, {-1, -0.25, 1} };

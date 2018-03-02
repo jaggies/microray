@@ -1,7 +1,8 @@
 #p <id> <r,g,b> ksphere eyes kd
 #sphere eyes <x,y,z> r
+background 0.1 0.2 0.7
 pointlight 10 10 10 1 1 1
-perspectivecamera 5 7 7 0 4.0 0 0 1 0 45 1
+perspectivecamera 6 8 8 0 4.0 0 0 1 0 45 1
 phongshader eyes 1 1 1 1 1 1 0 0 0 20.0 1.0 0.1 0.0
 phongshader body 1 0 0 1 1 1 0 0 0 20.0 1.0 0.1 0.0
 phongshader leftLeg 0 0 1 1 1 1 0 0 0 20.0 1.0 0.1 0.0
@@ -13,7 +14,11 @@ phongshader head 1 1 0 1 1 1 0 0 0 20.0 1.0 0.1 0.0
 phongshader ball1 0.1 0 0 1 1 1 0 0 0 20.0 1.0 0.8 0.0
 phongshader ball2 0 0.1 0 1 1 1 0 0 0 20.0 1.0 0.8 0.0
 phongshader ball3 0 0 0.1 1 1 1 0 0 0 20.0 1.0 0.8 0.0
-background 0.1 0.2 0.7
+phongshader odd 1.0 1.0 1.0  1 1 1  0.0 0.0 0.0  20.0 1.4 0.5 0.0
+phongshader even 0.0 0.0 0.0  1 1 1  0.0 0.0 0.0  20.0 1.4 0.5 0.0
+checkerboard checker odd even 20 20 0 0
+triangle checker -20 -0.40 -20  20 -0.40 -20  20 -0.40 20  0 0  1 0  1 1
+triangle checker 20 -0.40 20  -20 -0.40 20  -20 -0.40 -20  1 1  0 1  0 0
 sphere ball1 -2.100000 5.300000 0.900000 0.600000
 sphere ball2 1.900000 5.900000 1.100000 0.600000
 sphere ball3 -1.200000 6.800000 0.400000 0.600000

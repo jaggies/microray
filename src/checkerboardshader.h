@@ -14,15 +14,14 @@
 
 typedef struct CheckerboardShader {
     ShaderOps* op;
-    Vec3 color1;
-    Vec3 color2;
+    Shader* odd;
+    Shader* even;
     Vec2 scale;
     Vec2 bias;
-    Shader* target;
-    Vec3* targetField;
+    // private
+    Shader* target; // which of the above shaders is being evaluated
 } CheckerboardShader;
 
-extern Shader* createCheckerboardShader(Vec3* color1, Vec3* color2, Vec2* scale, Vec2* bias,
-        Shader* target, Vec3* targetField);
+extern Shader* createCheckerboardShader(Shader* odd, Shader* even, Vec2* scale, Vec2* bias);
 
 #endif /* CHECKERBOARD_H_ */
