@@ -15,15 +15,15 @@
 
 Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     if (hit->best) {
+        Vec3 I, N;
+        Shader* shader = hit->best->shader;
         vec3(0,0,0, color);
         addscaled3(&ray->point, hit->t, &ray->dir, &hit->point);
         hit->best->op->normal(hit->best, hit, &hit->normal);
         hit->best->op->uv(hit->best, hit, &hit->uv);
-        Vec3 I, N;
         copy3(&hit->normal, &N);
         copy3(&ray->dir, &I);
         reflectionDirection(&I, &N, &hit->reflect);
-        Shader* shader = hit->best->shader;
         for (int i = 0; i < world->nLights; i++) {
             Vec3 tmpColor;
             Light* light = world->lights[i];

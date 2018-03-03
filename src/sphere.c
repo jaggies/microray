@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "sphere.h"
 #include "shader.h"
 #include "hit.h"
@@ -54,24 +55,24 @@ void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
 static
 void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
     Sphere* sphere = (Sphere*) shape;
-	min->x = sphere->position.x - sphere->radius;
-	min->y = sphere->position.y - sphere->radius;
-	min->z = sphere->position.z - sphere->radius;
-	max->x = sphere->position.x + sphere->radius;
-	max->y = sphere->position.y + sphere->radius;
-	max->z = sphere->position.z + sphere->radius;
+    min->x = sphere->position.x - sphere->radius;
+    min->y = sphere->position.y - sphere->radius;
+    min->z = sphere->position.z - sphere->radius;
+    max->x = sphere->position.x + sphere->radius;
+    max->y = sphere->position.y + sphere->radius;
+    max->z = sphere->position.z + sphere->radius;
 }
 
 static ShapeOps _sphereOps;
 
 Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
+    Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
     if (!_sphereOps.intersect) {
         _sphereOps.intersect = intersect;
         _sphereOps.normal = normal;
         _sphereOps.uv = uv;
         _sphereOps.bounds = bounds;
     }
-    Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
     sphere->op = &_sphereOps;
     sphere->shader = shader;
     sphere->position.x = x;

@@ -1,10 +1,10 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include <shape.h>
-#include <light.h>
-#include <camera.h>
-#include <shader.h>
+#include "shape.h"
+#include "light.h"
+#include "camera.h"
+#include "shader.h"
 
 #define MAXSHAPES 100
 #define MAXSHADERS 20

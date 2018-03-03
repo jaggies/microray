@@ -20,10 +20,10 @@ static LightOps _pointLightOps;
 
 Light* createPointLight(Vec3* position, Vec3* color)
 {
-    if (!_pointLightOps.makeRay) {
-	_pointLightOps.makeRay = makeRay;
-    }
     PointLight* light = (PointLight*) malloc(sizeof(PointLight));
+    if (!_pointLightOps.makeRay) {
+        _pointLightOps.makeRay = makeRay;
+    }
     copy3(position, &light->point);
     copy3(color, &light->color);
     light->op = &_pointLightOps;

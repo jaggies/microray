@@ -23,12 +23,13 @@ Camera* createPerspectiveCamera(Vec3* from, Vec3* at, Vec3* up, float fov, float
         _perspCameraOps.makeRay = makeRay;
     }
     PerspectiveCamera* camera = (PerspectiveCamera*) malloc(sizeof(PerspectiveCamera));
-    camera->op = &_perspCameraOps;
     float tanfov2 = 2.0f * tan(Radians(fov / 2.0f));
-    Vec3 dir; sub3(at, from, &dir); normalize3(&dir);
-    Vec3 upNormalized; copy3(up, &upNormalized); normalize3(&upNormalized);
-    Vec3 tdu; cross(&dir, &upNormalized, &tdu); normalize3(&tdu); mult3(&tdu, tanfov2, &tdu);
-    Vec3 tdv; cross(&tdu, &dir, &tdv); normalize3(&tdv); mult3(&tdv, tanfov2, &tdv);
+    Vec3 dir, upNormalized, tdu, tdv;
+    camera->op = &_perspCameraOps;
+    sub3(at, from, &dir); normalize3(&dir);
+    copy3(up, &upNormalized); normalize3(&upNormalized);
+    cross(&dir, &upNormalized, &tdu); normalize3(&tdu); mult3(&tdu, tanfov2, &tdu);
+    cross(&tdu, &dir, &tdv); normalize3(&tdv); mult3(&tdv, tanfov2, &tdv);
     mult3(&tdu, aspect, &tdu);
     copy3(&tdu, &camera->du);
     copy3(&tdv, &camera->dv);

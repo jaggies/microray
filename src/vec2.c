@@ -13,7 +13,6 @@ void vec2(float x, float y, Vec2* result) {
     result->y = y;
 }
 
-
 void add2(Vec2* a, Vec2* b, Vec2* result) {
     result->x = a->x + b->x;
     result->y = a->y + b->y;

@@ -4,6 +4,7 @@
  *  Created on: Feb 11, 2014
  *      Author: jmiller
  */
+#include <stdlib.h>
 #include "triangle.h"
 #include "hit.h"
 
@@ -72,13 +73,13 @@ Shape* createTriangle(
         Vec3* p0, Vec3* p1, Vec3* p2,
         Vec2* uv0, Vec2* uv1, Vec2* uv2,
         struct Shader* shader) {
+    Triangle* triangle = (Triangle*) malloc(sizeof(Triangle));
     if (!_triangleOps.intersect) {
         _triangleOps.intersect = intersect;
         _triangleOps.normal = normal;
         _triangleOps.uv = uv;
         _triangleOps.bounds = bounds;
     }
-    Triangle* triangle = (Triangle*) malloc(sizeof(Triangle));
     triangle->op = &_triangleOps;
     triangle->shader = shader;
     copy3(p0, &triangle->point[0]);

@@ -11,20 +11,20 @@
 #include "vec3.h"
 #include "netpbm.h"
 
-int min(int a, int b) {
+static int min(int a, int b) {
     return a < b ? a : b;
 }
 
-int max(int a, int b) {
+static int max(int a, int b) {
     return a > b ? a : b;
 }
 
 static
 void closeNetPBM(NetPBM* pbm) {
     if (pbm->fp) {
-	    fclose(pbm->fp);
-		pbm->fp = 0;
-	}
+        fclose(pbm->fp);
+        pbm->fp = 0;
+    }
 }
 
 static
@@ -38,15 +38,16 @@ void putPixel(NetPBM* pbm, int x, int y, Vec3* color) {
 }
 
 NetPBM* createNetPBM(const char* path, int width, int height) {
-	FILE* fp = fopen(path, "w");
-	if (!fp) {
-	 	return 0;
+    NetPBM* pbm;
+    FILE* fp = fopen(path, "w");
+    if (!fp) {
+        return 0;
     }
-	NetPBM* pbm = (NetPBM*) malloc(sizeof(NetPBM));
-	pbm->putPixel = putPixel;
-	pbm->close = closeNetPBM;
-	pbm->fp = fp;
+    pbm = (NetPBM*) malloc(sizeof(NetPBM));
+    pbm->putPixel = putPixel;
+    pbm->close = closeNetPBM;
+    pbm->fp = fp;
     fprintf(fp, "P6 %d %d 255\n", width, height);
-	return pbm;
+    return pbm;
 }
 

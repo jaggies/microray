@@ -6,6 +6,7 @@
  */
 
 #include <math.h>
+#include <stdlib.h>
 #include "hit.h"
 #include "checkerboardshader.h"
 
@@ -37,13 +38,13 @@ static float getIndexOfRefraction(struct Shader* sh) {
 static ShaderOps _checkerOps;
 
 Shader* createCheckerboardShader(Shader* even, Shader* odd, Vec2* scale, Vec2* bias)  {
-    if (!_checkerOps.evaluate) {
-    	_checkerOps.evaluate = evaluate;
-    	_checkerOps.getIndexOfRefraction = getIndexOfRefraction;
-    	_checkerOps.getReflectionAmount = getReflectionAmount;
-    	_checkerOps.getTransmissionAmount = getTransmissionAmount;
-    }
     CheckerboardShader* shader = (CheckerboardShader*) malloc(sizeof(CheckerboardShader));
+    if (!_checkerOps.evaluate) {
+        _checkerOps.evaluate = evaluate;
+        _checkerOps.getIndexOfRefraction = getIndexOfRefraction;
+        _checkerOps.getReflectionAmount = getReflectionAmount;
+        _checkerOps.getTransmissionAmount = getTransmissionAmount;
+    }
     shader->op = &_checkerOps;
     shader->even = even;
     shader->odd = odd;

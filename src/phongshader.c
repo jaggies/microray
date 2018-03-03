@@ -5,10 +5,11 @@
  *      Author: jmiller
  */
 
+#include <stdlib.h>
 #include "phongshader.h"
 #include "hit.h"
 
-static float _threshold = 0.01f; // minimum factor before we'll call pow
+static const float _threshold = 0.01f; // minimum factor before we'll call pow
 
 static void evaluate(struct Shader* sh, Hit* hit, Vec3* color) {
     PhongShader* shader = (PhongShader*) sh;
@@ -49,13 +50,13 @@ static ShaderOps _phongOps;
 
 Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index,
         float reflect, float transmit) {
+    PhongShader* shader = (PhongShader*) malloc(sizeof(PhongShader));
     if (!_phongOps.evaluate) {
         _phongOps.evaluate = evaluate;
         _phongOps.getReflectionAmount = getReflectionAmount;
         _phongOps.getTransmissionAmount = getTransmissionAmount;
         _phongOps.getIndexOfRefraction = getIndexOfRefraction;
     }
-    PhongShader* shader = (PhongShader*) malloc(sizeof(PhongShader));
     shader->op = &_phongOps;
     copy3(diffuse, &shader->diffuse);
     copy3(specular, &shader->specular);

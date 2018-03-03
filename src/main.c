@@ -24,41 +24,17 @@
 #define YRES XRES
 #define MAXDEPTH 4 // max number of reflected rays
 
-int main(int argc, char **argv)
+void renderImage(World* world, const char* outpath)
 {
-    World* world;
-    NetPBM* pbm;
-    const char* outpath = "out.ppm"; // TODO: get path from arguments
-
-	if (argc > 1) {
-		world = loadFile(argv[1]);
-	} else {
-		world = testLoad(XRES, YRES);
-	}
-	if (world->nShapes == 0) {
-		printf("World contains no shapes, exiting\n");
-		return 0;
-	}
-	if (world->nLights == 0) {
-		printf("World contains no lights, exiting\n");
-		return 0;
-	}
-	if (!world->camera) {
-		printf("World contains no camera, exiting\n");
-		return 0;
-	}
-	world->width = XRES; // TODO: get from cmdline
-	world->height = YRES;
-
-	pbm = createNetPBM(outpath, world->width, world->height);
-
-    if (!pbm) {
-        printf("Failed to create output %s\n", outpath);
-        return 0;
-    }
-
+    NetPBM* pbm = createNetPBM(outpath, world->width, world->height);
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; // emit ray from pixel centers
+
+    if (!pbm) {
+        printf("Can't write image '%s'\n", outpath);
+        return;
+    }
+
     for (int h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
         for (int w = 0; w < world->width; w++, u += du) {
@@ -70,5 +46,33 @@ int main(int argc, char **argv)
         }
     }
     pbm->close(pbm);
+}
+
+
+int main(int argc, char **argv)
+{
+    World* world;
+    const char* outpath = "out.ppm"; // TODO: get path from arguments
+
+    if (argc > 1) {
+        world = loadFile(argv[1]);
+    } else {
+        world = testLoad(XRES, YRES);
+    }
+    if (world->nShapes == 0) {
+        printf("World contains no shapes, exiting\n");
+        return 0;
+    }
+    if (world->nLights == 0) {
+        printf("World contains no lights, exiting\n");
+        return 0;
+    }
+    if (!world->camera) {
+        printf("World contains no camera, exiting\n");
+        return 0;
+    }
+    world->width = XRES; // TODO: get from cmdline
+    world->height = YRES;
+    renderImage(world, outpath);
 }
 

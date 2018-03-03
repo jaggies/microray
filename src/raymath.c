@@ -21,8 +21,8 @@ int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, V
     float costheta1 = -dot3(incident, normal);
     float costheta2sq = 1.0 - eta*eta * (1.0 - costheta1 * costheta1);
     if (costheta2sq >= 0.0f) {
-        mult3(incident, eta, result);
         Vec3 tmp;
+        mult3(incident, eta, result);
         mult3(normal, (eta * costheta1 - sqrt(costheta2sq)), &tmp);
         add3(&tmp, result, result);
         return 1;

@@ -8,9 +8,7 @@
 #ifndef SHAPE_H_
 #define SHAPE_H_
 
-#include <stdlib.h>
 #include "ray.h"
-
 
 struct Hit;
 struct Shape;
