@@ -21,6 +21,6 @@ typedef struct Leaf {
     Shape **shapes;
 } Leaf;
 
-extern Shape* createLeaf(Shape *shapes, int nShapes);
+extern Shape* createLeaf(Shape **shapes, int nShapes);
 
 #endif /* LEAF_H_ */

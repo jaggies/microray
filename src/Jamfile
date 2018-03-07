@@ -2,6 +2,7 @@ SubDir TOP src ;
 
 Main microray : 
 	branch.c
+	bvh.c
 	checkerboardshader.c
 	hit.c
 	leaf.c

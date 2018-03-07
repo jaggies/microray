@@ -33,6 +33,6 @@ typedef struct Branch {
     BoundedShape fartherChild;
 } Branch;
 
-extern Shape* createBranch(Shape *closer, Shape *farther);
+extern Shape* createBranch(Shape *closer, Shape *farther, Vec3 *dir);
 
 #endif /* BRANCH_H_ */

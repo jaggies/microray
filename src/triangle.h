@@ -13,7 +13,7 @@
 typedef struct Triangle {
     ShapeOps* op;
     Shader* shader;
-    Vec3  point[1];
+    Vec3  point[3];
     Vec3  normal[1];
     Vec3  edge[2];
     Vec2  uv[3];

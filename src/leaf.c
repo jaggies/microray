@@ -14,11 +14,16 @@
 #include "shader.h"
 #include "hit.h"
 
+// XXX
+extern long intersections;
+
 static
 int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 
     if(shape == hit->ignore)
         return 0;
+
+    intersections++;
 
     Leaf* leaf = (Leaf*) shape;
     int result = 0;
@@ -58,11 +63,11 @@ void Leaf_bounds(struct Shape* shape, Vec3* boxmin, Vec3* boxmax) {
     boxmax->y = -FLT_MAX;
     boxmax->z = -FLT_MAX;
 
-    for(int i = 0; i < leaf->nShapes; i++) {
+    for(int s = 0; s < leaf->nShapes; s++) {
         Vec3 childboxmin;
         Vec3 childboxmax;
 
-        leaf->shapes[0]->op->bounds(leaf->shapes[0], &childboxmin, &childboxmax);
+        leaf->shapes[s]->op->bounds(leaf->shapes[s], &childboxmin, &childboxmax);
 
         // extend box by child box
         boxmin->x = fminf(boxmin->x, childboxmin.x);
@@ -76,7 +81,7 @@ void Leaf_bounds(struct Shape* shape, Vec3* boxmin, Vec3* boxmax) {
 
 static ShapeOps _LeafOps;
 
-Shape* createLeaf(Shape* shapes, int nShapes) {
+Shape* createLeaf(Shape** shapes, int nShapes) {
     assert(nShapes > 0);
 
     Leaf* leaf = (Leaf*) malloc(sizeof(Leaf));

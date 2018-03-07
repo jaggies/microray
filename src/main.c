@@ -48,6 +48,8 @@ void renderImage(World* world, const char* outpath)
     pbm->close(pbm);
 }
 
+// XXX
+long intersections = 0;
 
 int main(int argc, char **argv)
 {
@@ -74,5 +76,7 @@ int main(int argc, char **argv)
     world->width = XRES; // TODO: get from cmdline
     world->height = YRES;
     renderImage(world, outpath);
+
+    printf("%ld intersections\n", intersections);
 }
 

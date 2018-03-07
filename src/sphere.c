@@ -13,11 +13,16 @@
 
 static float tmin = 0.0f;
 
+// XXX
+extern long intersections;
+
 static
 int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 
     if(shape == hit->ignore)
         return 0;
+
+    intersections++;
 
     Sphere* sphere = (Sphere*) shape;
 
