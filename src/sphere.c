@@ -14,7 +14,11 @@
 static float tmin = 0.0f;
 
 static
-int intersect(struct Shape* shape, Ray* ray, float *tmax) {
+int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
+
+    if(shape == hit->ignore)
+        return 0;
+
     Sphere* sphere = (Sphere*) shape;
 
     // Distance from center to perpendicular plane
@@ -23,21 +27,23 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
     float b = dot3(&ray->dir, &dir);
     float disc = b*b - dot3(&dir, &dir) + sphere->radius2;
 
-    int hit = 0;
+    int result = 0;
     if (disc >= 0.0f) {
         disc = sqrt(disc);
         float t2 = b + disc;   // farthest point
-        if (t2 > tmin && t2 < *tmax) {
-            *tmax = t2;
-            hit++;
+        if (t2 > tmin && t2 < hit->t) {
+            hit->best = shape;
+            hit->t = t2;
+            result++;
         }
         float t1 = b - disc;   // nearest point
-        if (t1 > tmin && t1 < *tmax) {
-            *tmax = t1;
-            hit++;
+        if (t1 > tmin && t1 < hit->t) {
+            hit->best = shape;
+            hit->t = t1;
+            result++;
         }
     }
-    return hit;
+    return result;
 }
 
 static

@@ -9,13 +9,13 @@
 #define SHAPE_H_
 
 #include "ray.h"
+#include "hit.h"
 
-struct Hit;
 struct Shape;
 typedef struct Shader Shader;
 
 typedef struct ShapeOps {
-    int (*intersect)(struct Shape* shape, Ray* ray, float *tmax);
+    int (*intersect)(struct Shape* shape, Ray* ray, Hit* hit);
     void (*normal)(struct Shape* shape, struct Hit* hit, Vec3 *n);
     void (*uv)(struct Shape* shape, struct Hit* hit, Vec2 * uv);
     void (*bounds)(struct Shape*, Vec3* min, Vec3* max);

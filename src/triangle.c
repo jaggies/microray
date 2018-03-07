@@ -19,7 +19,11 @@ struct TriangleHit {
 static struct TriangleHit hitData;
 
 static
-int intersect(struct Shape* shape, Ray* ray, float *tmax) {
+int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
+
+    if(shape == hit->ignore)
+        return 0;
+
     Triangle* triangle = (Triangle*) shape;
 
     Vec3 s1; cross(&ray->dir, &triangle->edge[1], &s1);
@@ -40,8 +44,9 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 
     float t = dot3(&triangle->edge[1], &s2) * invDiv;
 
-    if ((t > tmin) && (t < *tmax)) {
-        *tmax = t;
+    if ((t > tmin) && (t < hit->t)) {
+        hit->t = t;
+        hit->best = shape;
         hitData.alpha = alpha;
         hitData.beta = beta;
         return 1;

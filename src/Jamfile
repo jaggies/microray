@@ -1,8 +1,10 @@
 SubDir TOP src ;
 
 Main microray : 
+	branch.c
 	checkerboardshader.c
 	hit.c
+	leaf.c
 	loader.c
 	main.c
 	netpbm.c
