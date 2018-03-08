@@ -19,6 +19,7 @@
 enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA, POINTLIGHT, CHECKERBOARD, BACKGROUND };
 const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera", "pointlight", "checkerboard", "background" };
 const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
+static const char* DELIM = " \t";
 
 static void addLight(World* world, Light* light) {
     if (light) {
@@ -70,76 +71,88 @@ static void addShader(World* world, const char* shaderName, Shader* shader) {
     }
 }
 
-static Vec3 loadBackground(const char* args) {
+static Vec3 loadBackground(char* args) {
     Vec3 color;
-    sscanf(args, "%f %f %f", &color.x, &color.y, &color.z);
+	color.x = atof(strtok(args, DELIM));
+	color.y = atof(strtok(0, DELIM));
+	color.z = atof(strtok(0, DELIM));
     return color;
 }
 
-static Shader* loadPhongShader(const char* args, const char** outname) {
-    char name[MAXNAME];
+static Shader* loadPhongShader(char* args, char** outname) {
     Vec3 diffuse, specular, ambient;
     float exponent, index, reflect, transmit;
-    sscanf(args, "%s  %f %f %f  %f %f %f  %f %f %f  %f %f %f %f", name,
-        &diffuse.x, &diffuse.y, &diffuse.z, &specular.x, &specular.y, &specular.z,
-        &ambient.x, &ambient.y, &ambient.z, &exponent, &index, &reflect, &transmit);
-    *outname = strdup(name);
+    *outname = strdup(strtok(args, DELIM));
+	diffuse.x = atof(strtok(0, DELIM));
+	diffuse.y = atof(strtok(0, DELIM));
+	diffuse.z = atof(strtok(0, DELIM));
+	specular.x = atof(strtok(0, DELIM));
+	specular.y = atof(strtok(0, DELIM));
+	specular.z = atof(strtok(0, DELIM));
+	ambient.x = atof(strtok(0, DELIM));
+	ambient.y = atof(strtok(0, DELIM));
+	ambient.z = atof(strtok(0, DELIM));
+	exponent = atof(strtok(0, DELIM));
+	index = atof(strtok(0, DELIM));
+	reflect = atof(strtok(0, DELIM));
+	transmit = atof(strtok(0, DELIM));
     return createPhongShader(&diffuse, &specular, &ambient, exponent, index, reflect, transmit);
 }
 
-static Shader* loadCheckerboardShader(World* world, const char* args, const char** outname) {
-    char name[MAXNAME];
-    char oddName[MAXNAME];
-    char evenName[MAXNAME];
+static Shader* loadCheckerboardShader(World* world, char* args, char** outname) {
+    char* name;
+    char* oddName;
+    char* evenName;
     Vec2 scale, bias;
-    sscanf(args, "%s %s %s %f %f %f %f", name, oddName, evenName, &scale.x, &scale.y, &bias.x, &bias.y);
+	name = strtok(args, DELIM);
+	oddName = strtok(0, DELIM);
+	evenName = strtok(0, DELIM);
+    scale.x = atof(strtok(0, DELIM));
+	scale.y = atof(strtok(0, DELIM));
+	bias.x = atof(strtok(0, DELIM));
+	bias.y = atof(strtok(0, DELIM));
     *outname = strdup(name);
     return createCheckerboardShader(getShader(world, oddName), getShader(world, evenName), &scale, &bias);
 }
 
-static Shape* loadSphere(World* world, const char* args) {
-    char material[MAXNAME];
-    float x, y, z, r;
-    sscanf(args, "%s %f %f %f %f", material, &x, &y, &z, &r);
+static Shape* loadSphere(World* world, char* args) {
+    char* material = strtok(args, DELIM);
+	float x = atof(strtok(0, DELIM));
+	float y = atof(strtok(0, DELIM));
+	float z = atof(strtok(0, DELIM));
+	float r = atof(strtok(0, DELIM));
     return createSphere(x, y, z, r, getShader(world, material));
 }
 
-static Shape* loadTriangle(World* world, const char* args) {
-    char material[MAXNAME];
+static Shape* loadTriangle(World* world, char* args) {
     Vec3 p1, p2, p3;
     Vec2 uv1, uv2, uv3;
-    sscanf(args, "%s %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f ", material, 
-        &p1.x, &p1.y, &p1.z,
-        &p2.x, &p2.y, &p2.z,
-        &p3.x, &p3.y, &p3.z,
-        &uv1.x, &uv1.y,
-        &uv2.x, &uv2.y,
-        &uv3.x, &uv3.y);
+    char* material = strtok(args, DELIM);
+	p1.x = atof(strtok(0, DELIM)); p1.y = atof(strtok(0, DELIM)); p1.z = atof(strtok(0, DELIM));
+	p2.x = atof(strtok(0, DELIM)); p2.y = atof(strtok(0, DELIM)); p2.z = atof(strtok(0, DELIM));
+	p3.x = atof(strtok(0, DELIM)); p3.y = atof(strtok(0, DELIM)); p3.z = atof(strtok(0, DELIM));
+	uv1.x = atof(strtok(0, DELIM)); uv1.y = atof(strtok(0, DELIM));
+	uv2.x = atof(strtok(0, DELIM)); uv2.y = atof(strtok(0, DELIM));
+	uv3.x = atof(strtok(0, DELIM)); uv3.y = atof(strtok(0, DELIM));
     return createTriangle(&p1, &p2, &p3, &uv1, &uv2, &uv3, getShader(world, material));
 }
 
-static Shader* loadPhong(const char* args) {
-    char name[MAXNAME];
-    Vec3 diffuse, specular, ambient;
-    float exponent, index, reflect, transmit;
-    sscanf(args, "%s  %f %f %f  %f %f %f  %f %f %f  %f %f %f %f",
-        name, &diffuse.x, &diffuse.y, &diffuse.z, &specular.x, &specular.y, &specular.z,
-        &ambient.x, &ambient.y, &ambient.z, &exponent, &index, &reflect, &transmit);
-    return createPhongShader(&diffuse, &specular, &ambient, exponent, index, reflect, transmit);
-}
-
-static Camera* loadPerspectiveCamera(const char* args) {
+static Camera* loadPerspectiveCamera(char* args) {
     Vec3 from, at, up;
     float fov, aspect;
-    sscanf(args, "%f %f %f %f %f %f %f %f %f %f %f",
-        &from.x, &from.y, &from.z, &at.x, &at.y, &at.z, &up.x, &up.y, &up.z, &fov, &aspect);
+	from.x = atof(strtok(args, DELIM)); from.y = atof(strtok(0, DELIM)); from.z = atof(strtok(0, DELIM));
+	at.x = atof(strtok(0, DELIM)); at.y = atof(strtok(0, DELIM)); at.z = atof(strtok(0, DELIM));
+	up.x = atof(strtok(0, DELIM)); up.y = atof(strtok(0, DELIM)); up.z = atof(strtok(0, DELIM));
+	fov = atof(strtok(0, DELIM));
+	aspect = atof(strtok(0, DELIM));
     // TODO: get aspect from world
     return createPerspectiveCamera(&from, &at, &up, fov, aspect);
 }
 
-static Light* loadPointLight(const char* args) {
+static Light* loadPointLight(char* args) {
     Vec3 position, color;
-    sscanf(args, "%f %f %f  %f %f %f", &position.x, &position.y, &position.z, &color.x, &color.y, &color.z);
+	position.x = atof(strtok(args, DELIM)); position.y = atof(strtok(0, DELIM)); position.z = atof(strtok(0, DELIM));
+	color.x = atof(strtok(0, DELIM)); color.y = atof(strtok(0, DELIM)); color.z = atof(strtok(0, DELIM));
     return createPointLight(&position, &color);
 }
 
@@ -176,7 +189,7 @@ World* loadFile(char* fromPath)
             printf("Bad token, line %d: \n\t%s", line, ptr);
             continue; // ignore rest of line
         } else {
-            const char* name;
+            char* name;
             Shader* shader;
             switch(foundToken) {
                 case COMMENT:
