@@ -12,6 +12,7 @@ Main microray :
 	perspectivecamera.c
 	phongshader.c
 	pointlight.c
+        range.c
 	raymath.c
 	raytrace.c
 	sphere.c
