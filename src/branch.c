@@ -12,8 +12,9 @@
 #include "hit.h"
 #include "range.h"
 
-// XXX
+#ifdef PROFILE
 extern long intersections;
+#endif /* PROFILE */
 
 static
 int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
@@ -21,7 +22,9 @@ int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     if(shape == hit->ignore)
         return 0;
 
+#ifdef PROFILE
     intersections++;
+#endif /* PROFILE */
 
     Branch* branch = (Branch*) shape;
 
@@ -54,17 +57,14 @@ int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 
 static
 void Branch_normal(struct Shape* shape, Hit* hit, Vec3 *n) {
-    Branch* branch = (Branch*) shape;
 
-    // ???
-    // sub3(&hit->point, &sphere->position, n);
-
-    normalize3(n);
+    // empty - never called
 }
 
 static
 void Branch_uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
-    uv->x = uv->y = 0.0f; // TODO
+
+    // empty - never called
 }
 
 static

@@ -1,8 +1,7 @@
 #include "range.h"
 
 void range_init(Vec2* r) {
-    r->x = -100000000.0;
-    r->y =  100000000.0;
+    vec2(RANGE_MIN, RANGE_MAX, r);
 }
 
 int range_is_empty(Vec2* r) {

@@ -13,8 +13,9 @@
 
 static float tmin = 0.0f;
 
-// XXX
+#ifdef PROFILE
 extern long intersections;
+#endif /* PROFILE */
 
 static
 int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
@@ -22,7 +23,9 @@ int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     if(shape == hit->ignore)
         return 0;
 
+#ifdef PROFILE
     intersections++;
+#endif /* PROFILE */
 
     Sphere* sphere = (Sphere*) shape;
 

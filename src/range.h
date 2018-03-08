@@ -12,6 +12,9 @@
 #include "vec3.h"
 #include "ray.h"
 
+#define RANGE_MIN -10000000.0
+#define RANGE_MAX 10000000.0
+
 // These functions perform operations on a Vec2 assuming "x" and "y"
 // are the lesser and greater two values of a 1D range.
 

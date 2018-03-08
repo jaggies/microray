@@ -14,8 +14,9 @@
 #include "shader.h"
 #include "hit.h"
 
-// XXX
+#ifdef PROFILE
 extern long intersections;
+#endif /* PROFILE */
 
 static
 int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
@@ -23,7 +24,9 @@ int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     if(shape == hit->ignore)
         return 0;
 
+#ifdef PROFILE
     intersections++;
+#endif /* PROFILE */
 
     Leaf* leaf = (Leaf*) shape;
     int result = 0;
@@ -40,15 +43,13 @@ static
 void Leaf_normal(struct Shape* shape, Hit* hit, Vec3 *n) {
     Leaf* leaf = (Leaf*) shape;
 
-    // ???
-    // sub3(&hit->point, &sphere->position, n);
-
-    normalize3(n);
+    // empty - never called
 }
 
 static
 void Leaf_uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
-    uv->x = uv->y = 0.0f; // TODO
+
+    // empty - never called
 }
 
 static
@@ -56,12 +57,8 @@ void Leaf_bounds(struct Shape* shape, Vec3* boxmin, Vec3* boxmax) {
     Leaf* leaf = (Leaf*) shape;
 
     // make empty box
-    boxmin->x = FLT_MAX;
-    boxmin->y = FLT_MAX;
-    boxmin->z = FLT_MAX;
-    boxmax->x = -FLT_MAX;
-    boxmax->y = -FLT_MAX;
-    boxmax->z = -FLT_MAX;
+    vec3(FLT_MAX, FLT_MAX, FLT_MAX, boxmin);
+    vec3(-FLT_MAX, -FLT_MAX, -FLT_MAX, boxmax);
 
     for(int s = 0; s < leaf->nShapes; s++) {
         Vec3 childboxmin;

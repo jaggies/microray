@@ -48,8 +48,9 @@ void renderImage(World* world, const char* outpath)
     pbm->close(pbm);
 }
 
-// XXX
+#ifdef PROFILE
 long intersections = 0;
+#endif /* PROFILE */
 
 int main(int argc, char **argv)
 {
@@ -77,6 +78,8 @@ int main(int argc, char **argv)
     world->height = YRES;
     renderImage(world, outpath);
 
+#ifdef PROFILE
     printf("%ld intersections\n", intersections);
+#endif /* PROFILE */
 }
 

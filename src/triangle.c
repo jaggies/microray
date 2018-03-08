@@ -18,8 +18,9 @@ struct TriangleHit {
 // TODO: move this to Hit data structure scratchpad
 static struct TriangleHit hitData;
 
-// XXX
+#ifdef PROFILE
 extern long intersections;
+#endif /* PROFILE */
 
 static
 int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
@@ -27,7 +28,9 @@ int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
     if(shape == hit->ignore)
         return 0;
 
+#ifdef PROFILE
     intersections++;
+#endif /* PROFILE */
 
     Triangle* triangle = (Triangle*) shape;
 
@@ -66,18 +69,27 @@ void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
 
 static void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
     Triangle* triangle = (Triangle*) shape;
-    max->x = min->x = triangle->point[0].x;
-    max->y = min->y = triangle->point[0].y;
-    max->z = min->z = triangle->point[0].z;
 
-    for(int i = 1; i < 3; i++) {
-        min->x = fminf(min->x, triangle->point[i].x);
-        min->y = fminf(min->y, triangle->point[i].y);
-        min->z = fminf(min->z, triangle->point[i].z);
-        max->x = fmaxf(max->x, triangle->point[i].x);
-        max->y = fmaxf(max->y, triangle->point[i].y);
-        max->z = fmaxf(max->z, triangle->point[i].z);
-    }
+    *max = triangle->point[0];
+    *min = triangle->point[0];
+
+    Vec3 point1;
+    add3(&triangle->point[0], &triangle->edge[0], &point1);
+    min->x = fminf(min->x, point1.x);
+    min->y = fminf(min->y, point1.y);
+    min->z = fminf(min->z, point1.z);
+    max->x = fmaxf(max->x, point1.x);
+    max->y = fmaxf(max->y, point1.y);
+    max->z = fmaxf(max->z, point1.z);
+
+    Vec3 point2;
+    add3(&triangle->point[0], &triangle->edge[1], &point2);
+    min->x = fminf(min->x, point2.x);
+    min->y = fminf(min->y, point2.y);
+    min->z = fminf(min->z, point2.z);
+    max->x = fmaxf(max->x, point2.x);
+    max->y = fmaxf(max->y, point2.y);
+    max->z = fmaxf(max->z, point2.z);
 }
 
 static
@@ -105,8 +117,6 @@ Shape* createTriangle(
     triangle->op = &_triangleOps;
     triangle->shader = shader;
     copy3(p0, &triangle->point[0]);
-    copy3(p1, &triangle->point[1]);
-    copy3(p2, &triangle->point[2]);
     sub3(p1, p0, &triangle->edge[0]);
     sub3(p2, p0, &triangle->edge[1]);
     copy2(uv0, &triangle->uv[0]);
