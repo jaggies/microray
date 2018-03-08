@@ -18,8 +18,20 @@ struct TriangleHit {
 // TODO: move this to Hit data structure scratchpad
 static struct TriangleHit hitData;
 
+#ifdef PROFILE
+extern long intersections;
+#endif /* PROFILE */
+
 static
-int intersect(struct Shape* shape, Ray* ray, float *tmax) {
+int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
+
+    if(shape == hit->ignore)
+        return 0;
+
+#ifdef PROFILE
+    intersections++;
+#endif /* PROFILE */
+
     Triangle* triangle = (Triangle*) shape;
 
     Vec3 s1; cross(&ray->dir, &triangle->edge[1], &s1);
@@ -40,8 +52,9 @@ int intersect(struct Shape* shape, Ray* ray, float *tmax) {
 
     float t = dot3(&triangle->edge[1], &s2) * invDiv;
 
-    if ((t > tmin) && (t < *tmax)) {
-        *tmax = t;
+    if ((t > tmin) && (t < hit->t)) {
+        hit->t = t;
+        hit->best = shape;
         hitData.alpha = alpha;
         hitData.beta = beta;
         return 1;
@@ -55,7 +68,28 @@ void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
 }
 
 static void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
-    // TODO
+    Triangle* triangle = (Triangle*) shape;
+
+    *max = triangle->point[0];
+    *min = triangle->point[0];
+
+    Vec3 point1;
+    add3(&triangle->point[0], &triangle->edge[0], &point1);
+    min->x = fminf(min->x, point1.x);
+    min->y = fminf(min->y, point1.y);
+    min->z = fminf(min->z, point1.z);
+    max->x = fmaxf(max->x, point1.x);
+    max->y = fmaxf(max->y, point1.y);
+    max->z = fmaxf(max->z, point1.z);
+
+    Vec3 point2;
+    add3(&triangle->point[0], &triangle->edge[1], &point2);
+    min->x = fminf(min->x, point2.x);
+    min->y = fminf(min->y, point2.y);
+    min->z = fminf(min->z, point2.z);
+    max->x = fmaxf(max->x, point2.x);
+    max->y = fmaxf(max->y, point2.y);
+    max->z = fmaxf(max->z, point2.z);
 }
 
 static

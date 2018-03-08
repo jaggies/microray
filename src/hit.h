@@ -10,7 +10,9 @@
 
 #include "vec2.h"
 #include "vec3.h"
-#include "shape.h"
+#include "ray.h"
+
+struct Shape;
 
 typedef struct Hit {
     float t;
@@ -21,7 +23,8 @@ typedef struct Hit {
     float index;    // index of refraction of current medium
     Ray  lightRay;  // lightRay from intersection to current light
     Vec3 reflect;   // reflected ray direction
-    Shape* best;    // tracks closest object
+    struct Shape* best;    // tracks closest object
+    const struct Shape* ignore;    // tracks closest object
 } Hit;
 
 extern void clearHit(Hit* hit);

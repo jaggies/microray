@@ -70,11 +70,10 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
 void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdepth) {
     Hit hit;
     clearHit(&hit);
+    hit.ignore = ignore;
     for (int s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
-        if (shape != ignore && shape->op->intersect(shape, ray, &hit.t)) {
-            hit.best = shape;
-        }
+        shape->op->intersect(shape, ray, &hit);
     }
     shade(ray, world, &hit, color, maxdepth);
 }
@@ -82,11 +81,11 @@ void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdept
 int shadow(Ray* ray, const Shape* ignore, World* world) {
     Hit hit;
     clearHit(&hit);
+    hit.ignore = ignore;
     for (int s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
-        if (shape != ignore && shape->op->intersect(shape, ray, &hit.t)) {
+        if(shape->op->intersect(shape, ray, &hit) > 0)
             return 1;
-        }
     }
     return 0;
 }

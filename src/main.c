@@ -48,6 +48,9 @@ void renderImage(World* world, const char* outpath)
     pbm->close(pbm);
 }
 
+#ifdef PROFILE
+long intersections = 0;
+#endif /* PROFILE */
 
 int main(int argc, char **argv)
 {
@@ -74,5 +77,9 @@ int main(int argc, char **argv)
     world->width = XRES; // TODO: get from cmdline
     world->height = YRES;
     renderImage(world, outpath);
+
+#ifdef PROFILE
+    printf("%ld intersections\n", intersections);
+#endif /* PROFILE */
 }
 

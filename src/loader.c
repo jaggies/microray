@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "vec3.h"
 #include "phongshader.h"
@@ -6,6 +7,9 @@
 #include "shape.h"
 #include "sphere.h"
 #include "triangle.h"
+#include "bvh.h"
+#include "branch.h"
+#include "leaf.h"
 #include "pointlight.h"
 #include "perspectivecamera.h"
 #include "world.h"
@@ -204,6 +208,18 @@ World* loadFile(char* fromPath)
                     printf("Unimplemented token %s, args:%s", tokens[foundToken], ptr);
             }
         }
+    }
+
+    Shape *root;
+
+    if(!getenv("NO_BVH")) {
+        if(1) {
+            root = createBVH(world->shapes, world->nShapes);
+        } else {
+            root = createLeaf(world->shapes, world->nShapes);
+        }
+        world->shapes[0] = root;
+        world->nShapes = 1;
     }
     return world;
 }
