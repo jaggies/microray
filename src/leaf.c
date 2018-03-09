@@ -41,7 +41,6 @@ int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 
 static
 void Leaf_normal(struct Shape* shape, Hit* hit, Vec3 *n) {
-    Leaf* leaf = (Leaf*) shape;
 
     // empty - never called
 }
