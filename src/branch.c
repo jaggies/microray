@@ -42,12 +42,14 @@ int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     int result = 0;
     Vec2 range;
 
-    range_init(&range);
+    range.x = 0.0f;
+    range.y = hit->t;
     range_intersect_ray_box(&range, &child0->boxmin, &child0->boxmax, ray);
     if ((!range_is_empty(&range)) && (range.x < hit->t))
         result += child0->shape->op->intersect(child0->shape, ray, hit);
 
-    range_init(&range);
+    range.x = 0.0f;
+    range.y = hit->t;
     range_intersect_ray_box(&range, &child1->boxmin, &child1->boxmax, ray);
     if ((!range_is_empty(&range)) && (range.x < hit->t))
         result += child1->shape->op->intersect(child1->shape, ray, hit);
