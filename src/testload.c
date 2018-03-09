@@ -33,7 +33,7 @@ World* testLoad(int xres, int yres) {
     vec3(0.0,0.0,0.0,&diffuse);
     Shader* blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
     vec3(0.5,0.5,0.5,&diffuse);
-    Shader* mirror = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
+    /* Shader* mirror */ (void) createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
     vec3(1.0,0.0,0.0, &diffuse);
     Shader* odd = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4, 0.5f, 0.0f);
     vec3(0.0,1.0,0.0, &diffuse);

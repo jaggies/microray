@@ -55,7 +55,7 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
                 negate3(&N);
                 float tmp = i1; i1 = i2; i2 = tmp;
             }
-            int tir = transmisionDirection(i1, i2, &ray->dir, &N, &refractedRay.dir);
+            (void) transmisionDirection(i1, i2, &ray->dir, &N, &refractedRay.dir);
             // nudge the point to avoid self-intersection
             addscaled3(&refractedRay.point, world->epsilon, &refractedRay.dir, &refractedRay.point);
             trace(&refractedRay, 0 /* ignore */, world, &refractedColor, maxdepth - 1);

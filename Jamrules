@@ -1,3 +1,4 @@
 #CC = gcc-mp-4.7 ;
 OPTIM = -g -O3 ;
+CCFLAGS = -Wall ;
 ALL_LOCATE_TARGET = $(TOP)/build/$(OSFULL) ;
