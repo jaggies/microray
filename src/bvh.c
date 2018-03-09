@@ -26,6 +26,7 @@ static void initialize_BVH_parameters()
     }
 }
 
+#ifdef PROFILE
 static int total_treed = 0;
 static time_t previous;
 static int bvh_level_counts[MAX_MAX_BVH_DEPTH];
@@ -51,6 +52,8 @@ void print_tree_stats()
     if(bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT] > 0)
         fprintf(stderr, "%d or more shapes in %6d leaves\n", MAX_LEAF_SIZE_COUNT, bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT]);
 }
+#endif /* PROFILE */
+
 Vec3 sort_dir;
 int shape_sort(const void *p1, const void *p2)
 {
