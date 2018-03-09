@@ -6,13 +6,18 @@
 #include "branch.h"
 #include "leaf.h"
 
-static int bvh_max_depth = 8; // 23;
+#define MAX_MAX_BVH_DEPTH 16
+#define MAX_LEAF_SIZE_COUNT 16
+
+static int bvh_max_depth = 8;
 static unsigned int bvh_leaf_max = 4;
 
 static void initialize_BVH_parameters()
 {
     if(getenv("BVH_MAX_DEPTH") != 0) {
         bvh_max_depth = atoi(getenv("BVH_MAX_DEPTH"));
+        if(bvh_max_depth > MAX_MAX_BVH_DEPTH)
+            bvh_max_depth = MAX_MAX_BVH_DEPTH;
         fprintf(stderr, "BVH max depth set to %d\n", bvh_max_depth);
     }
     if(getenv("BVH_LEAF_MAX") != 0) {
@@ -23,8 +28,9 @@ static void initialize_BVH_parameters()
 
 static int total_treed = 0;
 static time_t previous;
-static int bvh_level_counts[64];
-static int bvh_leaf_size_counts[64];
+static int bvh_level_counts[MAX_MAX_BVH_DEPTH];
+// Each element N of this array is the number of leafs with N children
+static int bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT + 1];
 static int bvh_node_count = 0;
 static int bvh_leaf_count = 0;
 
@@ -35,17 +41,16 @@ void print_tree_stats()
     for(int i = 0; i < bvh_max_depth + 1; i++) {
         fprintf(stderr, "bvh level %2d: %6d nodes\n", i, bvh_level_counts[i]);
     }
-    int largest_leaf_count = 63;
+    int largest_leaf_count = MAX_LEAF_SIZE_COUNT;
     while((largest_leaf_count > 0) && (bvh_leaf_size_counts[largest_leaf_count]) == 0)
         largest_leaf_count--;
 
     for(int i = 0; i <= largest_leaf_count; i++) {
         fprintf(stderr, "%2d shapes in %6d leaves\n", i, bvh_leaf_size_counts[i]);
     }
-    if(bvh_leaf_size_counts[63] > 0)
-        fprintf(stderr, "63 or more shapes in %6d leaves\n", bvh_leaf_size_counts[63]);
+    if(bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT] > 0)
+        fprintf(stderr, "%d or more shapes in %6d leaves\n", MAX_LEAF_SIZE_COUNT, bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT]);
 }
-
 Vec3 sort_dir;
 int shape_sort(const void *p1, const void *p2)
 {
@@ -71,27 +76,44 @@ int shape_sort(const void *p1, const void *p2)
     Vec3 diff;
     sub3(&s2center, &s1center, &diff);
 
-    return dot3(&diff, &sort_dir);
+    float dot = dot3(&diff, &sort_dir);
+
+    int result;
+
+    if(dot < 0)
+        result = 1; // s1 should be after s2
+    else if(dot > 0)
+        result = -1; // s1 should be before s2
+    else
+        result = 0; // s1 is at s2
+
+    return result;
 }
 
 Shape* make_tree(Shape** shapes, int nShapes, int level)
 {
+#ifdef PROFILE
     if(level == 0) {
         previous = time(NULL);
     }
+#endif // PROFILE
 
+#ifdef PROFILE
     if(time(NULL) > previous) {
         fprintf(stderr, "total treed = %d\n", total_treed);
         previous = time(NULL);
     }
+#endif // PROFILE
 
     if((level >= bvh_max_depth) || nShapes <= bvh_leaf_max) {
-        total_treed += nShapes;
         Shape* s = createLeaf(shapes, nShapes);
-        bvh_leaf_size_counts[(nShapes > 63) ? 63 : nShapes]++;
+#ifdef PROFILE
+        total_treed += nShapes;
+        bvh_leaf_size_counts[(nShapes > MAX_LEAF_SIZE_COUNT) ? MAX_LEAF_SIZE_COUNT : nShapes]++;
         bvh_leaf_count++;
         bvh_level_counts[level]++;
         bvh_node_count++;
+#endif // PROFILE
         return s;
     }
 
@@ -128,8 +150,6 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
         vec3(0, 0, 1, &split_plane_normal);
     }
 
-    // Cheat for the moment and always call bounds since reaching to
-    // precalculated boxes would be awkward
     sort_dir = split_plane_normal;
     qsort(shapes, nShapes, sizeof(Shape*), shape_sort);
 
@@ -146,18 +166,22 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
         Shape *g1 = make_tree(shapes + startA, countA, level + 1);
         Shape *g2 = make_tree(shapes + startB, countB, level + 1);
         g = createBranch(g1, g2, &split_plane_normal);
-        bvh_level_counts[level]++;
-        bvh_node_count++;
 
     } else {
 
-        total_treed += nShapes;
         g = createLeaf(shapes, nShapes);
-        bvh_leaf_size_counts[(nShapes > 63) ? 63 : nShapes]++;
+
+#ifdef PROFILE
+        total_treed += nShapes;
+        bvh_leaf_size_counts[(nShapes > MAX_LEAF_SIZE_COUNT) ? MAX_LEAF_SIZE_COUNT : nShapes]++;
         bvh_leaf_count++;
+#endif // PROFILE
+    }
+
+#ifdef PROFILE
         bvh_level_counts[level]++;
         bvh_node_count++;
-    }
+#endif // PROFILE
 
     return g;
 }
@@ -168,7 +192,9 @@ Shape *createBVH(Shape** shapes, int nShapes)
 
     Shape* s = make_tree(shapes, nShapes, 0);
 
-    // print_tree_stats();
+#ifdef PROFILE
+    print_tree_stats();
+#endif // PROFILE
 
     return s;
 }
