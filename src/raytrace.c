@@ -16,6 +16,8 @@
 Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
     if (hit->best) {
         Vec3 I, N;
+        int i;
+        float kt, kr;
         Shader* shader = hit->best->shader;
         vec3(0,0,0, color);
         addscaled3(&ray->point, hit->t, &ray->dir, &hit->point);
@@ -24,39 +26,40 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
         copy3(&hit->normal, &N);
         copy3(&ray->dir, &I);
         reflectionDirection(&I, &N, &hit->reflect);
-        for (int i = 0; i < world->nLights; i++) {
+        for (i = 0; i < world->nLights; i++) {
             Vec3 tmpColor;
             Light* light = world->lights[i];
             light->op->makeRay(light, &hit->point, &hit->lightRay);
             addscaled3(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
             hit->inShadow = shadow(&hit->lightRay, hit->best, world);
             shader->op->evaluate(shader, hit, &tmpColor);
-            add3(&tmpColor, color, color); // TODO: multiply by Light's ambient color
+            add3(&tmpColor, color, color); /* TODO: multiply by Light's ambient color */
         }
-        float kr = shader->op->getReflectionAmount(shader);
+        kr = shader->op->getReflectionAmount(shader);
         if ((kr > 0.0f) && (maxdepth > 0)) {
             Vec3 reflectColor;
             Ray reflectedRay;
             copy3(&hit->point, &reflectedRay.point);
             copy3(&hit->reflect, &reflectedRay.dir);
-            // nudge the point to avoid self-intersection
+            /* nudge the point to avoid self-intersection */
             addscaled3(&reflectedRay.point, world->epsilon, &reflectedRay.dir, &reflectedRay.point);
             trace(&reflectedRay, hit->best, world, &reflectColor, maxdepth - 1);
             addscaled3(color, kr, &reflectColor, color);
         }
-        float kt = shader->op->getTransmissionAmount(shader);
+        kt = shader->op->getTransmissionAmount(shader);
         if ((kt > 0.0f) && (maxdepth > 0)) {
             Vec3 refractedColor;
             Ray refractedRay;
+            float i1, i2;
             copy3(&hit->point, &refractedRay.point);
-            float i1 = 1.0f;
-            float i2 = shader->op->getIndexOfRefraction(shader);
-            if (dot3(&I, &N) >= 0.0) { // entering
-                negate3(&N);
+            i1 = 1.0f;
+            i2 = shader->op->getIndexOfRefraction(shader);
+            if (dot3(&I, &N) >= 0.0) { /* entering */
                 float tmp = i1; i1 = i2; i2 = tmp;
+                negate3(&N);
             }
             (void) transmisionDirection(i1, i2, &ray->dir, &N, &refractedRay.dir);
-            // nudge the point to avoid self-intersection
+            /* nudge the point to avoid self-intersection */
             addscaled3(&refractedRay.point, world->epsilon, &refractedRay.dir, &refractedRay.point);
             trace(&refractedRay, 0 /* ignore */, world, &refractedColor, maxdepth - 1);
             addscaled3(color, kt, &refractedColor, color);
@@ -68,10 +71,11 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
 }
 
 void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdepth) {
+    int s;
     Hit hit;
     clearHit(&hit);
     hit.ignore = ignore;
-    for (int s = 0; s < world->nShapes; s++) {
+    for (s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
         shape->op->intersect(shape, ray, &hit);
     }
@@ -79,10 +83,11 @@ void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdept
 }
 
 int shadow(Ray* ray, const Shape* ignore, World* world) {
+    int s;
     Hit hit;
     clearHit(&hit);
     hit.ignore = ignore;
-    for (int s = 0; s < world->nShapes; s++) {
+    for (s = 0; s < world->nShapes; s++) {
         Shape* shape = world->shapes[s];
         if(shape->op->intersect(shape, ray, &hit) > 0)
             return 1;

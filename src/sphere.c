@@ -18,7 +18,11 @@ extern long intersections;
 #endif /* PROFILE */
 
 static
-int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
+int intersect(Shape* shape, Ray* ray, Hit* hit) {
+    Vec3 dir;
+    float b, disc;
+    int result;
+    Sphere* sphere;
 
     if(shape == hit->ignore)
         return 0;
@@ -27,24 +31,24 @@ int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     intersections++;
 #endif /* PROFILE */
 
-    Sphere* sphere = (Sphere*) shape;
+    sphere = (Sphere*) shape;
 
-    // Distance from center to perpendicular plane
-    Vec3 dir;
+    /* Distance from center to perpendicular plane */
     sub3(&sphere->position, &ray->point, &dir);
-    float b = dot3(&ray->dir, &dir);
-    float disc = b*b - dot3(&dir, &dir) + sphere->radius2;
+    b = dot3(&ray->dir, &dir);
+    disc = b*b - dot3(&dir, &dir) + sphere->radius2;
 
-    int result = 0;
+    result = 0;
     if (disc >= 0.0f) {
+        float t1, t2;
         disc = sqrt(disc);
-        float t2 = b + disc;   // farthest point
+        t2 = b + disc;   /* farthest point */
         if (t2 > tmin && t2 < hit->t) {
             hit->best = shape;
             hit->t = t2;
             result++;
         }
-        float t1 = b - disc;   // nearest point
+        t1 = b - disc;   /* nearest point */
         if (t1 > tmin && t1 < hit->t) {
             hit->best = shape;
             hit->t = t1;
@@ -55,19 +59,19 @@ int intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 }
 
 static
-void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
+void normal(Shape* shape, Hit* hit, Vec3 *n) {
     Sphere* sphere = (Sphere*) shape;
     sub3(&hit->point, &sphere->position, n);
     normalize3(n);
 }
 
 static
-void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
-    uv->x = uv->y = 0.0f; // TODO
+void uv(Shape* shape, Hit* hit, Vec2 * uv) {
+    uv->x = uv->y = 0.0f; /* TODO */
 }
 
 static
-void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
+void bounds(Shape* shape, Vec3* min, Vec3* max) {
     Sphere* sphere = (Sphere*) shape;
     min->x = sphere->position.x - sphere->radius;
     min->y = sphere->position.y - sphere->radius;

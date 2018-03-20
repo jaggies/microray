@@ -60,3 +60,6 @@ dkms.conf
 .settings/
 .vscode/
 Debug/
+
+# Build targets
+build

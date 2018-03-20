@@ -10,20 +10,23 @@
 
 static float tmin = 0.0f;
 
-struct TriangleHit {
+typedef struct _TriangleHit {
     float alpha;
     float beta;
-};
+} TriangleHit;
 
-// TODO: move this to Hit data structure scratchpad
-static struct TriangleHit hitData;
+/* TODO: move this to Hit data structure scratchpad */
+static TriangleHit hitData;
 
 #ifdef PROFILE
 extern long intersections;
 #endif /* PROFILE */
 
 static
-int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
+int intersect(Shape* shape, Ray* ray, Hit *hit) {
+    Triangle* triangle;
+    float div, invDiv, alpha, beta, t;
+    Vec3 d, s1, s2; 
 
     if(shape == hit->ignore)
         return 0;
@@ -32,25 +35,25 @@ int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
     intersections++;
 #endif /* PROFILE */
 
-    Triangle* triangle = (Triangle*) shape;
+    triangle = (Triangle*) shape;
 
-    Vec3 s1; cross(&ray->dir, &triangle->edge[1], &s1);
-    float div = dot3(&s1, &triangle->edge[0]);
-    if (div == 0.0f) return 0;  // ray parallel to plane.
+    cross(&ray->dir, &triangle->edge[1], &s1);
+    div = dot3(&s1, &triangle->edge[0]);
+    if (div == 0.0f) return 0;  /* ray parallel to plane. */
 
-    float invDiv = 1.0f / div;
-    Vec3 d; sub3(&ray->point, &triangle->point[0], &d);
+    invDiv = 1.0f / div;
+    sub3(&ray->point, &triangle->point[0], &d);
 
-    // Compute barycentric coordinate 1
-    float alpha = dot3(&d, &s1) * invDiv;
+    /* Compute barycentric coordinate 1 */
+    alpha = dot3(&d, &s1) * invDiv;
     if ((alpha < 0.0f) || (alpha > 1.0f)) return 0;
 
-    // Compute barycentric coordinate 2
-    Vec3 s2; cross(&d, &triangle->edge[0], &s2);
-    float beta = dot3(&ray->dir, &s2) * invDiv;
+    /* Compute barycentric coordinate 2 */
+    cross(&d, &triangle->edge[0], &s2);
+    beta = dot3(&ray->dir, &s2) * invDiv;
     if ((beta < 0.0f) || ((alpha + beta) > 1.0f)) return 0;
 
-    float t = dot3(&triangle->edge[1], &s2) * invDiv;
+    t = dot3(&triangle->edge[1], &s2) * invDiv;
 
     if ((t > tmin) && (t < hit->t)) {
         hit->t = t;
@@ -63,17 +66,17 @@ int intersect(struct Shape* shape, Ray* ray, Hit *hit) {
 }
 
 static
-void normal(struct Shape* shape, Hit* hit, Vec3 *n) {
+void normal(Shape* shape, Hit* hit, Vec3 *n) {
     copy3(&((Triangle*) shape)->normal[0], n);
 }
 
-static void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
+static void bounds(Shape* shape, Vec3* min, Vec3* max) {
     Triangle* triangle = (Triangle*) shape;
+    Vec3 point1, point2;
 
     *max = triangle->point[0];
     *min = triangle->point[0];
 
-    Vec3 point1;
     add3(&triangle->point[0], &triangle->edge[0], &point1);
     min->x = fminf(min->x, point1.x);
     min->y = fminf(min->y, point1.y);
@@ -82,7 +85,6 @@ static void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
     max->y = fmaxf(max->y, point1.y);
     max->z = fmaxf(max->z, point1.z);
 
-    Vec3 point2;
     add3(&triangle->point[0], &triangle->edge[1], &point2);
     min->x = fminf(min->x, point2.x);
     min->y = fminf(min->y, point2.y);
@@ -93,10 +95,11 @@ static void bounds(struct Shape* shape, Vec3* min, Vec3* max) {
 }
 
 static
-void uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
+void uv(Shape* shape, Hit* hit, Vec2 * uv) {
     Triangle* triangle = (Triangle*) shape;
-    Vec2 edge10; sub2(triangle->uv + 1, triangle->uv + 0, &edge10);
-    Vec2 edge20; sub2(triangle->uv + 2, triangle->uv + 0, &edge20);
+    Vec2 edge10, edge20;
+    sub2(triangle->uv + 1, triangle->uv + 0, &edge10);
+    sub2(triangle->uv + 2, triangle->uv + 0, &edge20);
     addscaled2(triangle->uv + 0, hitData.alpha, &edge10, uv);
     addscaled2(uv, hitData.beta, &edge20, uv);
 }
@@ -106,7 +109,7 @@ static ShapeOps _triangleOps;
 Shape* createTriangle(
         Vec3* p0, Vec3* p1, Vec3* p2,
         Vec2* uv0, Vec2* uv1, Vec2* uv2,
-        struct Shader* shader) {
+        Shader* shader) {
     Triangle* triangle = (Triangle*) malloc(sizeof(Triangle));
     if (!_triangleOps.intersect) {
         _triangleOps.intersect = intersect;

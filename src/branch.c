@@ -17,7 +17,13 @@ extern long intersections;
 #endif /* PROFILE */
 
 static
-int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
+int Branch_intersect(Shape* shape, Ray* ray, Hit* hit) {
+
+    Branch* branch = (Branch*) shape;
+    int result = 0;
+    Vec2 range;
+    BoundedShape* child0;
+    BoundedShape* child1;
 
     if(shape == hit->ignore)
         return 0;
@@ -26,11 +32,6 @@ int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     intersections++;
 #endif /* PROFILE */
 
-    Branch* branch = (Branch*) shape;
-
-    BoundedShape* child0;
-    BoundedShape* child1;
-
     if(dot3(&ray->dir, &branch->dir) > 0) {
         child0 = &branch->closerChild;
         child1 = &branch->fartherChild;
@@ -38,9 +39,6 @@ int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
         child0 = &branch->fartherChild;
         child1 = &branch->closerChild;
     }
-
-    int result = 0;
-    Vec2 range;
 
     range.x = 0.0f;
     range.y = hit->t;
@@ -58,19 +56,19 @@ int Branch_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 }
 
 static
-void Branch_normal(struct Shape* shape, Hit* hit, Vec3 *n) {
+void Branch_normal(Shape* shape, Hit* hit, Vec3 *n) {
 
-    // empty - never called
+    /* empty - never called */
 }
 
 static
-void Branch_uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
+void Branch_uv(Shape* shape, Hit* hit, Vec2 * uv) {
 
-    // empty - never called
+    /* empty - never called */
 }
 
 static
-void Branch_bounds(struct Shape* shape, Vec3* boxmin, Vec3* boxmax) {
+void Branch_bounds(Shape* shape, Vec3* boxmin, Vec3* boxmax) {
     Branch* branch = (Branch*) shape;
 
     BoundedShape *closer = &branch->closerChild;

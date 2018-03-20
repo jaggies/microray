@@ -10,7 +10,7 @@
 #define MAXSHADERS 20
 #define MAXLIGHTS 8
 
-typedef struct World {
+typedef struct _World {
     Shape* shapes[MAXSHAPES];
     Shader* shaders[MAXSHADERS];
 	const char* shaderNames[MAXSHADERS];
@@ -19,13 +19,13 @@ typedef struct World {
     int nShapes;
 	int nShaders;
     int nLights;
-    Vec3 background; // background colors
-    float epsilon; // intersection slop
-	int width; // image width
-	int height; // image height
+    Vec3 background; /* background colors */
+    float epsilon; /* intersection slop */
+	int width; /* image width */
+	int height; /* image height */
 } World;
 
 World* createWorld();
 
-#endif // WORLD_H
+#endif /* WORLD_H */
 

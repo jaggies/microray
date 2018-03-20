@@ -10,14 +10,14 @@
 
 #include "shape.h"
 
-typedef struct Sphere {
-    ShapeOps* op; // these must be first
+typedef struct _Sphere {
+    ShapeOps* op; /* these must be first */
     Shader* shader;
     Vec3 position;
-    float radius; // used for bounds calculation
+    float radius; /* used for bounds calculation */
     float radius2;
 } Sphere;
 
-extern Shape* createSphere(float x, float y, float z, float radius, struct Shader* shader);
+extern Shape* createSphere(float x, float y, float z, float radius, Shader* shader);
 
 #endif /* SPHERE_H_ */

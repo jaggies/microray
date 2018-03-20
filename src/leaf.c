@@ -19,7 +19,9 @@ extern long intersections;
 #endif /* PROFILE */
 
 static
-int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
+int Leaf_intersect(Shape* shape, Ray* ray, Hit* hit) {
+    Leaf* leaf;
+    int s, result;
 
     if(shape == hit->ignore)
         return 0;
@@ -28,10 +30,10 @@ int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
     intersections++;
 #endif /* PROFILE */
 
-    Leaf* leaf = (Leaf*) shape;
-    int result = 0;
+    leaf = (Leaf*) shape;
+    result = 0;
 
-    for (int s = 0; s < leaf->nShapes; s++) {
+    for (s = 0; s < leaf->nShapes; s++) {
         Shape* shape = leaf->shapes[s];
         result += shape->op->intersect(shape, ray, hit);
     }
@@ -40,32 +42,33 @@ int Leaf_intersect(struct Shape* shape, Ray* ray, Hit* hit) {
 }
 
 static
-void Leaf_normal(struct Shape* shape, Hit* hit, Vec3 *n) {
+void Leaf_normal(Shape* shape, Hit* hit, Vec3 *n) {
 
-    // empty - never called
+    /* empty - never called */
 }
 
 static
-void Leaf_uv(struct Shape* shape, struct Hit* hit, Vec2 * uv) {
+void Leaf_uv(Shape* shape, Hit* hit, Vec2 * uv) {
 
-    // empty - never called
+    /* empty - never called */
 }
 
 static
-void Leaf_bounds(struct Shape* shape, Vec3* boxmin, Vec3* boxmax) {
+void Leaf_bounds(Shape* shape, Vec3* boxmin, Vec3* boxmax) {
     Leaf* leaf = (Leaf*) shape;
+	int s;
 
-    // make empty box
+    /* make empty box */
     vec3(FLT_MAX, FLT_MAX, FLT_MAX, boxmin);
     vec3(-FLT_MAX, -FLT_MAX, -FLT_MAX, boxmax);
 
-    for(int s = 0; s < leaf->nShapes; s++) {
+    for(s = 0; s < leaf->nShapes; s++) {
         Vec3 childboxmin;
         Vec3 childboxmax;
 
         leaf->shapes[s]->op->bounds(leaf->shapes[s], &childboxmin, &childboxmax);
 
-        // extend box by child box
+        /* extend box by child box */
         boxmin->x = fminf(boxmin->x, childboxmin.x);
         boxmin->y = fminf(boxmin->y, childboxmin.y);
         boxmin->z = fminf(boxmin->z, childboxmin.z);
@@ -78,9 +81,11 @@ void Leaf_bounds(struct Shape* shape, Vec3* boxmin, Vec3* boxmax) {
 static ShapeOps _LeafOps;
 
 Shape* createLeaf(Shape** shapes, int nShapes) {
-    assert(nShapes > 0);
+    Leaf* leaf;
 
-    Leaf* leaf = (Leaf*) malloc(sizeof(Leaf));
+	assert(nShapes > 0);
+
+    leaf = (Leaf*) malloc(sizeof(Leaf));
 
     if (!_LeafOps.intersect) {
         _LeafOps.intersect = Leaf_intersect;

@@ -8,15 +8,15 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
-struct Ray;
-struct Camera;
+typedef struct _Ray Ray;
+typedef struct _Camera Camera;
 
-typedef struct CameraOps {
-    void (*makeRay)(struct Camera*, float u, float v, struct Ray* ray);
+typedef struct _CameraOps {
+    void (*makeRay)(Camera*, float u, float v, Ray* ray);
 } CameraOps;
 
-typedef struct Camera {
-    struct CameraOps* op;
+typedef struct _Camera {
+    CameraOps* op;
 } Camera;
 
 #endif /* CAMERA_H_ */

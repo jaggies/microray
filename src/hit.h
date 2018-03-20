@@ -12,19 +12,19 @@
 #include "vec3.h"
 #include "ray.h"
 
-struct Shape;
+typedef struct _Shape Shape;
 
-typedef struct Hit {
+typedef struct _Hit {
     float t;
-    int  inShadow;  // whether this hit was in shadow (used by shade())
-    Vec3 point;     // point of intersection
-    Vec3 normal;    // normal at intersection
-    Vec2 uv;        // uv at intersection
-    float index;    // index of refraction of current medium
-    Ray  lightRay;  // lightRay from intersection to current light
-    Vec3 reflect;   // reflected ray direction
-    struct Shape* best;    // tracks closest object
-    const struct Shape* ignore;    // tracks closest object
+    int  inShadow;  /* whether this hit was in shadow (used by shade()) */
+    Vec3 point;     /* point of intersection */
+    Vec3 normal;    /* normal at intersection */
+    Vec2 uv;        /* uv at intersection */
+    float index;    /* index of refraction of current medium */
+    Ray  lightRay;  /* lightRay from intersection to current light */
+    Vec3 reflect;   /* reflected ray direction */
+    Shape* best;    /* tracks closest object */
+    const Shape* ignore;    /* tracks closest object */
 } Hit;
 
 extern void clearHit(Hit* hit);

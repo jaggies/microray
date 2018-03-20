@@ -9,40 +9,41 @@
 #include "phongshader.h"
 #include "hit.h"
 
-static const float _threshold = 0.01f; // minimum factor before we'll call pow
+static const float _threshold = 0.01f; /* minimum factor before we'll call pow() */
 
-static void evaluate(struct Shader* sh, Hit* hit, Vec3* color) {
+static void evaluate(Shader* sh, Hit* hit, Vec3* color) {
     PhongShader* shader = (PhongShader*) sh;
+    float cosAlpha, cosBeta;
 
-    // Ambient
+    /* Ambient */
     copy3(&shader->ambient, color);
 
     if (hit->inShadow) return;
 
-    // Diffuse
-    float cosAlpha = dot3(&hit->normal, &hit->lightRay.dir);
+    /* Diffuse */
+    cosAlpha = dot3(&hit->normal, &hit->lightRay.dir);
     cosAlpha = fabs(cosAlpha);
     if (cosAlpha > 0) {
         addscaled3(color, cosAlpha, &shader->diffuse, color);
     }
 
-    // Specular
-    float cosBeta = dot3(&hit->reflect, &hit->lightRay.dir);
+    /* Specular */
+    cosBeta = dot3(&hit->reflect, &hit->lightRay.dir);
     if (cosBeta > _threshold) {
         float ks = pow(cosBeta, shader->exponent);
         addscaled3(color, ks, &shader->specular, color);
     }
 }
 
-static float getReflectionAmount(struct Shader* sh) {
+static float getReflectionAmount(Shader* sh) {
     return ((PhongShader*) sh)->reflect;
 }
 
-static float getTransmissionAmount(struct Shader* sh) {
+static float getTransmissionAmount(Shader* sh) {
     return ((PhongShader*) sh)->transmit;
 }
 
-static float getIndexOfRefraction(struct Shader* sh) {
+static float getIndexOfRefraction(Shader* sh) {
     return ((PhongShader*) sh)->index;
 }
 

@@ -10,7 +10,7 @@
 
 #include "shape.h"
 
-typedef struct Triangle {
+typedef struct _Triangle {
     ShapeOps* op;
     Shader* shader;
     Vec3  point[1];
@@ -20,6 +20,6 @@ typedef struct Triangle {
 } Triangle;
 
 extern Shape* createTriangle(Vec3* p0, Vec3* p1, Vec3* p2,
-        Vec2* uv0, Vec2* uv1, Vec2* uv2, struct Shader* shader);
+        Vec2* uv0, Vec2* uv1, Vec2* uv2, Shader* shader);
 
 #endif /* TRIANGLE_H_ */

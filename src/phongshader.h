@@ -11,15 +11,15 @@
 #include "shader.h"
 #include "vec3.h"
 
-typedef struct PhongShader {
+typedef struct _PhongShader {
     ShaderOps* op;
-    struct Vec3 diffuse;
-    struct Vec3 specular;
-    struct Vec3 ambient;
-    float exponent; // specular exponent
-    float index; // index of refraction
-    float reflect; // amount of reflection
-    float transmit; // amount of transmission
+    Vec3 diffuse;
+    Vec3 specular;
+    Vec3 ambient;
+    float exponent; /* specular exponent */
+    float index; /* index of refraction */
+    float reflect; /* amount of reflection */
+    float transmit; /* amount of transmission */
 } PhongShader;
 
 extern Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent,

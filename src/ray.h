@@ -10,7 +10,7 @@
 
 #include "raymath.h"
 
-typedef struct Ray {
+typedef struct _Ray {
     Vec3 point;
     Vec3 dir;
 } Ray;

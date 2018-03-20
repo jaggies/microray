@@ -10,13 +10,13 @@
 
 #include "shape.h"
 
-// A Shape representing an array of shapes.
+/* A Shape representing an array of shapes. */
 
-// This was created to contain the leafs of a BVH, but isn't
-// specific to BVH.  Would "Group" or "List" be a better name?
+/* This was created to contain the leafs of a BVH, but isn't */
+/* specific to BVH.  Would "Group" or "List" be a better name? */
 
-typedef struct Leaf {
-    ShapeOps* op; // these must be first
+typedef struct _Leaf {
+    ShapeOps* op; /* these must be first */
     int nShapes;
     Shape **shapes;
 } Leaf;

@@ -43,7 +43,8 @@ static void addShape(World* world, Shape* shape) {
 
 static Shader* getShader(World* world, const char* shaderName) {
     static Shader* defaultShader = 0;
-    for (int i = 0; i < world->nShaders; i++) {
+    int i;
+    for (i = 0; i < world->nShaders; i++) {
         if (strcmp(shaderName, world->shaderNames[i]) == 0) {
             return world->shaders[i];
         }
@@ -63,7 +64,7 @@ static void addShader(World* world, const char* shaderName, Shader* shader) {
     if (shader) {
         if (world->nShaders < MAXSHADERS) {
             world->shaders[world->nShaders] = shader;
-            world->shaderNames[world->nShaders] = shaderName; // allocated in loadPhongShader
+            world->shaderNames[world->nShaders] = shaderName; /* allocated in loadPhongShader */
             world->nShaders++;
         } else {
             printf("Too many shaders!\n");
@@ -82,7 +83,7 @@ static Vec3 loadBackground(char* args) {
 static Shader* loadPhongShader(char* args, char** outname) {
     Vec3 diffuse, specular, ambient;
     float exponent, index, reflect, transmit;
-    *outname = strdup(strtok(args, DELIM));
+    *outname = (char*) strdup(strtok(args, DELIM));
 	diffuse.x = atof(strtok(0, DELIM));
 	diffuse.y = atof(strtok(0, DELIM));
 	diffuse.z = atof(strtok(0, DELIM));
@@ -111,7 +112,7 @@ static Shader* loadCheckerboardShader(World* world, char* args, char** outname) 
 	scale.y = atof(strtok(0, DELIM));
 	bias.x = atof(strtok(0, DELIM));
 	bias.y = atof(strtok(0, DELIM));
-    *outname = strdup(name);
+    *outname = (char*) strdup(name);
     return createCheckerboardShader(getShader(world, oddName), getShader(world, evenName), &scale, &bias);
 }
 
@@ -145,7 +146,7 @@ static Camera* loadPerspectiveCamera(char* args) {
 	up.x = atof(strtok(0, DELIM)); up.y = atof(strtok(0, DELIM)); up.z = atof(strtok(0, DELIM));
 	fov = atof(strtok(0, DELIM));
 	aspect = atof(strtok(0, DELIM));
-    // TODO: get aspect from world
+    /* TODO: get aspect from world */
     return createPerspectiveCamera(&from, &at, &up, fov, aspect);
 }
 
@@ -166,34 +167,36 @@ World* loadFile(char* fromPath)
         return 0;
     }
     while (!feof(fp)) {
+        int i;
         char* ptr;
         char* linestr = fgets(buffer, sizeof(buffer), fp);
-        int foundToken = -1; // unknown
+        int foundToken = -1; /* unknown */
         if (!linestr) {
             break;
         }
         line++;
-        for (int i = 0; i < kTokens; i++) {
+        for (i = 0; i < kTokens; i++) {
+            const char* token;
             ptr = linestr;
-            const char* token = tokens[i];
+            token = tokens[i];
             while (*token == *ptr && *token != 0 && *ptr != 0) {
                 ptr++;
                 token++;
             }
-            if (*token == 0) { // found
+            if (*token == 0) { /* found */
                 foundToken = i;
-                break; // token found
+                break; /* token found */
             }
         }
         if (foundToken == -1) {
             printf("Bad token, line %d: \n\t%s", line, ptr);
-            continue; // ignore rest of line
+            continue; /* ignore rest of line */
         } else {
             char* name;
             Shader* shader;
             switch(foundToken) {
                 case COMMENT:
-                    break; // ignore
+                    break; /* ignore */
                 case PERSPECTIVECAMERA:
                     world->camera = loadPerspectiveCamera(ptr);
                     break;
@@ -223,9 +226,8 @@ World* loadFile(char* fromPath)
         }
     }
 
-    Shape *root;
-
     if(!getenv("NO_BVH")) {
+        Shape *root;
         if(1) {
             root = createBVH(world->shapes, world->nShapes);
         } else {

@@ -8,11 +8,11 @@
 #ifndef VEC3_H_
 #define VEC3_H_
 
-typedef struct Vec3 {
+typedef struct _Vec3 {
     float x, y, z;
 } Vec3;
 
-// Vec3 operations
+/* Vec3 operations */
 extern void vec3(float x, float y, float z, Vec3* result);
 extern void add3(Vec3* a, Vec3* b, Vec3* result);
 extern void addscaled3(Vec3* a, float s, Vec3* b, Vec3* result);

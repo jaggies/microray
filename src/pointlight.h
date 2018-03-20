@@ -10,7 +10,7 @@
 
 #include "light.h"
 
-typedef struct PointLight {
+typedef struct _PointLight {
     LightOps* op;
     Vec3 point;
     Vec3 color;

@@ -22,22 +22,23 @@
 
 #define XRES 1024
 #define YRES XRES
-#define MAXDEPTH 4 // max number of reflected rays
+#define MAXDEPTH 4 /* max number of reflected rays */
 
 void renderImage(World* world, const char* outpath)
 {
+    int h, w;
     NetPBM* pbm = createNetPBM(outpath, world->width, world->height);
     float du = 1.0f / world->width, dv = 1.0f / world->height;
-    float v = 0.0f + dv * 0.5f; // emit ray from pixel centers
+    float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
 
     if (!pbm) {
         printf("Can't write image '%s'\n", outpath);
         return;
     }
 
-    for (int h = 0; h < world->height; h++, v += dv) {
+    for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
-        for (int w = 0; w < world->width; w++, u += du) {
+        for (w = 0; w < world->width; w++, u += du) {
             Ray ray;
             Vec3 color;
             world->camera->op->makeRay(world->camera, u, 1.0f-v, &ray);
@@ -55,7 +56,7 @@ long intersections = 0;
 int main(int argc, char **argv)
 {
     World* world;
-    const char* outpath = "out.ppm"; // TODO: get path from arguments
+    const char* outpath = "out.ppm"; /* TODO: get path from arguments */
 
     if (argc > 1) {
         world = loadFile(argv[1]);
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
         printf("World contains no camera, exiting\n");
         return 0;
     }
-    world->width = XRES; // TODO: get from cmdline
+    world->width = XRES; /* TODO: get from cmdline */
     world->height = YRES;
     renderImage(world, outpath);
 

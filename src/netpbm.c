@@ -6,7 +6,7 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h> // malloc
+#include <stdlib.h> /* malloc */
 #include <math.h>
 #include "vec3.h"
 #include "netpbm.h"

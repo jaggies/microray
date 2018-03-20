@@ -16,7 +16,7 @@ void reflectionDirection(Vec3* incident, Vec3* normal, Vec3* result)
 
 int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, Vec3* result)
 {
-    // Heckbert's method (T = eta*I + (eta * costheta1 - sqrt(costheta2sq)) * N)
+    /* Heckbert's method (T = eta*I + (eta * costheta1 - sqrt(costheta2sq)) * N) */
     float eta = eta1/eta2;
     float costheta1 = -dot3(incident, normal);
     float costheta2sq = 1.0 - eta*eta * (1.0 - costheta1 * costheta1);
@@ -27,7 +27,7 @@ int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, V
         add3(&tmp, result, result);
         return 1;
     }
-    return 0; // total internal reflection
+    return 0; /* total internal reflection */
 }
 
 float Radians(float degrees) {

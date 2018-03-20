@@ -8,9 +8,10 @@
 #ifndef NETPBM_H_
 #define NETPBM_H_
 
-typedef struct NetPBM {
-    void (*putPixel)(struct NetPBM* pbm, int x, int y, Vec3* color);
-	void (*close)(struct NetPBM* pbm);
+typedef struct _NetPBM NetPBM;
+typedef struct _NetPBM {
+    void (*putPixel)(NetPBM* pbm, int x, int y, Vec3* color);
+	void (*close)(NetPBM* pbm);
 	int width;
 	int height;
 	FILE* fp;

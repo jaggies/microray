@@ -12,14 +12,14 @@
 #include "vec2.h"
 #include "vec3.h"
 
-typedef struct CheckerboardShader {
+typedef struct _CheckerboardShader {
     ShaderOps* op;
     Shader* odd;
     Shader* even;
     Vec2 scale;
     Vec2 bias;
-    // private
-    Shader* target; // which of the above shaders is being evaluated
+    /* private */
+    Shader* target; /* which of the above shaders is being evaluated */
 } CheckerboardShader;
 
 extern Shader* createCheckerboardShader(Shader* odd, Shader* even, Vec2* scale, Vec2* bias);

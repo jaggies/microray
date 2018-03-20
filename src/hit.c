@@ -11,5 +11,5 @@ void clearHit(Hit* hit) {
     hit->t = 1.0e7;
     hit->best = 0;
     hit->inShadow = 0;
-    hit->index = 1.0f; // air
+    hit->index = 1.0f; /* air */
 }
