@@ -53,3 +53,10 @@ dkms.conf
 
 # Images
 *.ppm
+
+# Eclipse files
+.cproject
+.project
+.settings/
+.vscode/
+Debug/
