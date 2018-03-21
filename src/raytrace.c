@@ -54,7 +54,7 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             copy3(&hit->point, &refractedRay.point);
             i1 = 1.0f;
             i2 = shader->op->getIndexOfRefraction(shader);
-            if (dot3(&I, &N) >= 0.0) { /* entering */
+            if (dot3(&I, &N) >= 0.0f) { /* entering */
                 float tmp = i1; i1 = i2; i2 = tmp;
                 negate3(&N);
             }

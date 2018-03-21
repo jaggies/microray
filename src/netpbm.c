@@ -29,9 +29,9 @@ void closeNetPBM(NetPBM* pbm) {
 
 static
 void putPixel(NetPBM* pbm, int x, int y, Vec3* color) {
-    int r = min(255, max(0, round(color->x * 255)));
-    int g = min(255, max(0, round(color->y * 255)));
-    int b = min(255, max(0, round(color->z * 255)));
+    int r = min(255, max(0, (int)round(color->x * 255)));
+    int g = min(255, max(0, (int)round(color->y * 255)));
+    int b = min(255, max(0, (int)round(color->z * 255)));
     fputc(r, pbm->fp);
     fputc(g, pbm->fp);
     fputc(b, pbm->fp);

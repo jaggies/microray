@@ -1,5 +1,9 @@
 SubDir TOP src ;
 
+if $(TARGET) = "COCO" {
+	SubDirHdrs $(TOP) os ;
+    LINKLIBS on microray = -los ;
+}
 Main microray : 
 	branch.c
 	bvh.c
@@ -12,7 +16,7 @@ Main microray :
 	perspectivecamera.c
 	phongshader.c
 	pointlight.c
-        range.c
+	range.c
 	raymath.c
 	raytrace.c
 	sphere.c

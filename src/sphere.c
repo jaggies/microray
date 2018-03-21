@@ -11,14 +11,14 @@
 #include "shader.h"
 #include "hit.h"
 
-static float tmin = 0.0f;
+#define tmin (0.0f)
 
 #ifdef PROFILE
 extern long intersections;
 #endif /* PROFILE */
 
 static
-int intersect(Shape* shape, Ray* ray, Hit* hit) {
+int sphereIntersect(Shape* shape, Ray* ray, Hit* hit) {
     Vec3 dir;
     float b, disc;
     int result;
@@ -59,19 +59,19 @@ int intersect(Shape* shape, Ray* ray, Hit* hit) {
 }
 
 static
-void normal(Shape* shape, Hit* hit, Vec3 *n) {
+void sphereNormal(Shape* shape, Hit* hit, Vec3 *n) {
     Sphere* sphere = (Sphere*) shape;
     sub3(&hit->point, &sphere->position, n);
     normalize3(n);
 }
 
 static
-void uv(Shape* shape, Hit* hit, Vec2 * uv) {
+void sphereUV(Shape* shape, Hit* hit, Vec2 * uv) {
     uv->x = uv->y = 0.0f; /* TODO */
 }
 
 static
-void bounds(Shape* shape, Vec3* min, Vec3* max) {
+void sphereBounds(Shape* shape, Vec3* min, Vec3* max) {
     Sphere* sphere = (Sphere*) shape;
     min->x = sphere->position.x - sphere->radius;
     min->y = sphere->position.y - sphere->radius;
@@ -86,10 +86,10 @@ static ShapeOps _sphereOps;
 Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
     Sphere* sphere = (Sphere*) malloc(sizeof(Sphere));
     if (!_sphereOps.intersect) {
-        _sphereOps.intersect = intersect;
-        _sphereOps.normal = normal;
-        _sphereOps.uv = uv;
-        _sphereOps.bounds = bounds;
+        _sphereOps.intersect = sphereIntersect;
+        _sphereOps.normal = sphereNormal;
+        _sphereOps.uv = sphereUV;
+        _sphereOps.bounds = sphereBounds;
     }
     sphere->op = &_sphereOps;
     sphere->shader = shader;

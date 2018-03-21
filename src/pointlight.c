@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "pointlight.h"
 
-static void makeRay(Light* l, Vec3* point, Ray* ray)
+static void pointLightMakeRay(Light* l, Vec3* point, Ray* ray)
 {
     PointLight* light = (PointLight*) l;
     copy3(point, &ray->point);
@@ -22,7 +22,7 @@ Light* createPointLight(Vec3* position, Vec3* color)
 {
     PointLight* light = (PointLight*) malloc(sizeof(PointLight));
     if (!_pointLightOps.makeRay) {
-        _pointLightOps.makeRay = makeRay;
+        _pointLightOps.makeRay = pointLightMakeRay;
     }
     copy3(position, &light->point);
     copy3(color, &light->color);

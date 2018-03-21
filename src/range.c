@@ -18,21 +18,21 @@ void range_intersect_ray_box(Vec2* range, Vec3* boxmin, Vec3* boxmax, Ray* ray) 
 
     t0 = (boxmin->x - ray->point.x) / ray->dir.x;
     t1 = (boxmax->x - ray->point.x) / ray->dir.x;
-    if(ray->dir.x >= 0.0)
+    if(ray->dir.x >= 0.0f)
         range_intersect_floats(range, t0, t1);
     else
         range_intersect_floats(range, t1, t0);
 
     t0 = (boxmin->y - ray->point.y) / ray->dir.y;
     t1 = (boxmax->y - ray->point.y) / ray->dir.y;
-    if(ray->dir.y >= 0.0)
+    if(ray->dir.y >= 0.0f)
         range_intersect_floats(range, t0, t1);
     else
         range_intersect_floats(range, t1, t0);
 
     t0 = (boxmin->z - ray->point.z) / ray->dir.z;
     t1 = (boxmax->z - ray->point.z) / ray->dir.z;
-    if(ray->dir.z >= 0.0)
+    if(ray->dir.z >= 0.0f)
         range_intersect_floats(range, t0, t1);
     else
         range_intersect_floats(range, t1, t0);

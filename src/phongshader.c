@@ -11,7 +11,7 @@
 
 static const float _threshold = 0.01f; /* minimum factor before we'll call pow() */
 
-static void evaluate(Shader* sh, Hit* hit, Vec3* color) {
+static void phongEvaluate(Shader* sh, Hit* hit, Vec3* color) {
     PhongShader* shader = (PhongShader*) sh;
     float cosAlpha, cosBeta;
 
@@ -35,15 +35,15 @@ static void evaluate(Shader* sh, Hit* hit, Vec3* color) {
     }
 }
 
-static float getReflectionAmount(Shader* sh) {
+static float phongGetReflectionAmount(Shader* sh) {
     return ((PhongShader*) sh)->reflect;
 }
 
-static float getTransmissionAmount(Shader* sh) {
+static float phongGetTransmissionAmount(Shader* sh) {
     return ((PhongShader*) sh)->transmit;
 }
 
-static float getIndexOfRefraction(Shader* sh) {
+static float phongGetIndexOfRefraction(Shader* sh) {
     return ((PhongShader*) sh)->index;
 }
 
@@ -53,10 +53,10 @@ Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float ex
         float reflect, float transmit) {
     PhongShader* shader = (PhongShader*) malloc(sizeof(PhongShader));
     if (!_phongOps.evaluate) {
-        _phongOps.evaluate = evaluate;
-        _phongOps.getReflectionAmount = getReflectionAmount;
-        _phongOps.getTransmissionAmount = getTransmissionAmount;
-        _phongOps.getIndexOfRefraction = getIndexOfRefraction;
+        _phongOps.evaluate = phongEvaluate;
+        _phongOps.getReflectionAmount = phongGetReflectionAmount;
+        _phongOps.getTransmissionAmount = phongGetTransmissionAmount;
+        _phongOps.getIndexOfRefraction = phongGetIndexOfRefraction;
     }
     shader->op = &_phongOps;
     copy3(diffuse, &shader->diffuse);

@@ -1,0 +1,12 @@
+SubDir TOP os ;
+
+Library libos :
+	atof.c
+	math.c
+	qsort.c
+	sqrt.c 
+	stdio.c
+	stdlib.c
+	string.c
+	;
+

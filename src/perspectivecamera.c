@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "perspectivecamera.h"
 
-static void makeRay(Camera* cam, float u, float v, Ray* ray) {
+static void perspMakeRay(Camera* cam, float u, float v, Ray* ray) {
     PerspectiveCamera* camera = (PerspectiveCamera*) cam;
     copy3(&camera->baseray.point, &ray->point);
     addscaled3(&camera->baseray.dir, u, &camera->du, &ray->dir);
@@ -23,7 +23,7 @@ Camera* createPerspectiveCamera(Vec3* from, Vec3* at, Vec3* up, float fov, float
     Vec3 dir, upNormalized, tdu, tdv;
     float tanfov2;
     if (!_perspCameraOps.makeRay) {
-        _perspCameraOps.makeRay = makeRay;
+        _perspCameraOps.makeRay = perspMakeRay;
     }
     camera = (PerspectiveCamera*) malloc(sizeof(PerspectiveCamera));
     tanfov2 = 2.0f * tan(Radians(fov / 2.0f));

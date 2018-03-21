@@ -19,7 +19,7 @@ int transmisionDirection(float eta1, float eta2, Vec3* incident, Vec3* normal, V
     /* Heckbert's method (T = eta*I + (eta * costheta1 - sqrt(costheta2sq)) * N) */
     float eta = eta1/eta2;
     float costheta1 = -dot3(incident, normal);
-    float costheta2sq = 1.0 - eta*eta * (1.0 - costheta1 * costheta1);
+    float costheta2sq = 1.0f - eta*eta * (1.0f - costheta1 * costheta1);
     if (costheta2sq >= 0.0f) {
         Vec3 tmp;
         mult3(incident, eta, result);

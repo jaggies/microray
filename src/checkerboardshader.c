@@ -10,7 +10,7 @@
 #include "hit.h"
 #include "checkerboardshader.h"
 
-static void evaluate(Shader* sh, Hit* hit, Vec3* color)
+static void checkerEvaluate(Shader* sh, Hit* hit, Vec3* color)
 {
 	int u, v;
     Vec2 p; 
@@ -22,17 +22,17 @@ static void evaluate(Shader* sh, Hit* hit, Vec3* color)
     (*shader->target->op->evaluate)(shader->target, hit, color);
 }
 
-static float getReflectionAmount(Shader* sh) {
+static float checkerGetReflectionAmount(Shader* sh) {
     CheckerboardShader* shader = (CheckerboardShader*) sh;
     return shader->target->op->getReflectionAmount(shader->target);
 }
 
-static float getTransmissionAmount(Shader* sh) {
+static float checkerGetTransmissionAmount(Shader* sh) {
     CheckerboardShader* shader = (CheckerboardShader*) sh;
     return shader->target->op->getTransmissionAmount(shader->target);
 }
 
-static float getIndexOfRefraction(Shader* sh) {
+static float checkerGetIndexOfRefraction(Shader* sh) {
     CheckerboardShader* shader = (CheckerboardShader*) sh;
     return shader->target->op->getIndexOfRefraction(shader->target);
 }
@@ -42,10 +42,10 @@ static ShaderOps _checkerOps;
 Shader* createCheckerboardShader(Shader* even, Shader* odd, Vec2* scale, Vec2* bias)  {
     CheckerboardShader* shader = (CheckerboardShader*) malloc(sizeof(CheckerboardShader));
     if (!_checkerOps.evaluate) {
-        _checkerOps.evaluate = evaluate;
-        _checkerOps.getIndexOfRefraction = getIndexOfRefraction;
-        _checkerOps.getReflectionAmount = getReflectionAmount;
-        _checkerOps.getTransmissionAmount = getTransmissionAmount;
+        _checkerOps.evaluate = checkerEvaluate;
+        _checkerOps.getIndexOfRefraction = checkerGetIndexOfRefraction;
+        _checkerOps.getReflectionAmount = checkerGetReflectionAmount;
+        _checkerOps.getTransmissionAmount = checkerGetTransmissionAmount;
     }
     shader->op = &_checkerOps;
     shader->even = even;

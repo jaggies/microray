@@ -83,7 +83,7 @@ static ShapeOps _LeafOps;
 Shape* createLeaf(Shape** shapes, int nShapes) {
     Leaf* leaf;
 
-	assert(nShapes > 0);
+	/* assert(nShapes > 0); */
 
     leaf = (Leaf*) malloc(sizeof(Leaf));
 

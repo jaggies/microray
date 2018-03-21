@@ -1,4 +1,33 @@
 #CC = gcc-mp-4.7 ;
-OPTIM = -g -O3 ;
-CCFLAGS = -Wall ;
-ALL_LOCATE_TARGET = $(TOP)/build/$(OSFULL) ;
+
+
+if $(TARGET) = "AMIGA" {
+	NDK = /path/to/NDK_3.9 ;
+	NDK_INC = $(NDK)/Include/include_h ;
+	NDK_LIB = $(NDK)/Include/linker_libs ;
+	CC = /opt/vbcc/bin/vc ;
+	CCFLAGS += +aos68k -I$(NDK_INC) -Dconst= ;
+	LINK = $(CC) $(CCFLAGS) ;
+	#LINK = /opt/vbcc/bin/vlink ;
+	LINKFLAGS += -L$(NDK_LIB) ;
+	ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
+} else if $(TARGET) = "COCO" {
+	# Use CMOC compiler
+	AR = lwar -car ;
+	RANLIB = echo ; # TODO
+	CC = cmoc ;
+	#LINK = lwlink ;
+
+	OPTIM = ;
+	#CCFLAGS = --verbose ;
+	CCFLAGS += -DCOCO -Dconst= ;
+	CCFLAGS += --coco ; # Coco .bin file
+	#CCFLAGS += --os9 ; # Coco OS9 executable
+	ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
+	LINK = $(CC) $(CCFLAGS) -L$(ALL_LOCATE_TARGET) ;
+} else {
+	CCFLAGS += -Wall ;
+	OPTIM = -g -O3 ;
+	ALL_LOCATE_TARGET = $(TOP)/build/$(OSFULL) ;
+}
+

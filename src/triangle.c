@@ -8,7 +8,7 @@
 #include "triangle.h"
 #include "hit.h"
 
-static float tmin = 0.0f;
+#define tmin (0.0f)
 
 typedef struct _TriangleHit {
     float alpha;
@@ -23,7 +23,7 @@ extern long intersections;
 #endif /* PROFILE */
 
 static
-int intersect(Shape* shape, Ray* ray, Hit *hit) {
+int triangleIntersect(Shape* shape, Ray* ray, Hit *hit) {
     Triangle* triangle;
     float div, invDiv, alpha, beta, t;
     Vec3 d, s1, s2; 
@@ -66,11 +66,11 @@ int intersect(Shape* shape, Ray* ray, Hit *hit) {
 }
 
 static
-void normal(Shape* shape, Hit* hit, Vec3 *n) {
+void triangleNormal(Shape* shape, Hit* hit, Vec3 *n) {
     copy3(&((Triangle*) shape)->normal[0], n);
 }
 
-static void bounds(Shape* shape, Vec3* min, Vec3* max) {
+static void triangleBounds(Shape* shape, Vec3* min, Vec3* max) {
     Triangle* triangle = (Triangle*) shape;
     Vec3 point1, point2;
 
@@ -95,7 +95,7 @@ static void bounds(Shape* shape, Vec3* min, Vec3* max) {
 }
 
 static
-void uv(Shape* shape, Hit* hit, Vec2 * uv) {
+void triangleUV(Shape* shape, Hit* hit, Vec2 * uv) {
     Triangle* triangle = (Triangle*) shape;
     Vec2 edge10, edge20;
     sub2(triangle->uv + 1, triangle->uv + 0, &edge10);
@@ -112,10 +112,10 @@ Shape* createTriangle(
         Shader* shader) {
     Triangle* triangle = (Triangle*) malloc(sizeof(Triangle));
     if (!_triangleOps.intersect) {
-        _triangleOps.intersect = intersect;
-        _triangleOps.normal = normal;
-        _triangleOps.uv = uv;
-        _triangleOps.bounds = bounds;
+        _triangleOps.intersect = triangleIntersect;
+        _triangleOps.normal = triangleNormal;
+        _triangleOps.uv = triangleUV;
+        _triangleOps.bounds = triangleBounds;
     }
     triangle->op = &_triangleOps;
     triangle->shader = shader;

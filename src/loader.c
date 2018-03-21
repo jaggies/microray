@@ -20,6 +20,7 @@ enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA, POINTLIGHT, CHEC
 const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera", "pointlight", "checkerboard", "background" };
 const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
 static const char* DELIM = " \t";
+static Shader* defaultShader = 0;
 
 static void addLight(World* world, Light* light) {
     if (light) {
@@ -42,7 +43,6 @@ static void addShape(World* world, Shape* shape) {
 }
 
 static Shader* getShader(World* world, const char* shaderName) {
-    static Shader* defaultShader = 0;
     int i;
     for (i = 0; i < world->nShaders; i++) {
         if (strcmp(shaderName, world->shaderNames[i]) == 0) {
@@ -52,10 +52,10 @@ static Shader* getShader(World* world, const char* shaderName) {
     printf("Shader %s not found\n", shaderName);
     if (!defaultShader) {
         Vec3 diffuse, specular, ambient; 
-        vec3(1,1,1,&diffuse);
-        vec3(1,1,1,&specular);
-        vec3(0,0,0,&ambient);
-        defaultShader = createPhongShader(&diffuse, &specular, &ambient, 20.0, 1.0, 0.0, 0.0);
+        vec3(1.0f,1.0f,1.0f,&diffuse);
+        vec3(1.0f,1.0f,1.0f,&specular);
+        vec3(0.0f,0.0f,0.0f,&ambient);
+        defaultShader = createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
     }
     return defaultShader; 
 }

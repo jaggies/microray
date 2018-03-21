@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <float.h>
+#ifdef PROFILE
+#include <time.h>
+#endif
 #include "bvh.h"
 #include "branch.h"
 #include "leaf.h"
