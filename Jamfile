@@ -1,5 +1,5 @@
 SubDir TOP ;
-if $(TARGET)="COCO" {
+if $(TARGET) = "COCO" {
     SubInclude TOP os ;
 }
 SubInclude TOP src ;

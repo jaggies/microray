@@ -3,6 +3,8 @@ SubDir TOP src ;
 if $(TARGET) = "COCO" {
 	SubDirHdrs $(TOP) os ;
     LINKLIBS on microray = -los ;
+} else if $(TARGET) = "AMIGA" {
+    LINKLIBS on microray = -lmieee -lvc ;
 }
 Main microray : 
 	branch.c
@@ -25,4 +27,5 @@ Main microray :
 	vec2.c
 	vec3.c
 	world.c
+	amigastubs.c 
 	;

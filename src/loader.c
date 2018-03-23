@@ -27,7 +27,7 @@ static void addLight(World* world, Light* light) {
         if (world->nLights < MAXLIGHTS) {
             world->lights[world->nLights++] = light;
         } else {
-            printf("Too many lights!\n");
+            printf("Too many lights (%d)!\n", world->nLights);
         }
     }
 }
@@ -162,7 +162,9 @@ World* loadFile(char* fromPath)
     int line = 0;
     char buffer[100];
     World* world = createWorld();
-    FILE *fp = fopen(fromPath, "r");
+    FILE *fp;
+    printf("Opening file %s\n", fromPath);
+    fp = fopen(fromPath, "r");
     if (!fp) {
         return 0;
     }
@@ -171,6 +173,7 @@ World* loadFile(char* fromPath)
         char* ptr;
         char* linestr = fgets(buffer, sizeof(buffer), fp);
         int foundToken = -1; /* unknown */
+        printf(":%s\n", linestr);
         if (!linestr) {
             break;
         }

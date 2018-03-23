@@ -27,15 +27,19 @@
 void renderImage(World* world, const char* outpath)
 {
     int h, w;
-    NetPBM* pbm = createNetPBM(outpath, world->width, world->height);
+    NetPBM* pbm;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
+
+    printf("Creating PBM...\n");
+    pbm = createNetPBM(outpath, world->width, world->height);
 
     if (!pbm) {
         printf("Can't write image '%s'\n", outpath);
         return;
     }
 
+    printf("Rendering image...\n");
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
         for (w = 0; w < world->width; w++, u += du) {
@@ -58,11 +62,16 @@ int main(int argc, char **argv)
     World* world;
     const char* outpath = "out.ppm"; /* TODO: get path from arguments */
 
+    printf("*** MICRORAY ***\n");
+
     if (argc > 1) {
+        printf("Loading %s..\n", argv[1]);
         world = loadFile(argv[1]);
     } else {
+        printf("Loading default scene..\n", argv[1]);
         world = testLoad(XRES, YRES);
     }
+    printf("done\n");
     if (world->nShapes == 0) {
         printf("World contains no shapes, exiting\n");
         return 0;
@@ -77,6 +86,7 @@ int main(int argc, char **argv)
     }
     world->width = XRES; /* TODO: get from cmdline */
     world->height = YRES;
+    printf("Rendering world at %dx%d\n", world->width, world->height);
     renderImage(world, outpath);
 
 #ifdef PROFILE
