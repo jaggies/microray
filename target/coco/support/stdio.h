@@ -17,6 +17,7 @@ extern char * fgets(char* str, int size, FILE * stream);
 extern int fclose(FILE *stream);
 extern int fputc(int c, FILE *stream);
 extern int fprintf(FILE* stream, const char* format, ...);
+extern int fflush(FILE* fp);
 #else
 #include <stdlib.h>
 #endif 

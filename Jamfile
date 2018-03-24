@@ -1,5 +1,6 @@
 SubDir TOP ;
-if $(TARGET) = "COCO" {
-    SubInclude TOP os ;
+if $(TARGET) {
+    SubInclude TOP target $(TARGET) ;
+	echo **** Building for $(TARGET) **** ;
 }
 SubInclude TOP src ;

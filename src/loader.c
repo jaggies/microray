@@ -231,7 +231,7 @@ World* loadFile(char* fromPath)
 
     if(!getenv("NO_BVH")) {
         Shape *root;
-        printf("Creating BVH...")
+        printf("Creating BVH...");
         fflush(stdout);
         if(1) {
             root = createBVH(world->shapes, world->nShapes);

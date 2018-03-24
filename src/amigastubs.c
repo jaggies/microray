@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef AMIGAOS
+
 #define HEAPSIZE (1024*1024)
 #define STACKSIZE (64*1024)
 
@@ -26,3 +28,4 @@ char* strdup(const char *str) {
     return (char*) memcpy((char*) malloc(n), str, n);
 }
 
+#endif

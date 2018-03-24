@@ -67,7 +67,7 @@ int main(int argc, char **argv)
         printf("Loading %s..\n", argv[1]);
         world = loadFile(argv[1]);
     } else {
-        printf("Loading default scene..\n", argv[1]);
+        printf("Loading default scene..\n");
         world = testLoad(XRES, YRES);
     }
     if (world->nShapes == 0) {

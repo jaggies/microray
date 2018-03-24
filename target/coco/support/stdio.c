@@ -26,3 +26,6 @@ int fprintf(FILE* stream, const char* format, ...) {
 	return 0;
 }
 
+int fflush(FILE* fp) {
+    return 0;
+}

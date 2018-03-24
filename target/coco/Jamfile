@@ -1,0 +1,18 @@
+# Use CMOC compiler
+AR = lwar -car ;
+RANLIB = echo ; # TODO
+CC = cmoc ;
+#LINK = lwlink ;
+
+OPTIM = ;
+CCFLAGS = ;
+#CCFLAGS += --verbose ;
+CCFLAGS += -DCOCO -Dconst= ;
+CCFLAGS += -I$(TOP)/target/coco/support ;
+CCFLAGS += --coco ; # Coco .bin file
+#CCFLAGS += --os9 ; # Coco OS9 executable
+ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
+LINKLIBS += -lcoco ;
+LINK = $(CC) $(CCFLAGS) -L$(ALL_LOCATE_TARGET) ;
+
+SubInclude TOP target coco support ;

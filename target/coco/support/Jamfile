@@ -1,6 +1,6 @@
-SubDir TOP os ;
+SubDir TOP target coco support ;
 
-Library libos :
+Library libcoco :
 	atof.c
 	math.c
 	qsort.c
