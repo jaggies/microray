@@ -1,11 +1,13 @@
 #include <stddef.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define HEAPSIZE (1024*1024)
 #define STACKSIZE (64*1024)
 
 size_t __stack=65536; /* 64KB stack-size */
 char __heap[HEAPSIZE],*__heapptr=__heap;
-size_t __heapsize=HEAPSIZE;
+size_t __heapsize = HEAPSIZE;
 
 float fminf(float a, float b) { 
 	return a < b ? a : b;

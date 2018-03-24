@@ -4,7 +4,8 @@ if $(TARGET) = "COCO" {
 	SubDirHdrs $(TOP) os ;
     LINKLIBS on microray = -los ;
 } else if $(TARGET) = "AMIGA" {
-    LINKLIBS on microray = -lmieee -lvc ;
+    #LINKLIBS on microray = -lmieee -lvc ;
+    LINKLIBS on microray = -lmsoft -lvc ;
 }
 Main microray : 
 	branch.c

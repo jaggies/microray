@@ -3,7 +3,7 @@ if $(TARGET) = "AMIGA" {
 	NDK_INC = $(NDK)/Include/include_h ;
 	NDK_LIB = $(NDK)/Include/linker_libs ;
 	CC = /opt/vbcc/bin/vc ;
-	CCFLAGS += +aos68k -I$(NDK_INC) -Dconst= ;
+	CCFLAGS += +aos68k -c99 -I$(NDK_INC) -Dconst= -soft-float ;
 	#LINK = /opt/vbcc/bin/vlink ;
 	LINKFLAGS += -L$(NDK_LIB) ;
 	ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;

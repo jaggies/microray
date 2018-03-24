@@ -41,6 +41,7 @@ NetPBM* createNetPBM(const char* path, int width, int height) {
     NetPBM* pbm;
     FILE* fp = fopen(path, "w");
     if (!fp) {
+        printf("Couldn't open file %s for write!\n", path);
         return 0;
     }
     pbm = (NetPBM*) malloc(sizeof(NetPBM));

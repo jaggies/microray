@@ -21,9 +21,9 @@ typedef struct _ShapeOps {
     void (*bounds)(Shape*, Vec3* min, Vec3* max);
 } ShapeOps;
 
-typedef struct _Shape {
+struct _Shape {
     ShapeOps *op; /* These must be first in all "subclasses" */
     Shader* shader; 
-} Shape;
+};
 
 #endif /* SHAPE_H_ */

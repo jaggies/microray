@@ -20,7 +20,7 @@
 #include "netpbm.h"
 #include "testload.h"
 
-#define XRES 1024
+#define XRES 100
 #define YRES XRES
 #define MAXDEPTH 4 /* max number of reflected rays */
 
@@ -30,8 +30,6 @@ void renderImage(World* world, const char* outpath)
     NetPBM* pbm;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
-
-    printf("Creating PBM...\n");
     pbm = createNetPBM(outpath, world->width, world->height);
 
     if (!pbm) {
@@ -39,9 +37,10 @@ void renderImage(World* world, const char* outpath)
         return;
     }
 
-    printf("Rendering image...\n");
+    printf("Rendering scene (%dx%d)\n", world->width, world->height);
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
+        printf("Line %d (%d%%)\n", h, 100*h / world->height);
         for (w = 0; w < world->width; w++, u += du) {
             Ray ray;
             Vec3 color;
@@ -71,7 +70,6 @@ int main(int argc, char **argv)
         printf("Loading default scene..\n", argv[1]);
         world = testLoad(XRES, YRES);
     }
-    printf("done\n");
     if (world->nShapes == 0) {
         printf("World contains no shapes, exiting\n");
         return 0;
@@ -86,7 +84,6 @@ int main(int argc, char **argv)
     }
     world->width = XRES; /* TODO: get from cmdline */
     world->height = YRES;
-    printf("Rendering world at %dx%d\n", world->width, world->height);
     renderImage(world, outpath);
 
 #ifdef PROFILE

@@ -21,6 +21,7 @@ const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivec
 const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
 static const char* DELIM = " \t";
 static Shader* defaultShader = 0;
+extern char* strdup(const char* str);
 
 static void addLight(World* world, Light* light) {
     if (light) {
@@ -37,7 +38,7 @@ static void addShape(World* world, Shape* shape) {
         if (world->nShapes < MAXSHAPES) {
             world->shapes[world->nShapes++] = shape;
         } else {
-            printf("Too many shapes!\n");
+            printf("Too many shapes (%d)!\n", world->nShapes);
         }
     }
 }
@@ -67,7 +68,7 @@ static void addShader(World* world, const char* shaderName, Shader* shader) {
             world->shaderNames[world->nShaders] = shaderName; /* allocated in loadPhongShader */
             world->nShaders++;
         } else {
-            printf("Too many shaders!\n");
+            printf("Too many shaders(%d)!\n", world->nShaders);
         }
     }
 }
@@ -173,7 +174,6 @@ World* loadFile(char* fromPath)
         char* ptr;
         char* linestr = fgets(buffer, sizeof(buffer), fp);
         int foundToken = -1; /* unknown */
-        printf(":%s\n", linestr);
         if (!linestr) {
             break;
         }
@@ -231,11 +231,14 @@ World* loadFile(char* fromPath)
 
     if(!getenv("NO_BVH")) {
         Shape *root;
+        printf("Creating BVH...")
+        fflush(stdout);
         if(1) {
             root = createBVH(world->shapes, world->nShapes);
         } else {
             root = createLeaf(world->shapes, world->nShapes);
         }
+        printf("done!\n");
         world->shapes[0] = root;
         world->nShapes = 1;
     }
