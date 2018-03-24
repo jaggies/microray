@@ -15,9 +15,11 @@
 #include "world.h"
 
 #define MAXNAME 16
+#define DEFAULT_WIDTH 320
+#define DEFAULT_HEIGHT 200
 
-enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA, POINTLIGHT, CHECKERBOARD, BACKGROUND };
-const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera", "pointlight", "checkerboard", "background" };
+enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA, POINTLIGHT, CHECKERBOARD, BACKGROUND, RESOLUTION };
+const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera", "pointlight", "checkerboard", "background", "resolution" };
 const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
 static const char* DELIM = " \t";
 static Shader* defaultShader = 0;
@@ -81,6 +83,11 @@ static Vec3 loadBackground(char* args) {
     return color;
 }
 
+void loadResolution(World* world, char* args) {
+    world->width = atoi(strtok(args, DELIM));
+    world->height = atoi(strtok(0, DELIM));
+}
+
 static Shader* loadPhongShader(char* args, char** outname) {
     Vec3 diffuse, specular, ambient;
     float exponent, index, reflect, transmit;
@@ -139,15 +146,18 @@ static Shape* loadTriangle(World* world, char* args) {
     return createTriangle(&p1, &p2, &p3, &uv1, &uv2, &uv3, getShader(world, material));
 }
 
-static Camera* loadPerspectiveCamera(char* args) {
+static Camera* loadPerspectiveCamera(World* world, char* args) {
     Vec3 from, at, up;
     float fov, aspect;
-	from.x = atof(strtok(args, DELIM)); from.y = atof(strtok(0, DELIM)); from.z = atof(strtok(0, DELIM));
-	at.x = atof(strtok(0, DELIM)); at.y = atof(strtok(0, DELIM)); at.z = atof(strtok(0, DELIM));
-	up.x = atof(strtok(0, DELIM)); up.y = atof(strtok(0, DELIM)); up.z = atof(strtok(0, DELIM));
-	fov = atof(strtok(0, DELIM));
-	aspect = atof(strtok(0, DELIM));
-    /* TODO: get aspect from world */
+    from.x = atof(strtok(args, DELIM)); from.y = atof(strtok(0, DELIM)); from.z = atof(strtok(0, DELIM));
+    at.x = atof(strtok(0, DELIM)); at.y = atof(strtok(0, DELIM)); at.z = atof(strtok(0, DELIM));
+    up.x = atof(strtok(0, DELIM)); up.y = atof(strtok(0, DELIM)); up.z = atof(strtok(0, DELIM));
+    fov = atof(strtok(0, DELIM));
+    aspect = atof(strtok(0, DELIM));
+    if (world->width != 0 && world->height != 0) {
+        aspect = ((float) world->width / world->height) / aspect;
+        printf("Computed aspect: %f\n", aspect);
+    }
     return createPerspectiveCamera(&from, &at, &up, fov, aspect);
 }
 
@@ -201,7 +211,7 @@ World* loadFile(char* fromPath)
                 case COMMENT:
                     break; /* ignore */
                 case PERSPECTIVECAMERA:
-                    world->camera = loadPerspectiveCamera(ptr);
+                    world->camera = loadPerspectiveCamera(world, ptr);
                     break;
                 case SPHERE:
                     addShape(world, loadSphere(world, ptr));
@@ -223,6 +233,9 @@ World* loadFile(char* fromPath)
                     shader = loadCheckerboardShader(world, ptr, &name);
                     addShader(world, name, shader);
                     break;
+                case RESOLUTION:
+                    loadResolution(world, ptr);
+                    break;
                 default:
                     printf("Unimplemented token %s, args:%s", tokens[foundToken], ptr);
             }
@@ -242,5 +255,12 @@ World* loadFile(char* fromPath)
         world->shapes[0] = root;
         world->nShapes = 1;
     }
+
+    // Fix up aspect
+    if (world->height == 0 || world->width == 0) {
+        world->width = DEFAULT_WIDTH;
+        world->height = DEFAULT_HEIGHT;
+    }
+
     return world;
 }

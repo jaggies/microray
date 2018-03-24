@@ -1,5 +1,6 @@
 #p <id> <r,g,b> ksphere eyes kd
 #sphere eyes <x,y,z> r
+resolution 320 200
 background 0.1 0.2 0.7
 pointlight 10 10 10 1 1 1
 perspectivecamera 6 8 8 0 4.0 0 0 1 0 45 1

@@ -20,8 +20,6 @@
 #include "netpbm.h"
 #include "testload.h"
 
-#define XRES 100
-#define YRES XRES
 #define MAXDEPTH 4 /* max number of reflected rays */
 
 void renderImage(World* world, const char* outpath)
@@ -64,11 +62,11 @@ int main(int argc, char **argv)
     printf("*** MICRORAY ***\n");
 
     if (argc > 1) {
-        printf("Loading %s..\n", argv[1]);
+        printf("Loading %s\n", argv[1]);
         world = loadFile(argv[1]);
     } else {
-        printf("Loading default scene..\n");
-        world = testLoad(XRES, YRES);
+        printf("Loading default scene\n");
+        world = testLoad(100, 100);
     }
     if (world->nShapes == 0) {
         printf("World contains no shapes, exiting\n");
@@ -82,8 +80,6 @@ int main(int argc, char **argv)
         printf("World contains no camera, exiting\n");
         return 0;
     }
-    world->width = XRES; /* TODO: get from cmdline */
-    world->height = YRES;
     renderImage(world, outpath);
 
 #ifdef PROFILE
