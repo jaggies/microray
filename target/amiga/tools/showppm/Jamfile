@@ -1,0 +1,7 @@
+SubDir TOP target amiga tools showppm ;
+
+LINKLIBS on showppm = -lamiga ;
+
+Main showppm : 
+	showppm.c
+	;

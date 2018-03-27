@@ -1,9 +1,12 @@
-NDK = /path/to/NDK_3.9 ;
-NDK_INC = $(NDK)/Include/include_h ;
-NDK_LIB = $(NDK)/Include/linker_libs ;
+NDK = /opt/amiga/ndk_3.9 ;
+NDK_INC = $(NDK)/include/include_h ;
+NDK_LIB = $(NDK)/include/linker_libs ;
 CC = /opt/vbcc/bin/vc ;
 CCFLAGS = +aos68k -c99 -DAMIGAOS -I$(NDK_INC) -Dconst= -soft-float ;
 LINKFLAGS += -L$(NDK_LIB) ;
 LINKLIBS += -lmsoft -lvc ;
 ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
 LINK = $(CC) $(CCFLAGS) $(LINKFLAGS) -L$(ALL_LOCATE_TARGET) ;
+
+SubDir TOP target amiga ;
+SubInclude TOP target amiga tools ;
