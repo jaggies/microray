@@ -23,3 +23,8 @@ Main microray :
 	world.c
 	amigastubs.c 
 	;
+
+Main testpbm :
+	testpbm.c
+	netpbm.c
+	;

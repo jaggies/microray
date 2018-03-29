@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include "util.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "pointlight.h"
@@ -28,9 +29,10 @@ void renderImage(World* world, const char* outpath)
     NetPBM* pbm;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
-    pbm = createNetPBM(outpath, world->width, world->height);
+    pbm = createNetPBM();
 
-    if (!pbm) {
+    world->depth = 255;
+    if (!pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
         printf("Can't write image '%s'\n", outpath);
         return;
     }
@@ -42,9 +44,13 @@ void renderImage(World* world, const char* outpath)
         for (w = 0; w < world->width; w++, u += du) {
             Ray ray;
             Vec3 color;
+            unsigned char rgb[3];
             world->camera->op->makeRay(world->camera, u, 1.0f-v, &ray);
             trace(&ray, 0 /* ignore */, world, &color, MAXDEPTH);
-            pbm->putPixel(pbm, w, h, &color);
+            rgb[0] = min(255, max(0, (int)round(color.x * 255)));
+            rgb[1] = min(255, max(0, (int)round(color.y * 255)));
+            rgb[2] = min(255, max(0, (int)round(color.z * 255)));
+            pbm->write(pbm, rgb);
         }
     }
     pbm->close(pbm);

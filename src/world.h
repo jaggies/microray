@@ -13,16 +13,17 @@
 typedef struct _World {
     Shape* shapes[MAXSHAPES];
     Shader* shaders[MAXSHADERS];
-	const char* shaderNames[MAXSHADERS];
+    const char* shaderNames[MAXSHADERS];
     Light* lights[MAXLIGHTS];
     Camera* camera;
     int nShapes;
-	int nShaders;
+    int nShaders;
     int nLights;
     Vec3 background; /* background colors */
     float epsilon; /* intersection slop */
-	int width; /* image width */
-	int height; /* image height */
+    int width; /* image width */
+    int height; /* image height */
+    int depth; /* image depth */
 } World;
 
 World* createWorld();
