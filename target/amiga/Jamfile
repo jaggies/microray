@@ -3,9 +3,16 @@ NDK_INC = $(NDK)/include/include_h ;
 NDK_LIB = $(NDK)/include/linker_libs ;
 M68KDIR = /opt/m68k-amigaos ;
 AR = $(M68KDIR)/bin/m68k-amigaos-ar cur ;
-RANLIB = $(M68KDIR)/bin/m68k-amigaos-ranlib ;
-CC = /opt/vbcc/bin/vc ;
-CCFLAGS = +aos68k -c99 -DAMIGAOS -I$(NDK_INC) -Dconst= -soft-float ;
+RANLIB = ; # $(M68KDIR)/bin/m68k-amigaos-ranlib ;
+CCFLAGS = -DAMIGAOS -I$(NDK_INC) ;
+
+if $(USE_GCC) {
+	CC = $(M68KDIR)/bin/m68k-amigaos-gcc ;
+} else {
+	CC = /opt/vbcc/bin/vc ;
+	CCFLAGS += -Dconst= -c99 +aos68k -soft-float ; 
+}
+
 LINKFLAGS += -L$(NDK_LIB) ;
 LINKLIBS += -lmsoft -lvc ;
 ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
