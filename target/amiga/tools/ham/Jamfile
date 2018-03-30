@@ -1,0 +1,7 @@
+SubDir TOP target amiga tools ham ;
+
+LINKLIBS on ham = -lamiga ;
+
+Main ham : 
+	ham.c
+	;

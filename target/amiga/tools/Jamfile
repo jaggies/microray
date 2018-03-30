@@ -1,1 +1,3 @@
 SubInclude TOP target amiga tools showppm ;
+SubInclude TOP target amiga tools ham ;
+
