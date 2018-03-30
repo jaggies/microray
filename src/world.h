@@ -1,16 +1,19 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include "shape.h"
-#include "light.h"
-#include "camera.h"
-#include "shader.h"
+#include "vec3.h"
 
 #define MAXSHAPES 100
 #define MAXSHADERS 20
 #define MAXLIGHTS 8
 
-typedef struct _World {
+typedef struct World World;
+typedef struct Shape Shape;
+typedef struct Shader Shader;
+typedef struct Light Light;
+typedef struct Camera Camera;
+
+struct World {
     Shape* shapes[MAXSHAPES];
     Shader* shaders[MAXSHADERS];
     const char* shaderNames[MAXSHADERS];
@@ -24,7 +27,7 @@ typedef struct _World {
     int width; /* image width */
     int height; /* image height */
     int depth; /* image depth */
-} World;
+};
 
 World* createWorld();
 

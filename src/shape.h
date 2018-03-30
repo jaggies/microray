@@ -11,19 +11,20 @@
 #include "ray.h"
 #include "hit.h"
 
-typedef struct _Shape Shape;
-typedef struct _Shader Shader;
+typedef struct Shader Shader;
+typedef struct Shape Shape;
+typedef struct ShapeOps ShapeOps;
 
-typedef struct _ShapeOps {
+struct Shape {
+    ShapeOps *op; /* These must be first in all "subclasses" */
+    Shader* shader; 
+};
+
+struct ShapeOps {
     int (*intersect)(Shape* shape, Ray* ray, Hit* hit);
     void (*normal)(Shape* shape, Hit* hit, Vec3 *n);
     void (*uv)(Shape* shape, Hit* hit, Vec2 * uv);
     void (*bounds)(Shape*, Vec3* min, Vec3* max);
-} ShapeOps;
-
-struct _Shape {
-    ShapeOps *op; /* These must be first in all "subclasses" */
-    Shader* shader; 
 };
 
 #endif /* SHAPE_H_ */

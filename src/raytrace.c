@@ -9,6 +9,8 @@
 #include "vec3.h"
 #include "hit.h"
 #include "shader.h"
+#include "shape.h"
+#include "light.h"
 #include "ray.h"
 #include "world.h"
 #include "raytrace.h"

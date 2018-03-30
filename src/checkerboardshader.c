@@ -8,6 +8,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "hit.h"
+#include "shader.h"
 #include "checkerboardshader.h"
 
 static void checkerEvaluate(Shader* sh, Hit* hit, Vec3* color)

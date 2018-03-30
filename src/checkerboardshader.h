@@ -8,11 +8,13 @@
 #ifndef CHECKERBOARD_H_
 #define CHECKERBOARD_H_
 
-#include "shader.h"
 #include "vec2.h"
 #include "vec3.h"
 
-typedef struct _CheckerboardShader {
+typedef struct Shader Shader;
+typedef struct CheckerboardShader CheckerboardShader;
+
+struct CheckerboardShader {
     ShaderOps* op;
     Shader* odd;
     Shader* even;
@@ -20,7 +22,7 @@ typedef struct _CheckerboardShader {
     Vec2 bias;
     /* private */
     Shader* target; /* which of the above shaders is being evaluated */
-} CheckerboardShader;
+};
 
 extern Shader* createCheckerboardShader(Shader* odd, Shader* even, Vec2* scale, Vec2* bias);
 

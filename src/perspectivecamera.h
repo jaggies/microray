@@ -12,11 +12,13 @@
 #include "vec3.h"
 #include "ray.h"
 
-typedef struct _PerspectiveCamera {
+typedef struct PerspectiveCamera PerspectiveCamera;
+
+struct PerspectiveCamera {
     CameraOps* op;
     Vec3 du, dv; /* orthogonal vectors define the camera plane */
     Ray baseray; /* ray originating at uv(0,0) pointing to lower left */
-} PerspectiveCamera;
+};
 
 extern Camera* createPerspectiveCamera(Vec3* from, Vec3* at, Vec3* up, float fov, float aspect);
 

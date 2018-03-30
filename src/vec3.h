@@ -8,9 +8,11 @@
 #ifndef VEC3_H_
 #define VEC3_H_
 
-typedef struct _Vec3 {
+typedef struct Vec3 Vec3;
+
+struct Vec3 {
     float x, y, z;
-} Vec3;
+};
 
 /* Vec3 operations */
 extern void vec3(float x, float y, float z, Vec3* result);

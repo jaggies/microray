@@ -8,9 +8,11 @@
 #ifndef VEC2_H_
 #define VEC2_H_
 
-typedef struct _Vec2 {
+typedef struct Vec2 Vec2;
+
+struct Vec2 {
     float x, y;
-} Vec2;
+};
 
 /* Vec2 operations */
 extern void vec2(float x, float y, Vec2* result);

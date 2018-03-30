@@ -11,14 +11,15 @@
 #include "vec3.h"
 #include "ray.h"
 
-typedef struct _Light Light;
+typedef struct Light Light;
+typedef struct LightOps LightOps;
 
-typedef struct _LightOps {
+struct LightOps {
     void (*makeRay)(Light* light, Vec3* point, Ray* ray);
-} LightOps;
+};
 
-typedef struct _Light {
+struct Light {
     LightOps* op;
-} Light;
+};
 
 #endif /* LIGHT_H_ */

@@ -10,9 +10,11 @@
 
 #include "raymath.h"
 
-typedef struct _Ray {
+typedef struct Ray Ray;
+
+struct Ray {
     Vec3 point;
     Vec3 dir;
-} Ray;
+};
 
 #endif /* RAY_H_ */

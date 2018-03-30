@@ -10,11 +10,13 @@
 
 #include "light.h"
 
-typedef struct _PointLight {
+typedef struct PointLight PointLight;
+
+struct PointLight {
     LightOps* op;
     Vec3 point;
     Vec3 color;
-} PointLight;
+};
 
 extern Light* createPointLight(Vec3* position, Vec3* color);
 
