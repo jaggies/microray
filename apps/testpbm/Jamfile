@@ -1,0 +1,11 @@
+SubDir TOP apps testpbm ;
+SubDirHdrs $(TOP) src ;
+
+Depends testpbm : libmray.a ;
+
+LINKLIBS on testpbm = $(LINKLIBS) -lmray ;
+
+Main testpbm : 
+	testpbm.c
+	;
+

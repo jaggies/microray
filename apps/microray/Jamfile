@@ -1,0 +1,11 @@
+SubDir TOP apps microray ;
+SubDirHdrs $(TOP) src ;
+
+Depends microray : libmray.a ;
+
+LINKLIBS on microray = $(LINKLIBS) -lmray ;
+
+Main microray : 
+	microray.c
+	;
+

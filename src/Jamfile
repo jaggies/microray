@@ -22,13 +22,3 @@ Library libmray :
 	world.c
 	amigastubs.c 
 	;
-
-LINKLIBS on microray = $(LINKLIBS) -lmray ;
-Main microray : 
-	main.c
-	;
-
-LINKLIBS on testpbm = $(LINKLIBS) -lmray ;
-Main testpbm :
-	testpbm.c
-	;

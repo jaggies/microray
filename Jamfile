@@ -8,3 +8,4 @@ if $(TARGET) {
 }
     
 SubInclude TOP src ;
+SubInclude TOP apps ;
