@@ -1,13 +1,12 @@
 SubDir TOP src ;
 
-Main microray : 
+Library libmray :
 	branch.c
 	bvh.c
 	checkerboardshader.c
 	hit.c
 	leaf.c
 	loader.c
-	main.c
 	netpbm.c
 	perspectivecamera.c
 	phongshader.c
@@ -24,7 +23,12 @@ Main microray :
 	amigastubs.c 
 	;
 
+LINKLIBS on microray = $(LINKLIBS) -lmray ;
+Main microray : 
+	main.c
+	;
+
+LINKLIBS on testpbm = $(LINKLIBS) -lmray ;
 Main testpbm :
 	testpbm.c
-	netpbm.c
 	;

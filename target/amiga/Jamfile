@@ -1,6 +1,9 @@
 NDK = /opt/amiga/ndk_3.9 ;
 NDK_INC = $(NDK)/include/include_h ;
 NDK_LIB = $(NDK)/include/linker_libs ;
+M68KDIR = /opt/m68k-amigaos ;
+AR = $(M68KDIR)/bin/m68k-amigaos-ar cur ;
+RANLIB = $(M68KDIR)/bin/m68k-amigaos-ranlib ;
 CC = /opt/vbcc/bin/vc ;
 CCFLAGS = +aos68k -c99 -DAMIGAOS -I$(NDK_INC) -Dconst= -soft-float ;
 LINKFLAGS += -L$(NDK_LIB) ;
