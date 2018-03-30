@@ -91,5 +91,6 @@ int main(int argc, char **argv)
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);
 #endif /* PROFILE */
+    return 0;
 }
 

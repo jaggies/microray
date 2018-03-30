@@ -35,8 +35,8 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
             printf("Couldn't open pbm file '%s'\n", path);
             return 0;
         }
-        fscanf(pbm->fp, "%s %d %d %d\n", hdr, &pbm->width, &pbm->height, &pbm->depth);
-        if (pbm->width == 0 || pbm->height == 0) {
+        int n = fscanf(pbm->fp, "%s %d %d %d\n", hdr, &pbm->width, &pbm->height, &pbm->depth);
+        if (n != 4 || pbm->width == 0 || pbm->height == 0) {
             printf("Invalid width/height while reading pbm header\n");
             fclose(pbm->fp);
             pbm->fp = 0;

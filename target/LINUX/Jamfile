@@ -1,0 +1,2 @@
+SubDir TOP target LINUX ;
+LINKLIBS += -lm ;

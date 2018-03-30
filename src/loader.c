@@ -23,7 +23,9 @@ const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivec
 const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
 static const char* DELIM = " \t";
 static Shader* defaultShader = 0;
+#ifndef strdup
 extern char* strdup(const char* str);
+#endif
 
 static void addLight(World* world, Light* light) {
     if (light) {
