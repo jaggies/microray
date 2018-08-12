@@ -55,11 +55,16 @@ dkms.conf
 *.ppm
 
 # Eclipse files
-.cproject
-.project
-.settings/
-.vscode/
+#.cproject
+#.project
+#.settings/
 Debug/
+
+# Visual studio files
+.vscode/
 
 # Build targets
 build
+
+# Junk files 
+.trash
