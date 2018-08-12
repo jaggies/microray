@@ -56,13 +56,13 @@ static Shader* getShader(World* world, const char* shaderName) {
     }
     printf("Shader %s not found\n", shaderName);
     if (!defaultShader) {
-        Vec3 diffuse, specular, ambient; 
+        Vec3 diffuse, specular, ambient;
         vec3(1.0f,1.0f,1.0f,&diffuse);
         vec3(1.0f,1.0f,1.0f,&specular);
         vec3(0.0f,0.0f,0.0f,&ambient);
         defaultShader = createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
     }
-    return defaultShader; 
+    return defaultShader;
 }
 
 static void addShader(World* world, const char* shaderName, Shader* shader) {
@@ -170,7 +170,7 @@ static Light* loadPointLight(char* args) {
     return createPointLight(&position, &color);
 }
 
-World* loadFile(char* fromPath)
+World* loadFile(const char* fromPath)
 {
     int line = 0;
     char buffer[100];

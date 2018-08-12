@@ -8,6 +8,6 @@
 #ifndef LOADER_H_
 #define LOADER_H_
 
-World* loadFile(char* fromPath);
+World* loadFile(const char* fromPath);
 
 #endif /* LOADER_H_ */

@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <X11/Intrinsic.h>
 #include <Xm/MainW.h>
 #include <Xm/Label.h>
@@ -30,7 +31,11 @@
 #include "testload.h"
 
 #define MAXDEPTH 4 /* max number of reflected rays */
+#ifdef PROFILE
+    long intersections = 0;
+#endif /* PROFILE */
 
+XtAppContext app;
 Widget topLevel;
 Pixel cur_color;
 
@@ -235,42 +240,45 @@ static void renderImage(World* world, const char* outpath) {
     pbm->close(pbm);
 }
 
-#ifdef PROFILE
-long intersections = 0;
-#endif /* PROFILE */
+Boolean render_proc(XtPointer client_data)
+{
+    World* world = (World*) client_data;
+    printf("Render\n");
+    renderImage(world, "out.ppm"); // TODO: save as same <filename>.ppm
+    return 1;
+}
 
-int main(int argc, char **argv) {
-    World* world;
-    const char* outpath = "out.ppm"; /* TODO: get path from arguments */
-
-    printf("*** MICRORAY ***\n");
-
-    if (argc > 1) {
-        printf("Loading %s\n", argv[1]);
-        world = loadFile(argv[1]);
-    } else {
-        printf("Loading default scene\n");
-        world = testLoad(100, 100);
+void startRender(const char* path) {
+    printf("Loading %s\n", path);
+    World* world = loadFile(path);
+    if (!world) {
+        printf("Failed to load %s\n", path);
+        return;
     }
     if (world->nShapes == 0) {
-        printf("World contains no shapes, exiting\n");
-        return 0;
+        printf("World contains no shapes\n");
+        return;
     }
     if (world->nLights == 0) {
-        printf("World contains no lights, exiting\n");
-        return 0;
+        printf("World contains no lights\n");
+        return;
     }
     if (!world->camera) {
-        printf("World contains no camera, exiting\n");
-        return 0;
+        printf("World contains no camera\n");
+        return;
     }
+    XtAppAddWorkProc(app, render_proc, world);
+}
 
-    XtAppContext app;
+int main(int argc, char **argv) {
     XtSetLanguageProc(NULL, NULL, NULL);
     topLevel = XtVaAppInitialize(&app, "MainWindow", NULL, 0, &argc, argv, NULL, NULL);
     createHierarchy(app, topLevel);
 
-    renderImage(world, outpath); // TODO: workproc
+    if (argc > 1) {
+        startRender(argv[1]);
+    }
+
     #ifdef PROFILE
         printf("%ld intersections\n", intersections);
     #endif /* PROFILE */
