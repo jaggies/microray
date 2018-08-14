@@ -32,8 +32,8 @@
 #include "testload.h"
 
 #define MAXDEPTH 4 /* max number of reflected rays */
-#define DEFAULT_WIDTH 512
-#define DEFAULT_HEIGHT 512
+#define DEFAULT_WIDTH 1
+#define DEFAULT_HEIGHT 1
 #ifdef PROFILE
     long intersections = 0;
 #endif /* PROFILE */
@@ -64,6 +64,9 @@ void load_cb(Widget dialog, XtPointer client_data, XtPointer call_data)
 
 void expose_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
     short width, height;
+    if (!pixmap) {
+        return;
+    }
     XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
     XCopyArea(XtDisplay(widget), pixmap, XtWindow(widget), gc,
             0 /*srcx*/, 0 /*srcy*/, width, height, 0 /*dstx*/, 0 /*dsty*/);
@@ -77,8 +80,9 @@ void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
         XmDestroyPixmap(XtScreen(widget), pixmap);
         pixmap = 0;
     }
+    printf("resize %d x %d\n", width, height);
     pixmap = XCreatePixmap(XtDisplay(drawingArea),
-            RootWindowOfScreen (XtScreen(drawingArea)), DEFAULT_WIDTH, DEFAULT_HEIGHT,
+            RootWindowOfScreen (XtScreen(drawingArea)), width, height,
             DefaultDepthOfScreen (XtScreen(drawingArea)));
     XDrawString(XtDisplay(widget), pixmap, gc, 10, 10, "hello", 5);
     XDrawPoint(XtDisplay(widget), pixmap, gc, 15, 20);
