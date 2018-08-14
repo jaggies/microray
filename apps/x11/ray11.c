@@ -13,9 +13,10 @@
 #include <sys/stat.h>
 #include <X11/Intrinsic.h>
 #include <Xm/MainW.h>
-#include <Xm/Label.h>
 #include <Xm/MessageB.h>
 #include <Xm/FileSB.h>
+#include <Xm/DrawingA.h>
+#include <Xm/ScrolledW.h>
 #include "util.h"
 #include "sphere.h"
 #include "triangle.h"
@@ -31,22 +32,57 @@
 #include "testload.h"
 
 #define MAXDEPTH 4 /* max number of reflected rays */
+#define DEFAULT_WIDTH 512
+#define DEFAULT_HEIGHT 512
 #ifdef PROFILE
     long intersections = 0;
 #endif /* PROFILE */
 
 XtAppContext app;
 Widget topLevel;
+Widget drawingArea;
 Pixel cur_color;
+GC gc;
+Pixmap pixmap; // backing store for XmDrawingArea
 
-// Remove these
-Widget label;
-static const String colors[] = { "black", "red", "green", "blue" };
-char cur_bitmap[] = { 0 };
-static char* MSG =
-        "Use the FileSelection dialog to find bitmap files to\n"
-        "display in the scrolling area in the main window.  Use\n"
-        "the edit menu to display the bitmap in different colors.";
+static char* ABOUT_MSG = "MicroRay (c) 2018 Jim Miller";
+static char* HELP_MSG = "Help yourself.";
+static void startRender(const char* path);
+
+void load_cb(Widget dialog, XtPointer client_data, XtPointer call_data)
+{
+    char *file = NULL;
+    XmFileSelectionBoxCallbackStruct *cbs = (XmFileSelectionBoxCallbackStruct *) call_data;
+
+    if (cbs) {
+        if (!XmStringGetLtoR(cbs->value, XmFONTLIST_DEFAULT_TAG, &file))
+            return; /* internal error */
+        startRender(file);
+        XtFree(file); /* free allocated data from XmStringGetLtoR() */
+    }
+}
+
+void expose_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
+    short width, height;
+    XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
+    XCopyArea(XtDisplay(widget), pixmap, XtWindow(widget), gc,
+            0 /*srcx*/, 0 /*srcy*/, width, height, 0 /*dstx*/, 0 /*dsty*/);
+}
+
+void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
+    short width, height;
+    XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
+    /* create a pixmap the same size as the drawing area. */
+    if (pixmap) {
+        XmDestroyPixmap(XtScreen(widget), pixmap);
+        pixmap = 0;
+    }
+    pixmap = XCreatePixmap(XtDisplay(drawingArea),
+            RootWindowOfScreen (XtScreen(drawingArea)), DEFAULT_WIDTH, DEFAULT_HEIGHT,
+            DefaultDepthOfScreen (XtScreen(drawingArea)));
+    XDrawString(XtDisplay(widget), pixmap, gc, 10, 10, "hello", 5);
+    XDrawPoint(XtDisplay(widget), pixmap, gc, 15, 20);
+}
 
 void edit_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
 
@@ -59,7 +95,6 @@ void unmanage_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
 void file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 {
     static Widget dialog; /* make it static for reuse */
-    extern void load_pixmap();
     int item_no = (int) client_data;
 
     if (item_no == 1) /* the "quit" item */
@@ -68,32 +103,29 @@ void file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
     /* "Open" was selected.  Create a Motif FileSelectionDialog w/callback */
     if (!dialog) {
         dialog = XmCreateFileSelectionDialog(topLevel, "file_sel", NULL, 0);
-        XtAddCallback(dialog, XmNokCallback, load_pixmap, NULL);
+        XtAddCallback(dialog, XmNokCallback, load_cb, NULL);
+        XtAddCallback(dialog, XmNokCallback, unmanage_cb, NULL);
         XtAddCallback(dialog, XmNcancelCallback, unmanage_cb, NULL);
     }
     XtManageChild(dialog);
     XtPopup(XtParent(dialog), XtGrabNone);
 }
 
-void help_cb(widget, client_data, call_data)
-    Widget widget;XtPointer client_data;XtPointer call_data; {
-    static Widget dialog;
-
-    if (!dialog) {
-        Arg args[5];
-        int n = 0;
-        XmString msg = XmStringCreateLtoR(MSG, XmFONTLIST_DEFAULT_TAG);
-        XtSetArg(args[n], XmNmessageString, msg);
-        n++;
-        dialog = XmCreateInformationDialog(topLevel, "help_dialog", args, n);
-    }
+void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
+{
+    Widget dialog;
+    Arg args[5];
+    int n = 0;
+    XmString msg =  XmStringCreateLtoR(((int) client_data) == 0 ?
+            HELP_MSG : ABOUT_MSG, XmFONTLIST_DEFAULT_TAG);
+    XtSetArg(args[n], XmNmessageString, msg); n++;
+    dialog = XmCreateInformationDialog(topLevel, "help_dialog", args, n);
     XtManageChild(dialog);
     XtPopup(XtParent(dialog), XtGrabNone);
+    XmStringFree(msg);
 }
 
-
 void createHierarchy(XtAppContext app, Widget top) {
-
     Widget main_w = XtVaCreateManagedWidget("main_window", xmMainWindowWidgetClass, top,
             XmNscrollBarDisplayPolicy, XmAS_NEEDED,
             XmNscrollingPolicy, XmAUTOMATIC,
@@ -101,16 +133,20 @@ void createHierarchy(XtAppContext app, Widget top) {
 
     XmString file = XmStringCreateLocalized("File");
     XmString edit = XmStringCreateLocalized("Edit");
+    XmString view = XmStringCreateLocalized("View");
     XmString help = XmStringCreateLocalized("Help");
     Widget menubar = XmVaCreateSimpleMenuBar(main_w, "menubar",
             XmVaCASCADEBUTTON, file, 'F',
             XmVaCASCADEBUTTON, edit, 'E',
+            XmVaCASCADEBUTTON, view, 'V',
             XmVaCASCADEBUTTON, help, 'H',
             NULL);
     XmStringFree(file);
     XmStringFree(edit);
+    XmStringFree(view);
+    XmStringFree(help);
 
-    Widget widget = XtNameToWidget(menubar, "button_2");
+    Widget widget = XtNameToWidget(menubar, "button_3");
     if (widget) {
         XtVaSetValues(menubar, XmNmenuHelpWidget, widget, NULL);
     }
@@ -118,94 +154,53 @@ void createHierarchy(XtAppContext app, Widget top) {
     XmString open_ = XmStringCreateLocalized("Open...");
     XmString quit = XmStringCreateLocalized("Quit");
     XmVaCreateSimplePulldownMenu(menubar, "file_menu", 0, file_cb,
-    XmVaPUSHBUTTON, open_, 'N', NULL, NULL,
-    XmVaSEPARATOR,
-    XmVaPUSHBUTTON, quit, 'Q', NULL, NULL,
-    NULL);
+            XmVaPUSHBUTTON, open_, 'N', NULL, NULL,
+            XmVaSEPARATOR,
+            XmVaPUSHBUTTON, quit, 'Q', NULL, NULL,
+            NULL);
     XmStringFree(open_);
     XmStringFree(quit);
 
-    /* Second menu is the Edit menu -- callback is change_color() */
-    XmString black = XmStringCreateLocalized(colors[0]);
-    XmString red = XmStringCreateLocalized(colors[1]);
-    XmString green = XmStringCreateLocalized(colors[2]);
-    XmString blue = XmStringCreateLocalized(colors[3]);
+    /* Second menu is the Edit menu  */
     Widget menu = XmVaCreateSimplePulldownMenu(menubar, "edit_menu", 1, edit_cb,
-    XmVaRADIOBUTTON, black, 'k', NULL, NULL,
-    XmVaRADIOBUTTON, red, 'R', NULL, NULL,
-    XmVaRADIOBUTTON, green, 'G', NULL, NULL,
-    XmVaRADIOBUTTON, blue, 'B', NULL, NULL,
-    XmNradioBehavior, True, /* RowColumn resources to enforce */
-    XmNradioAlwaysOne, True, /* radio behavior in Menu */
-    NULL);
-    XmStringFree(black);
-    XmStringFree(red);
-    XmStringFree(green);
-    XmStringFree(blue);
+            XmNradioBehavior, True, /* RowColumn resources to enforce */
+            XmNradioAlwaysOne, True, /* radio behavior in Menu */
+            NULL);
 
     if ((widget = XtNameToWidget(menu, "button_0"))) {
         XtVaSetValues(widget, XmNset, True, NULL);
     }
 
-    XmVaCreateSimplePulldownMenu(menubar, "help_menu", 2, help_cb,
-            XmVaPUSHBUTTON, help, 'H', NULL, NULL,
+    XmString help_item = XmStringCreateLocalized("Help...");
+    XmString about_item = XmStringCreateLocalized("About...");
+    XmVaCreateSimplePulldownMenu(menubar, "about_menu", 3, help_cb,
+            XmVaPUSHBUTTON, help_item, 'H', NULL, NULL,
+            XmVaPUSHBUTTON, about_item, 'A', NULL, NULL,
             NULL);
-    XmStringFree(help); /* we're done with it; now we can free it */
+
     XtManageChild(menubar);
 
-    /* set the label as the "work area" of the main window */
-    Widget label = XtVaCreateManagedWidget("label", xmLabelWidgetClass, main_w, NULL);
+    /* Create a ScrollArea as the "work area" of the main window */
+    Widget scroll = XtVaCreateManagedWidget("scrolledWindow", xmScrolledWindowWidgetClass, main_w, NULL);
+
+    /* Create a DrawingArea as the "work area" of the main window */
+    drawingArea = XtVaCreateManagedWidget("drawingArea", xmDrawingAreaWidgetClass, scroll,
+            XmNwidth, DEFAULT_WIDTH,
+            XmNheight, DEFAULT_HEIGHT, NULL);
+    XtAddCallback(drawingArea, XmNresizeCallback, resize_cb, NULL);
+    XtAddCallback(drawingArea, XmNexposeCallback, expose_cb, NULL);
+
     XtVaSetValues(main_w,
             XmNmenuBar, menubar,
-            XmNworkWindow, label,
+            XmNworkWindow, scroll,
             NULL);
+
+    XGCValues gcv;
+    Screen* screen = XtScreen(topLevel);
+    Display* dpy = XtDisplay(topLevel);
+    gcv.foreground = WhitePixelOfScreen(screen);
+    gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
     XtRealizeWidget(top);
-}
-
-void load_pixmap(dialog, client_data, call_data)
-    Widget dialog;XtPointer client_data;XtPointer call_data; {
-    char *file = NULL;
-    XmFileSelectionBoxCallbackStruct *cbs = (XmFileSelectionBoxCallbackStruct *) call_data;
-
-    if (cbs) {
-        if (!XmStringGetLtoR(cbs->value, XmFONTLIST_DEFAULT_TAG, &file))
-            return; /* internal error */
-        (void) strcpy(cur_bitmap, file);
-        XtFree(file); /* free allocated data from XmStringGetLtoR() */
-    }
-
-    Pixmap pixmap = XmGetPixmap(XtScreen(topLevel), cur_bitmap, cur_color,
-            WhitePixelOfScreen(XtScreen(topLevel)));
-
-    if (pixmap == XmUNSPECIFIED_PIXMAP) {
-        printf("Can't create pixmap from %s\n", cur_bitmap);
-    } else {
-        Pixmap old;
-        XtVaGetValues(label, XmNlabelPixmap, &old, NULL);
-        XmDestroyPixmap(XtScreen(topLevel), old);
-        XtVaSetValues(label,
-                XmNlabelType, XmPIXMAP,
-                XmNlabelPixmap, pixmap,
-                NULL);
-    }
-}
-
-void change_color(widget, client_data, call_data)
-    Widget widget; /* menu item that was selected */
-    XtPointer client_data; /* the index into the menu */
-    XtPointer call_data; /* unused */
-{
-    XColor xcolor, unused;
-    Display *dpy = XtDisplay(label);
-    Colormap cmap = DefaultColormapOfScreen(XtScreen(label));
-    int item_no = (int) client_data;
-
-    if (XAllocNamedColor(dpy, cmap, colors[item_no], &xcolor, &unused) == 0
-            || cur_color == xcolor.pixel)
-        return;
-
-    cur_color = xcolor.pixel;
-    load_pixmap(widget, NULL, NULL);
 }
 
 static void renderImage(World* world, const char* outpath) {
@@ -238,6 +233,11 @@ static void renderImage(World* world, const char* outpath) {
         }
     }
     pbm->close(pbm);
+
+    #ifdef PROFILE
+        printf("%ld intersections\n", intersections);
+        intersections = 0;
+    #endif /* PROFILE */
 }
 
 Boolean render_proc(XtPointer client_data)
@@ -248,7 +248,7 @@ Boolean render_proc(XtPointer client_data)
     return 1;
 }
 
-void startRender(const char* path) {
+static void startRender(const char* path) {
     printf("Loading %s\n", path);
     World* world = loadFile(path);
     if (!world) {
@@ -267,6 +267,10 @@ void startRender(const char* path) {
         printf("World contains no camera\n");
         return;
     }
+    XtVaSetValues(drawingArea,
+            XmNwidth, world->width,
+            XmNheight, world->height, NULL);
+
     XtAppAddWorkProc(app, render_proc, world);
 }
 
@@ -278,10 +282,6 @@ int main(int argc, char **argv) {
     if (argc > 1) {
         startRender(argv[1]);
     }
-
-    #ifdef PROFILE
-        printf("%ld intersections\n", intersections);
-    #endif /* PROFILE */
 
     XtAppMainLoop(app);
     return 0;
