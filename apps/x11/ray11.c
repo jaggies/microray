@@ -74,16 +74,20 @@ void expose_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
 
 void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
     short width, height;
+    assert(widget == drawingArea);
     XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
     /* create a pixmap the same size as the drawing area. */
     if (pixmap) {
         XmDestroyPixmap(XtScreen(widget), pixmap);
         pixmap = 0;
     }
-    printf("resize %d x %d\n", width, height);
+    int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
+    printf("resize %dx%d@%dbpp\n", width, height, depth);
     pixmap = XCreatePixmap(XtDisplay(drawingArea),
-            RootWindowOfScreen (XtScreen(drawingArea)), width, height,
-            DefaultDepthOfScreen (XtScreen(drawingArea)));
+            RootWindowOfScreen(XtScreen(drawingArea)), width, height, depth);
+    XSetForeground(XtDisplay(widget), gc, WhitePixelOfScreen(XtScreen(widget)));
+    XFillRectangle (XtDisplay(widget), pixmap, gc, 0, 0, width, height);
+    XSetForeground(XtDisplay(widget), gc, BlackPixelOfScreen(XtScreen(widget)));
     XDrawString(XtDisplay(widget), pixmap, gc, 10, 10, "hello", 5);
     XDrawPoint(XtDisplay(widget), pixmap, gc, 15, 20);
 }
@@ -221,9 +225,10 @@ static void renderImage(World* world, const char* outpath) {
     }
 
     printf("Rendering scene (%dx%d)\n", world->width, world->height);
+    const Display* dpy = XtDisplay(drawingArea);
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
-        printf("Line %d (%d%%)\n", h, 100 * h / world->height);
+        //printf("Line %d (%d%%)\n", h, 100 * h / world->height);
         for (w = 0; w < world->width; w++, u += du) {
             Ray ray;
             Vec3 color;
@@ -234,6 +239,9 @@ static void renderImage(World* world, const char* outpath) {
             rgb[1] = min(255, max(0, (int) round(color.y * 255)));
             rgb[2] = min(255, max(0, (int) round(color.z * 255)));
             pbm->write(pbm, rgb);
+
+            XSetForeground(dpy, gc, (int) (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]);
+            XDrawPoint(dpy, pixmap, gc, w, h);
         }
     }
     pbm->close(pbm);
