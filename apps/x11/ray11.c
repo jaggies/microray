@@ -211,6 +211,15 @@ void createHierarchy(XtAppContext app, Widget top) {
     XtRealizeWidget(top);
 }
 
+uint32_t dither(int x, int y, uint8_t red, uint8_t green, uint8_t blue, int depth) {
+    switch(depth) {
+        case 24:
+            return (uint32_t) (red << 16) | (green << 8) | blue;
+        default:
+            return x;
+    }
+}
+
 static void renderImage(World* world, const char* outpath) {
     int h, w;
     NetPBM* pbm;
@@ -226,6 +235,9 @@ static void renderImage(World* world, const char* outpath) {
 
     printf("Rendering scene (%dx%d)\n", world->width, world->height);
     const Display* dpy = XtDisplay(drawingArea);
+    const Screen* scr = XtScreen(drawingArea);
+    const Colormap cmap = XDefaultColormap(dpy, DefaultScreen(dpy));
+    const depth = DefaultDepthOfScreen(XtScreen(drawingArea));
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
         //printf("Line %d (%d%%)\n", h, 100 * h / world->height);
@@ -239,8 +251,7 @@ static void renderImage(World* world, const char* outpath) {
             rgb[1] = min(255, max(0, (int) round(color.y * 255)));
             rgb[2] = min(255, max(0, (int) round(color.z * 255)));
             pbm->write(pbm, rgb);
-
-            XSetForeground(dpy, gc, (int) (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]);
+            XSetForeground(dpy, gc, dither(w, h, rgb[0], rgb[1], rgb[2], depth));
             XDrawPoint(dpy, pixmap, gc, w, h);
         }
     }
