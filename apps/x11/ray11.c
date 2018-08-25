@@ -34,6 +34,13 @@
 #define MAXDEPTH 4 /* max number of reflected rays */
 #define DEFAULT_WIDTH 1
 #define DEFAULT_HEIGHT 1
+#define RBITS 2
+#define GBITS 2
+#define BBITS 2
+#define RMASK (((1 << RBITS) - 1) << (8 - RBITS))
+#define GMASK (((1 << GBITS) - 1) << (8 - GBITS))
+#define BMASK (((1 << BBITS) - 1) << (8 - BBITS))
+
 #ifdef PROFILE
     long intersections = 0;
 #endif /* PROFILE */
@@ -42,12 +49,16 @@ XtAppContext app;
 Widget topLevel;
 Widget drawingArea;
 Pixel cur_color;
+XGCValues gcv;
 GC gc;
 Pixmap pixmap; // backing store for XmDrawingArea
 
 static char* ABOUT_MSG = "MicroRay (c) 2018 Jim Miller";
 static char* HELP_MSG = "Help yourself.";
 static void startRender(const char* path);
+static const char *vic_name[] = { "StaticGray", "GrayScale", "StaticColor",
+        "PseudoColor", "TrueColor", "DirectColor" };
+static unsigned char pixelMap[256]; // mapping from pixels to cmap entries
 
 void load_cb(Widget dialog, XtPointer client_data, XtPointer call_data)
 {
@@ -55,8 +66,9 @@ void load_cb(Widget dialog, XtPointer client_data, XtPointer call_data)
     XmFileSelectionBoxCallbackStruct *cbs = (XmFileSelectionBoxCallbackStruct *) call_data;
 
     if (cbs) {
-        if (!XmStringGetLtoR(cbs->value, XmFONTLIST_DEFAULT_TAG, &file))
+        if (!XmStringGetLtoR(cbs->value, XmFONTLIST_DEFAULT_TAG, &file)) {
             return; /* internal error */
+        }
         startRender(file);
         XtFree(file); /* free allocated data from XmStringGetLtoR() */
     }
@@ -64,10 +76,14 @@ void load_cb(Widget dialog, XtPointer client_data, XtPointer call_data)
 
 void expose_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
     short width, height;
-    if (!pixmap) {
-        return;
-    }
+    if (!pixmap) return;
     XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
+    Window root;
+    int x, y;
+    unsigned int p_width, p_height, p_border, p_depth;
+    Status status = XGetGeometry(XtDisplay(widget), pixmap, &root, &x, &y, &p_width, &p_height,
+            &p_border, &p_depth);
+    assert(status && width == p_width && height == p_height);
     XCopyArea(XtDisplay(widget), pixmap, XtWindow(widget), gc,
             0 /*srcx*/, 0 /*srcy*/, width, height, 0 /*dstx*/, 0 /*dsty*/);
 }
@@ -81,10 +97,11 @@ void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
         XmDestroyPixmap(XtScreen(widget), pixmap);
         pixmap = 0;
     }
-    int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
-    printf("resize %dx%d@%dbpp\n", width, height, depth);
-    pixmap = XCreatePixmap(XtDisplay(drawingArea),
-            RootWindowOfScreen(XtScreen(drawingArea)), width, height, depth);
+    XWindowAttributes attr = {0};
+    XGetWindowAttributes(XtDisplay(widget), XtWindow(widget), &attr);
+    printf("resize %dx%d@%dbpp\n", width, height, attr.depth);
+    pixmap = XCreatePixmap(XtDisplay(drawingArea), XtWindow(drawingArea), width, height, attr.depth);
+    assert(pixmap);
     XSetForeground(XtDisplay(widget), gc, WhitePixelOfScreen(XtScreen(widget)));
     XFillRectangle (XtDisplay(widget), pixmap, gc, 0, 0, width, height);
     XSetForeground(XtDisplay(widget), gc, BlackPixelOfScreen(XtScreen(widget)));
@@ -131,6 +148,65 @@ void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
     XtManageChild(dialog);
     XtPopup(XtParent(dialog), XtGrabNone);
     XmStringFree(msg);
+}
+
+int min_(int a, int b) { return a < b ? a : b; }
+int max_(int a, int b) { return a > b ? a : b; }
+
+int lookup(int r, int g, int b) {
+    static int rerr = 0, gerr = 0, berr = 0;
+
+    int rmasked = min_(255, max_(0, r + rerr)) & RMASK;
+    int gmasked = min_(255, max_(0, g + gerr)) & GMASK;
+    int bmasked = min_(255, max_(0, b + berr)) & BMASK;
+
+    rerr += r - rmasked;
+    gerr += g - gmasked;
+    berr += b - bmasked;
+    int index = rmasked >> (8 - (RBITS + GBITS + BBITS));
+    index |= gmasked >> (8 - (GBITS + BBITS));
+    index |= bmasked >> (8 - BBITS);
+
+    return pixelMap[index];
+}
+
+void allocVisual(int rbits, int gbits, int bbits) {
+    Display* dpy = XtDisplay(drawingArea);
+
+    // find a visual
+    XVisualInfo vinfo;
+    if (!XMatchVisualInfo(dpy, 0, 8, PseudoColor, &vinfo)) {
+        fprintf(stderr, "can't find visual\n");
+        return;
+    }
+
+    Colormap cmap = XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
+
+    printf("Using visual= %ld, class=%s, depth=%d\n",
+         vinfo.visualid, vic_name[vinfo.class], vinfo.depth);
+
+    XColor clr = {0};
+    int rlevels = 1 << rbits;
+    int glevels = 1 << gbits;
+    int blevels = 1 << bbits;
+    for (int r = 0; r < rlevels; r++) {
+        clr.red = 0xffff * r / (rlevels - 1);
+        for (int g = 0; g < glevels; g++) {
+            clr.green = 0xffff * g / (glevels - 1);
+            for (int b = 0; b < blevels; b++) {
+                clr.blue = 0xffff * b / (blevels - 1);
+                Status status = XAllocColor(dpy, cmap, &clr);
+                if (status) {
+                    int index = (r << (GBITS + BBITS)) | (g << BBITS) | b;
+                    pixelMap[index] = clr.pixel;
+                    printf("Allocated (%x,%x,%x) as %08lx\n", clr.red, clr.green, clr.blue,
+                            clr.pixel);
+                } else {
+                    printf("Couldn't allocate (%d,%d,%d), status=%d\n", r, g, b, status);
+                }
+            }
+        }
+    }
 }
 
 void createHierarchy(XtAppContext app, Widget top) {
@@ -189,7 +265,8 @@ void createHierarchy(XtAppContext app, Widget top) {
     XtManageChild(menubar);
 
     /* Create a ScrollArea as the "work area" of the main window */
-    Widget scroll = XtVaCreateManagedWidget("scrolledWindow", xmScrolledWindowWidgetClass, main_w, NULL);
+    Widget scroll = XtVaCreateManagedWidget("scrolledWindow", xmScrolledWindowWidgetClass,
+            main_w, NULL);
 
     /* Create a DrawingArea as the "work area" of the main window */
     drawingArea = XtVaCreateManagedWidget("drawingArea", xmDrawingAreaWidgetClass, scroll,
@@ -203,21 +280,11 @@ void createHierarchy(XtAppContext app, Widget top) {
             XmNworkWindow, scroll,
             NULL);
 
-    XGCValues gcv;
-    Screen* screen = XtScreen(topLevel);
-    Display* dpy = XtDisplay(topLevel);
+    Screen* screen = XtScreen(top);
+    Display* dpy = XtDisplay(top);
     gcv.foreground = WhitePixelOfScreen(screen);
     gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
     XtRealizeWidget(top);
-}
-
-uint32_t dither(int x, int y, uint8_t red, uint8_t green, uint8_t blue, int depth) {
-    switch(depth) {
-        case 24:
-            return (uint32_t) (red << 16) | (green << 8) | blue;
-        default:
-            return x;
-    }
 }
 
 static void renderImage(World* world, const char* outpath) {
@@ -234,10 +301,9 @@ static void renderImage(World* world, const char* outpath) {
     }
 
     printf("Rendering scene (%dx%d)\n", world->width, world->height);
-    const Display* dpy = XtDisplay(drawingArea);
-    const Screen* scr = XtScreen(drawingArea);
-    const Colormap cmap = XDefaultColormap(dpy, DefaultScreen(dpy));
-    const depth = DefaultDepthOfScreen(XtScreen(drawingArea));
+    Display* dpy = XtDisplay(drawingArea);
+    Colormap cmap = XDefaultColormap(dpy, DefaultScreen(dpy));
+    const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
         //printf("Line %d (%d%%)\n", h, 100 * h / world->height);
@@ -251,10 +317,21 @@ static void renderImage(World* world, const char* outpath) {
             rgb[1] = min(255, max(0, (int) round(color.y * 255)));
             rgb[2] = min(255, max(0, (int) round(color.z * 255)));
             pbm->write(pbm, rgb);
-            XSetForeground(dpy, gc, dither(w, h, rgb[0], rgb[1], rgb[2], depth));
+            unsigned long pixel;
+            switch(depth) {
+                // case theVisual->class == TrueColor || theVisual->class == DirectColor
+                case 24:
+                    pixel = (uint32_t) (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
+                    break;
+                default:
+                    pixel = lookup(rgb[0], rgb[1], rgb[2]);
+            }
+            XSetForeground(dpy, gc, pixel);
             XDrawPoint(dpy, pixmap, gc, w, h);
         }
     }
+    // Force an expose event
+    XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
     pbm->close(pbm);
 
     #ifdef PROFILE
@@ -301,6 +378,8 @@ int main(int argc, char **argv) {
     XtSetLanguageProc(NULL, NULL, NULL);
     topLevel = XtVaAppInitialize(&app, "MainWindow", NULL, 0, &argc, argv, NULL, NULL);
     createHierarchy(app, topLevel);
+
+    allocVisual(RBITS, GBITS, BBITS);
 
     if (argc > 1) {
         startRender(argv[1]);

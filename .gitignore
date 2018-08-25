@@ -53,6 +53,8 @@ dkms.conf
 
 # Images
 *.ppm
+*.png
+images
 
 # Eclipse files
 #.cproject
