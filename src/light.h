@@ -19,7 +19,8 @@ struct LightOps {
 };
 
 struct Light {
-    LightOps* op;
+    LightOps* op; /* These have to be the first two in all subclasses */
+	Vec3 color;
 };
 
 #endif /* LIGHT_H_ */

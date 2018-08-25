@@ -35,7 +35,7 @@ Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth) {
             addscaled3(&hit->lightRay.point, world->epsilon, &hit->lightRay.dir, &hit->lightRay.point);
             hit->inShadow = shadow(&hit->lightRay, hit->best, world);
             shader->op->evaluate(shader, hit, &tmpColor);
-            add3(&tmpColor, color, color); /* TODO: multiply by Light's ambient color */
+            multadd3(&tmpColor, &light->color, color, color); /* TODO: multiply by Light's ambient color */
         }
         kr = shader->op->getReflectionAmount(shader);
         if ((kr > 0.0f) && (maxdepth > 0)) {

@@ -14,8 +14,8 @@ typedef struct PointLight PointLight;
 
 struct PointLight {
     LightOps* op;
-    Vec3 point;
     Vec3 color;
+    Vec3 point;
 };
 
 extern Light* createPointLight(Vec3* position, Vec3* color);

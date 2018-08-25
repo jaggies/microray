@@ -1,8 +1,8 @@
 #p <id> <r,g,b> ksphere eyes kd
 #sphere eyes <x,y,z> r
-resolution 320 200
+resolution 1024 1024
 background 0.1 0.2 0.7
-pointlight 10 10 10 1 1 1
+pointlight 10 10 10 0.5 0.5 0.5
 perspectivecamera 6 8 8 0 4.0 0 0 1 0 45 1
 phongshader eyes 1 1 1 1 1 1 0 0 0 20.0 1.0 0.1 0.0
 phongshader body 1 0 0 1 1 1 0 0 0 20.0 1.0 0.1 0.0
