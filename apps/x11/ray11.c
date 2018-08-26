@@ -49,9 +49,9 @@ XtAppContext app;
 Widget topLevel;
 Widget drawingArea;
 Pixel cur_color;
-XGCValues gcv;
 GC gc;
 Pixmap pixmap; // backing store for XmDrawingArea
+Colormap cmap;
 
 static char* ABOUT_MSG = "MicroRay (c) 2018 Jim Miller";
 static char* HELP_MSG = "Help yourself.";
@@ -176,13 +176,13 @@ void allocVisual(int rbits, int gbits, int bbits) {
     // find a visual
     XVisualInfo vinfo;
     if (!XMatchVisualInfo(dpy, 0, 8, PseudoColor, &vinfo)) {
-        fprintf(stderr, "can't find visual\n");
+        fprintf(stderr, "Can't find 8-bit visual\n");
         return;
     }
 
-    Colormap cmap = XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
+    cmap = XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
 
-    printf("Using visual= %ld, class=%s, depth=%d\n",
+    printf("Using 8-bit visual %ld, class=%s, depth=%d\n",
          vinfo.visualid, vic_name[vinfo.class], vinfo.depth);
 
     XColor clr = {0};
@@ -199,8 +199,7 @@ void allocVisual(int rbits, int gbits, int bbits) {
                 if (status) {
                     int index = (r << (GBITS + BBITS)) | (g << BBITS) | b;
                     pixelMap[index] = clr.pixel;
-                    printf("Allocated (%x,%x,%x) as %08lx\n", clr.red, clr.green, clr.blue,
-                            clr.pixel);
+                    // printf("Alloc (%x,%x,%x) as %08lx\n", clr.red, clr.green, clr.blue, clr.pixel);
                 } else {
                     printf("Couldn't allocate (%d,%d,%d), status=%d\n", r, g, b, status);
                 }
@@ -211,8 +210,9 @@ void allocVisual(int rbits, int gbits, int bbits) {
 
 void createHierarchy(XtAppContext app, Widget top) {
     Widget main_w = XtVaCreateManagedWidget("main_window", xmMainWindowWidgetClass, top,
-            XmNscrollBarDisplayPolicy, XmAS_NEEDED,
-            XmNscrollingPolicy, XmAUTOMATIC,
+            XmNscrollBarDisplayPolicy, XmSTATIC /* XmAS_NEEDED */,
+            XmNscrollingPolicy, XmSTATIC /* XmAUTOMATIC */,
+            XmNscrolledWindowChildType, XmWORK_AREA,
             NULL);
 
     XmString file = XmStringCreateLocalized("File");
@@ -238,7 +238,7 @@ void createHierarchy(XtAppContext app, Widget top) {
     XmString open_ = XmStringCreateLocalized("Open...");
     XmString quit = XmStringCreateLocalized("Quit");
     XmVaCreateSimplePulldownMenu(menubar, "file_menu", 0, file_cb,
-            XmVaPUSHBUTTON, open_, 'N', NULL, NULL,
+            XmVaPUSHBUTTON, open_, 'O', NULL, NULL,
             XmVaSEPARATOR,
             XmVaPUSHBUTTON, quit, 'Q', NULL, NULL,
             NULL);
@@ -246,10 +246,7 @@ void createHierarchy(XtAppContext app, Widget top) {
     XmStringFree(quit);
 
     /* Second menu is the Edit menu  */
-    Widget menu = XmVaCreateSimplePulldownMenu(menubar, "edit_menu", 1, edit_cb,
-            XmNradioBehavior, True, /* RowColumn resources to enforce */
-            XmNradioAlwaysOne, True, /* radio behavior in Menu */
-            NULL);
+    Widget menu = XmVaCreateSimplePulldownMenu(menubar, "edit_menu", 1, edit_cb, NULL);
 
     if ((widget = XtNameToWidget(menu, "button_0"))) {
         XtVaSetValues(widget, XmNset, True, NULL);
@@ -282,9 +279,9 @@ void createHierarchy(XtAppContext app, Widget top) {
 
     Screen* screen = XtScreen(top);
     Display* dpy = XtDisplay(top);
+    XGCValues gcv = {0};
     gcv.foreground = WhitePixelOfScreen(screen);
     gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
-    XtRealizeWidget(top);
 }
 
 static void renderImage(World* world, const char* outpath) {
@@ -302,7 +299,6 @@ static void renderImage(World* world, const char* outpath) {
 
     printf("Rendering scene (%dx%d)\n", world->width, world->height);
     Display* dpy = XtDisplay(drawingArea);
-    Colormap cmap = XDefaultColormap(dpy, DefaultScreen(dpy));
     const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
@@ -378,6 +374,7 @@ int main(int argc, char **argv) {
     XtSetLanguageProc(NULL, NULL, NULL);
     topLevel = XtVaAppInitialize(&app, "MainWindow", NULL, 0, &argc, argv, NULL, NULL);
     createHierarchy(app, topLevel);
+    XtRealizeWidget(topLevel);
 
     allocVisual(RBITS, GBITS, BBITS);
 
