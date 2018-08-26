@@ -94,8 +94,14 @@ void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
     XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
     /* create a pixmap the same size as the drawing area. */
     if (pixmap) {
-        XmDestroyPixmap(XtScreen(widget), pixmap);
-        pixmap = 0;
+        unsigned int p_width, p_height, p_border, p_depth, x, y;
+        Window root;
+        Status status = XGetGeometry(XtDisplay(widget), pixmap, &root, &x, &y, &p_width, &p_height,
+                &p_border, &p_depth);
+        if (p_width < width || p_height < height) {
+            XmDestroyPixmap(XtScreen(widget), pixmap);
+            pixmap = 0;
+        }
     }
     XWindowAttributes attr = {0};
     XGetWindowAttributes(XtDisplay(widget), XtWindow(widget), &attr);
