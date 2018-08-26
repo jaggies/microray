@@ -32,10 +32,11 @@
 #include "testload.h"
 
 #define MAXDEPTH 4 /* max number of reflected rays */
+#define USE_ERROR_DIFFUSION
 #define DEFAULT_WIDTH 1
 #define DEFAULT_HEIGHT 1
-#define RBITS 2
-#define GBITS 2
+#define RBITS 3
+#define GBITS 3
 #define BBITS 2
 #define RMASK (((1 << RBITS) - 1) << (8 - RBITS))
 #define GMASK (((1 << GBITS) - 1) << (8 - GBITS))
@@ -235,7 +236,7 @@ void allocVisual(int rbits, int gbits, int bbits) {
         return;
     }
 
-    cmap = XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
+    cmap = DefaultColormap(dpy, 0); //XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
     assert(vinfo.depth == 8);
 
     printf("Rmask=%02x, Gmask=%02x, Bmask=%02x\n", RMASK, GMASK, BMASK);
@@ -261,9 +262,9 @@ void allocVisual(int rbits, int gbits, int bbits) {
                     int index = (r << (GBITS + BBITS)) | (g << BBITS) | b;
                     assert(index < 256);
                     pixelMap[index] = color.pixel;
-                    //printf("Alloc (%x,%x,%x) as %08lx\n", color.red, color.green, color.blue, color.pixel);
+                    // printf("Alloc (%d,%d,%d) as %08lx\n", red, green, blue, color.pixel);
                 } else {
-                    printf("Couldn't allocate (%d,%d,%d), status=%d\n", r, g, b, status);
+                    printf("Couldn't allocate (%d,%d,%d) => index=%d\n", r, g, b, color.pixel);
                 }
             }
         }
