@@ -83,7 +83,7 @@ void expose_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
     unsigned int p_width, p_height, p_border, p_depth;
     Status status = XGetGeometry(XtDisplay(widget), pixmap, &root, &x, &y, &p_width, &p_height,
             &p_border, &p_depth);
-    assert(status && width == p_width && height == p_height);
+    assert(status && width <= p_width && height <= p_height);
     XCopyArea(XtDisplay(widget), pixmap, XtWindow(widget), gc,
             0 /*srcx*/, 0 /*srcy*/, width, height, 0 /*dstx*/, 0 /*dsty*/);
 }
@@ -94,25 +94,26 @@ void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
     XtVaGetValues(widget, XmNwidth, &width, XmNheight, &height, NULL);
     /* create a pixmap the same size as the drawing area. */
     if (pixmap) {
-        unsigned int p_width, p_height, p_border, p_depth, x, y;
+        unsigned int p_width, p_height, p_border, p_depth;
+        int x, y;
         Window root;
         Status status = XGetGeometry(XtDisplay(widget), pixmap, &root, &x, &y, &p_width, &p_height,
                 &p_border, &p_depth);
+        assert(status);
         if (p_width < width || p_height < height) {
             XmDestroyPixmap(XtScreen(widget), pixmap);
             pixmap = 0;
         }
     }
-    XWindowAttributes attr = {0};
-    XGetWindowAttributes(XtDisplay(widget), XtWindow(widget), &attr);
-    printf("resize %dx%d@%dbpp\n", width, height, attr.depth);
-    pixmap = XCreatePixmap(XtDisplay(drawingArea), XtWindow(drawingArea), width, height, attr.depth);
-    assert(pixmap);
-    XSetForeground(XtDisplay(widget), gc, WhitePixelOfScreen(XtScreen(widget)));
-    XFillRectangle (XtDisplay(widget), pixmap, gc, 0, 0, width, height);
-    XSetForeground(XtDisplay(widget), gc, BlackPixelOfScreen(XtScreen(widget)));
-    XDrawString(XtDisplay(widget), pixmap, gc, 10, 10, "hello", 5);
-    XDrawPoint(XtDisplay(widget), pixmap, gc, 15, 20);
+    if (!pixmap) {
+        XWindowAttributes attr = {0};
+        XGetWindowAttributes(XtDisplay(widget), XtWindow(widget), &attr);
+        printf("Allocating pixmap: %dx%d@%dbpp\n", width, height, attr.depth);
+        pixmap = XCreatePixmap(XtDisplay(drawingArea), XtWindow(drawingArea), width+1, height+1, attr.depth);
+        assert(pixmap);
+        XSetForeground(XtDisplay(widget), gc, WhitePixelOfScreen(XtScreen(widget)));
+        XFillRectangle (XtDisplay(widget), pixmap, gc, 0, 0, width, height);
+    }
 }
 
 void edit_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
@@ -159,21 +160,30 @@ void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 int min_(int a, int b) { return a < b ? a : b; }
 int max_(int a, int b) { return a > b ? a : b; }
 
-int lookup(int r, int g, int b) {
+int dither(int r, int g, int b, int x, int y, int depth) {
     static int rerr = 0, gerr = 0, berr = 0;
 
-    int rmasked = min_(255, max_(0, r + rerr)) & RMASK;
-    int gmasked = min_(255, max_(0, g + gerr)) & GMASK;
-    int bmasked = min_(255, max_(0, b + berr)) & BMASK;
+    switch(depth) {
+        // case theVisual->class == TrueColor || theVisual->class == DirectColor
+        case 24:
+            return (uint32_t) (r << 16) | (g << 8) | b;
+            break;
+        case 8: {
+            int rmasked = min_(255, max_(0, r + rerr)) & RMASK;
+            int gmasked = min_(255, max_(0, g + gerr)) & GMASK;
+            int bmasked = min_(255, max_(0, b + berr)) & BMASK;
 
-    rerr += r - rmasked;
-    gerr += g - gmasked;
-    berr += b - bmasked;
-    int index = rmasked >> (8 - (RBITS + GBITS + BBITS));
-    index |= gmasked >> (8 - (GBITS + BBITS));
-    index |= bmasked >> (8 - BBITS);
-
-    return pixelMap[index];
+            rerr += r - rmasked;
+            gerr += g - gmasked;
+            berr += b - bmasked;
+            int index = rmasked >> (8 - (RBITS + GBITS + BBITS));
+            index |= gmasked >> (8 - (GBITS + BBITS));
+            index |= bmasked >> (8 - BBITS);
+            return pixelMap[index];
+        }
+        default:
+            return 0; // oops
+    }
 }
 
 void allocVisual(int rbits, int gbits, int bbits) {
@@ -319,16 +329,7 @@ static void renderImage(World* world, const char* outpath) {
             rgb[1] = min(255, max(0, (int) round(color.y * 255)));
             rgb[2] = min(255, max(0, (int) round(color.z * 255)));
             pbm->write(pbm, rgb);
-            unsigned long pixel;
-            switch(depth) {
-                // case theVisual->class == TrueColor || theVisual->class == DirectColor
-                case 24:
-                    pixel = (uint32_t) (rgb[0] << 16) | (rgb[1] << 8) | rgb[2];
-                    break;
-                default:
-                    pixel = lookup(rgb[0], rgb[1], rgb[2]);
-            }
-            XSetForeground(dpy, gc, pixel);
+            XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], w, h, depth));
             XDrawPoint(dpy, pixmap, gc, w, h);
         }
     }
