@@ -160,25 +160,64 @@ void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 int min_(int a, int b) { return a < b ? a : b; }
 int max_(int a, int b) { return a > b ? a : b; }
 
-int dither(int r, int g, int b, int x, int y, int depth) {
-    static int rerr = 0, gerr = 0, berr = 0;
+static const int dmat[4][4] = {
+          { 0, 12,  3, 15},
+          { 8,  4, 11,  7},
+          { 2, 14,  1, 13},
+          {10,  6,  9,  5} };
 
+int ordered_dither(int inl, int outl, int x, int y, int grey) {
+     int thresh, val, err, n;
+     // the threshhold for the decision
+     thresh = dmat[x&3][y&3];
+
+     // the lower of the two possible values, due to integer division
+     val = grey*(outl-1)/inl;
+
+     // the error for choosing this value
+     err = grey-val*inl/(outl-1);
+
+     // calculate normalized value between 0 and 15 for given error
+     n = 16*err*outl/inl;
+     if ( n > thresh )
+         return(val+1);  // choose brighter level
+     else
+         return(val);    // choose darker level
+ }
+
+int diffusion_dither(int r, int g, int b) {
+    static int rerr = 0, gerr = 0, berr = 0;
+    int rmasked = min_(255, max_(0, r + rerr)) & RMASK;
+    int gmasked = min_(255, max_(0, g + gerr)) & GMASK;
+    int bmasked = min_(255, max_(0, b + berr)) & BMASK;
+
+    rerr += r - rmasked;
+    gerr += g - gmasked;
+    berr += b - bmasked;
+    int index = rmasked >> (8 - (RBITS + GBITS + BBITS));
+    index |= gmasked >> (8 - (GBITS + BBITS));
+    index |= bmasked >> (8 - BBITS);
+    return index;
+}
+
+int dither(int r, int g, int b, int x, int y, int depth) {
     switch(depth) {
         // case theVisual->class == TrueColor || theVisual->class == DirectColor
         case 24:
             return (uint32_t) (r << 16) | (g << 8) | b;
             break;
         case 8: {
-            int rmasked = min_(255, max_(0, r + rerr)) & RMASK;
-            int gmasked = min_(255, max_(0, g + gerr)) & GMASK;
-            int bmasked = min_(255, max_(0, b + berr)) & BMASK;
-
-            rerr += r - rmasked;
-            gerr += g - gmasked;
-            berr += b - bmasked;
-            int index = rmasked >> (8 - (RBITS + GBITS + BBITS));
-            index |= gmasked >> (8 - (GBITS + BBITS));
-            index |= bmasked >> (8 - BBITS);
+            int index;
+            #ifdef USE_ERROR_DIFFUSION
+            index = diffusion_dither(r, g, b);
+            #else
+            int rx = ordered_dither(1<<8, 1<<RBITS, x, y, r);
+            int gx = ordered_dither(1<<8, 1<<GBITS, x, y, g);
+            int bx = ordered_dither(1<<8, 1<<BBITS, x, y, b);
+            index = rx << (GBITS + BBITS);
+            index |= gx << BBITS;
+            index |= bx;
+            #endif
             return pixelMap[index];
         }
         default:
@@ -197,25 +236,32 @@ void allocVisual(int rbits, int gbits, int bbits) {
     }
 
     cmap = XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
+    assert(vinfo.depth == 8);
 
+    printf("Rmask=%02x, Gmask=%02x, Bmask=%02x\n", RMASK, GMASK, BMASK);
     printf("Using 8-bit visual %ld, class=%s, depth=%d\n",
          vinfo.visualid, vic_name[vinfo.class], vinfo.depth);
 
-    XColor clr = {0};
     int rlevels = 1 << rbits;
     int glevels = 1 << gbits;
     int blevels = 1 << bbits;
     for (int r = 0; r < rlevels; r++) {
-        clr.red = 0xffff * r / (rlevels - 1);
+        unsigned short red = 0xffff * r / (rlevels - 1);
         for (int g = 0; g < glevels; g++) {
-            clr.green = 0xffff * g / (glevels - 1);
+            unsigned short green = 0xffff * g / (glevels - 1);
             for (int b = 0; b < blevels; b++) {
-                clr.blue = 0xffff * b / (blevels - 1);
-                Status status = XAllocColor(dpy, cmap, &clr);
+                unsigned short blue = 0xffff * b / (blevels - 1);
+                XColor color;
+                color.red = red;
+                color.green = green;
+                color.blue = blue;
+                color.flags = DoRed | DoGreen | DoBlue;
+                Status status = XAllocColor(dpy, cmap, &color);
                 if (status) {
                     int index = (r << (GBITS + BBITS)) | (g << BBITS) | b;
-                    pixelMap[index] = clr.pixel;
-                    // printf("Alloc (%x,%x,%x) as %08lx\n", clr.red, clr.green, clr.blue, clr.pixel);
+                    assert(index < 256);
+                    pixelMap[index] = color.pixel;
+                    //printf("Alloc (%x,%x,%x) as %08lx\n", color.red, color.green, color.blue, color.pixel);
                 } else {
                     printf("Couldn't allocate (%d,%d,%d), status=%d\n", r, g, b, status);
                 }
