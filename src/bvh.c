@@ -7,6 +7,7 @@
 #include "bvh.h"
 #include "branch.h"
 #include "leaf.h"
+#include "util.h"
 
 #define MAX_MAX_BVH_DEPTH 16
 #define MAX_LEAF_SIZE_COUNT 16

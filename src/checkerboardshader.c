@@ -10,6 +10,7 @@
 #include "hit.h"
 #include "shader.h"
 #include "checkerboardshader.h"
+#include "util.h"
 
 static void checkerEvaluate(Shader* sh, Hit* hit, Vec3* color)
 {

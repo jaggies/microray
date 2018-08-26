@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "triangle.h"
 #include "hit.h"
+#include "util.h"
 
 #define tmin (0.0f)
 

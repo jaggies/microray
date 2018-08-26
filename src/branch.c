@@ -12,6 +12,7 @@
 #include "shader.h"
 #include "shape.h"
 #include "range.h"
+#include "util.h"
 
 #ifdef PROFILE
 extern long intersections;

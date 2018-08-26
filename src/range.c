@@ -1,4 +1,5 @@
 #include "range.h"
+#include "util.h"
 
 void range_init(Vec2* r) {
     vec2(RANGE_MIN, RANGE_MAX, r);

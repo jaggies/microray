@@ -13,6 +13,7 @@
 #include "leaf.h"
 #include "shader.h"
 #include "hit.h"
+#include "util.h"
 
 #ifdef PROFILE
 extern long intersections;
