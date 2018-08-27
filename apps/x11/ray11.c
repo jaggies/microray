@@ -34,6 +34,7 @@
 
 #define MAXDEPTH 4 /* max number of reflected rays */
 #define USE_ERROR_DIFFUSION
+#define DITHER_IN_FULL_COLOR
 #define DEFAULT_WIDTH 1
 #define DEFAULT_HEIGHT 1
 #define RBITS 3
@@ -168,9 +169,22 @@ int dither(int r, int g, int b, int x, int y, int depth) {
     #endif
     switch(depth) {
         // case theVisual->class == TrueColor || theVisual->class == DirectColor
-        case 24:
-            return (uint32_t) (r << 16) | (g << 8) | b;
-            break;
+        case 24: {
+            #ifdef DITHER_IN_FULL_COLOR
+                #ifdef USE_ERROR_DIFFUSION
+                int rx = diffusion_dither(1<<8, 1<<RBITS, r, &rerr);
+                int gx = diffusion_dither(1<<8, 1<<GBITS, g, &gerr);
+                int bx = diffusion_dither(1<<8, 1<<BBITS, b, &berr);
+                #else
+                int rx = ordered_dither(1<<8, 1<<RBITS, x, y, r);
+                int gx = ordered_dither(1<<8, 1<<GBITS, x, y, g);
+                int bx = ordered_dither(1<<8, 1<<BBITS, x, y, b);
+                #endif
+                return (rx << (24-RBITS)) | (gx << (16 - GBITS)) | (bx << (8 - BBITS));
+            #else
+                return (uint32_t) (r << 16) | (g << 8) | b;
+            #endif
+        } break;
         case 8: {
             int index;
             #ifdef USE_ERROR_DIFFUSION
