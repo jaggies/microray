@@ -4,6 +4,7 @@ Library libmray :
 	branch.c
 	bvh.c
 	checkerboardshader.c
+	dither.c
 	hit.c
 	leaf.c
 	loader.c

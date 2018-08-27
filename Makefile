@@ -3,6 +3,7 @@ SRC = \
 	./src/branch.c \
 	./src/bvh.c \
 	./src/checkerboardshader.c \
+	./src/dither.c \
 	./src/hit.c \
 	./src/leaf.c \
 	./src/loader.c \
@@ -34,10 +35,10 @@ OPT = -O
 all: microray ray11
 
 microray: $(OBJ) apps/microray/microray.c
-	$(CC) $(OPT) $(CCFLAGS) $(INCLUDE) -o $@ $(CCFLAGS) $(OBJ) $(LIBS) apps/microray/microray.c
+	$(CC) $(OPT) $(CCFLAGS) -o $@ $(CCFLAGS) $(INCLUDE) $(OBJ) $(LIBS) apps/microray/microray.c
 
 ray11: $(OBJ) apps/x11/ray11.c
-	$(CC) $(OPT) $(CCFLAGS) $(INCLUDE) $(X11INC) -o $@ $(CCFLAGS) $(OBJ) $(LIBS) apps/x11/ray11.c -lXm -lXt -lX11
+	$(CC) $(OPT) $(CCFLAGS) -o $@ $(CCFLAGS) $(INCLUDE) $(X11INC) $(OBJ) $(LIBS) apps/x11/ray11.c -lXm -lXt -lX11
 
 clean:
 	@rm -rf $(OBJ) microray ray11

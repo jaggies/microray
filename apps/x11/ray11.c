@@ -30,6 +30,7 @@
 #include "loader.h"
 #include "netpbm.h"
 #include "testload.h"
+#include "dither.h"
 
 #define MAXDEPTH 4 /* max number of reflected rays */
 #define USE_ERROR_DIFFUSION
@@ -161,47 +162,10 @@ void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 int min_(int a, int b) { return a < b ? a : b; }
 int max_(int a, int b) { return a > b ? a : b; }
 
-static const int dmat[4][4] = {
-          { 0, 12,  3, 15},
-          { 8,  4, 11,  7},
-          { 2, 14,  1, 13},
-          {10,  6,  9,  5} };
-
-int ordered_dither(int inl, int outl, int x, int y, int grey) {
-     int thresh, val, err, n;
-     // the threshhold for the decision
-     thresh = dmat[x&3][y&3];
-
-     // the lower of the two possible values, due to integer division
-     val = grey*(outl-1)/inl;
-
-     // the error for choosing this value
-     err = grey-val*inl/(outl-1);
-
-     // calculate normalized value between 0 and 15 for given error
-     n = 16*err*outl/inl;
-     if ( n > thresh )
-         return(val+1);  // choose brighter level
-     else
-         return(val);    // choose darker level
- }
-
-int diffusion_dither(int r, int g, int b) {
-    static int rerr = 0, gerr = 0, berr = 0;
-    int rmasked = min_(255, max_(0, r + rerr)) & RMASK;
-    int gmasked = min_(255, max_(0, g + gerr)) & GMASK;
-    int bmasked = min_(255, max_(0, b + berr)) & BMASK;
-
-    rerr += r - rmasked;
-    gerr += g - gmasked;
-    berr += b - bmasked;
-    int index = rmasked >> (8 - (RBITS + GBITS + BBITS));
-    index |= gmasked >> (8 - (GBITS + BBITS));
-    index |= bmasked >> (8 - BBITS);
-    return index;
-}
-
 int dither(int r, int g, int b, int x, int y, int depth) {
+    #ifdef USE_ERROR_DIFFUSION
+    static int rerr, berr, gerr;
+    #endif
     switch(depth) {
         // case theVisual->class == TrueColor || theVisual->class == DirectColor
         case 24:
@@ -210,15 +174,15 @@ int dither(int r, int g, int b, int x, int y, int depth) {
         case 8: {
             int index;
             #ifdef USE_ERROR_DIFFUSION
-            index = diffusion_dither(r, g, b);
+            int rx = diffusion_dither(1<<8, 1<<RBITS, r, &rerr);
+            int gx = diffusion_dither(1<<8, 1<<GBITS, g, &gerr);
+            int bx = diffusion_dither(1<<8, 1<<BBITS, b, &berr);
             #else
             int rx = ordered_dither(1<<8, 1<<RBITS, x, y, r);
             int gx = ordered_dither(1<<8, 1<<GBITS, x, y, g);
             int bx = ordered_dither(1<<8, 1<<BBITS, x, y, b);
-            index = rx << (GBITS + BBITS);
-            index |= gx << BBITS;
-            index |= bx;
             #endif
+            index = (rx << (GBITS + BBITS)) | (gx << BBITS) | bx;
             return pixelMap[index];
         }
         default:
@@ -264,7 +228,7 @@ void allocVisual(int rbits, int gbits, int bbits) {
                     pixelMap[index] = color.pixel;
                     // printf("Alloc (%d,%d,%d) as %08lx\n", red, green, blue, color.pixel);
                 } else {
-                    printf("Couldn't allocate (%d,%d,%d) => index=%d\n", r, g, b, color.pixel);
+                    printf("Couldn't allocate (%d,%d,%d) => index=%lu\n", r, g, b, color.pixel);
                 }
             }
         }
