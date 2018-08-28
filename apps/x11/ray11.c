@@ -357,6 +357,13 @@ static void renderImage(World* world, const char* outpath) {
             XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], w, h, depth));
             XDrawPoint(dpy, pixmap, gc, w, h);
         }
+        // Force an expose event
+        XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
+        while (XPending(dpy)) {
+            XEvent event;
+            XNextEvent(dpy, &event);
+            XtDispatchEvent(&event);
+        }
     }
     // Force an expose event
     XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
