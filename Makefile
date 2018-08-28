@@ -22,9 +22,12 @@ SRC = \
 	./src/world.c 
 
 OBJ = $(SRC:.c=.o)
-CCFLAGS = -Aa
 INCLUDE = -Isrc
 X11INC = -I/usr/X11/include -I/opt/local/include/
+#X11INC = -I/usr/include/X11R5 -I/usr/include/Motif1.2/
+X11LIB = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2 -lXm -lXt -lX11
+DEFINES = -DSHOW_PROGRESS
+CCFLAGS = -Aa $(DEFINES)
 CC = CC
 LIBS = -lm 
 OPT = -O 
@@ -38,7 +41,7 @@ microray: $(OBJ) apps/microray/microray.c
 	$(CC) $(OPT) $(CCFLAGS) -o $@ $(CCFLAGS) $(INCLUDE) $(OBJ) $(LIBS) apps/microray/microray.c
 
 ray11: $(OBJ) apps/x11/ray11.c
-	$(CC) $(OPT) $(CCFLAGS) -o $@ $(CCFLAGS) $(INCLUDE) $(X11INC) $(OBJ) $(LIBS) apps/x11/ray11.c -lXm -lXt -lX11
+	$(CC) $(OPT) $(CCFLAGS) -o $@ $(CCFLAGS) $(INCLUDE) $(X11INC) $(OBJ) $(LIBS) apps/x11/ray11.c $(X11LIB)
 
 clean:
 	@rm -rf $(OBJ) microray ray11

@@ -8,7 +8,7 @@ static void callback(void* clientData, int x, int y, unsigned char pixel[3]) {
 
 int main(int argc, char** argv) {
     int width, height, depth, pixels;
-    NetPBM* pbm = createNetPBM();
+    NetPBM* pbm = createNetPBM("out.ppm");
     if (argc < 2) {
         printf("Usage: %s <image.ppm>\n", argv[0]);
         return 0;

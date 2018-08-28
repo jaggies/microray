@@ -109,7 +109,7 @@ void resize_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
         }
     }
     if (!pixmap) {
-        XWindowAttributes attr = {0};
+        XWindowAttributes attr; /*= {0}; */
         XGetWindowAttributes(XtDisplay(widget), XtWindow(widget), &attr);
         printf("Allocating pixmap: %dx%d@%dbpp\n", width, height, attr.depth);
         pixmap = XCreatePixmap(XtDisplay(drawingArea), XtWindow(drawingArea), width+1, height+1, attr.depth);
@@ -168,7 +168,7 @@ int dither(int r, int g, int b, int x, int y, int depth) {
     static int rerr, berr, gerr;
     #endif
     switch(depth) {
-        // case theVisual->class == TrueColor || theVisual->class == DirectColor
+        /* case theVisual->class == TrueColor || theVisual->class == DirectColor */
         case 24: {
             #ifdef DITHER_IN_FULL_COLOR
                 #ifdef USE_ERROR_DIFFUSION
@@ -200,26 +200,25 @@ int dither(int r, int g, int b, int x, int y, int depth) {
             return pixelMap[index];
         }
         default:
-            return 0; // oops
+            return 0; /* oops */
     }
 }
 
 void allocVisual(int rbits, int gbits, int bbits) {
     Display* dpy = XtDisplay(drawingArea);
 
-    // find a visual
+    /* find a visual */
     XVisualInfo vinfo;
     if (!XMatchVisualInfo(dpy, 0, 8, PseudoColor, &vinfo)) {
         fprintf(stderr, "Can't find 8-bit visual\n");
         return;
     }
 
-    cmap = DefaultColormap(dpy, 0); //XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone);
+    cmap = DefaultColormap(dpy, 0); /* XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocNone); */
     assert(vinfo.depth == 8);
 
     printf("Rmask=%02x, Gmask=%02x, Bmask=%02x\n", RMASK, GMASK, BMASK);
-    printf("Using 8-bit visual %ld, class=%s, depth=%d\n",
-         vinfo.visualid, vic_name[vinfo.class], vinfo.depth);
+    /* printf("Using 8-bit visual %ld, class=%s, depth=%d\n", vinfo.visualid, vic_name[vinfo.class], vinfo.depth); */
 
     int rlevels = 1 << rbits;
     int glevels = 1 << gbits;
@@ -240,7 +239,7 @@ void allocVisual(int rbits, int gbits, int bbits) {
                     int index = (r << (GBITS + BBITS)) | (g << BBITS) | b;
                     assert(index < 256);
                     pixelMap[index] = color.pixel;
-                    // printf("Alloc (%d,%d,%d) as %08lx\n", red, green, blue, color.pixel);
+                    /* printf("Alloc (%d,%d,%d) as %08lx\n", red, green, blue, color.pixel); */
                 } else {
                     printf("Couldn't allocate (%d,%d,%d) => index=%lu\n", r, g, b, color.pixel);
                 }
@@ -253,7 +252,9 @@ void createHierarchy(XtAppContext app, Widget top) {
     Widget main_w = XtVaCreateManagedWidget("main_window", xmMainWindowWidgetClass, top,
             XmNscrollBarDisplayPolicy, XmSTATIC /* XmAS_NEEDED */,
             XmNscrollingPolicy, XmSTATIC /* XmAUTOMATIC */,
+	    #ifdef MOTIF2
             XmNscrolledWindowChildType, XmWORK_AREA,
+	    #endif
             NULL);
 
     XmString file = XmStringCreateLocalized("File");
@@ -320,7 +321,7 @@ void createHierarchy(XtAppContext app, Widget top) {
 
     Screen* screen = XtScreen(top);
     Display* dpy = XtDisplay(top);
-    XGCValues gcv = {0};
+    XGCValues gcv; /* = {0};*/
     gcv.foreground = WhitePixelOfScreen(screen);
     gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
 }
@@ -330,7 +331,7 @@ static void renderImage(World* world, const char* outpath) {
     NetPBM* pbm;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
-    pbm = createNetPBM();
+    pbm = createNetPBM(outpath);
 
     world->depth = 255;
     if (!pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
@@ -343,7 +344,7 @@ static void renderImage(World* world, const char* outpath) {
     const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
-        //printf("Line %d (%d%%)\n", h, 100 * h / world->height);
+        /* printf("Line %d (%d%%)\n", h, 100 * h / world->height); */
         for (w = 0; w < world->width; w++, u += du) {
             Ray ray;
             Vec3 color;
@@ -357,15 +358,17 @@ static void renderImage(World* world, const char* outpath) {
             XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], w, h, depth));
             XDrawPoint(dpy, pixmap, gc, w, h);
         }
-        // Force an expose event
+	// Force an expose event
+        #ifdef SHOW_PROGRESS
         XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
         while (XPending(dpy)) {
             XEvent event;
             XNextEvent(dpy, &event);
             XtDispatchEvent(&event);
         }
+        #endif
     }
-    // Force an expose event
+    /* Force an expose event */
     XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
     pbm->close(pbm);
 
@@ -379,7 +382,7 @@ Boolean render_proc(XtPointer client_data)
 {
     World* world = (World*) client_data;
     printf("Render\n");
-    renderImage(world, "out.ppm"); // TODO: save as same <filename>.ppm
+    renderImage(world, "out.ppm"); /* TODO: save as same <filename>.ppm */
     return 1;
 }
 

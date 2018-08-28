@@ -29,7 +29,7 @@ void renderImage(World* world, const char* outpath)
     NetPBM* pbm;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
-    pbm = createNetPBM();
+    pbm = createNetPBM(outpath);
 
     world->depth = 255;
     if (!pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
