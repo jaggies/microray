@@ -3,7 +3,7 @@ SubDirHdrs $(TOP) src ;
 
 Depends microray : libmray.a ;
 
-LINKLIBS on microray = $(LINKLIBS) -lmray ;
+LINKLIBS on microray = $(LINKLIBS) -lmray -lm ;
 
 Main microray : 
 	microray.c
