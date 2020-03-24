@@ -40,7 +40,7 @@ void renderImage(World* world, const char* outpath)
     printf("Rendering scene (%dx%d)\n", world->width, world->height);
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
-        printf("Line %d (%d%%)\n", h, 100*h / world->height);
+        printf("Line %d (%ld%%)\n", h, 100L*h / world->height);
         for (w = 0; w < world->width; w++, u += du) {
             Ray ray;
             Vec3 color;
