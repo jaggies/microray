@@ -1,0 +1,45 @@
+SRC = \
+	lib\amiga.c \
+	lib\branch.c \
+	lib\bvh.c \
+	lib\checkshd.c \
+	lib\dither.c \
+	lib\hit.c \
+	lib\leaf.c \
+	lib\loader.c \
+	lib\netpbm.c \
+	lib\perspcam.c \
+	lib\phongshd.c \
+	lib\pointlit.c \
+	lib\range.c \
+	lib\raymath.c \
+	lib\raytrace.c \
+	lib\sphere.c \
+	lib\testload.c \
+	lib\triangle.c \
+	lib\vec2.c \
+	lib\vec3.c \
+	lib\world.c 
+
+OBJ = $(SRC:.c=.obj)
+INCLUDE = -Ilib
+X11INC = -I\usr\X11\include -I\opt\local\include\
+#X11INC = -I\usr\include\X11R5 -I\usr\include\Motif1.2\
+X11LIB = -L\usr\lib\X11R5 -L\usr\lib\Motif1.2 -lXm -lXt -lX11
+DEFINES = -DSHOW_PROGRESS
+CCFLAGS = $(DEFINES)
+CC = \tools\tc3\bin\tcc -DDOS
+LIBS = ray.lib
+OPT = -G -mh
+
+.c.obj: 
+	$(CC) $(OPT) $(CCFLAGS) $(INCLUDE) -c -o$* $< 
+	tlib ray +$*
+
+all: microray 
+
+microray: $(OBJ) ray.lib 
+	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\microray\microray.c
+
+clean:
+	@del lib\*.obj microray 

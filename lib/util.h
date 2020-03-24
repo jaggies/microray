@@ -10,8 +10,10 @@
 
 #include <math.h>
 
+#ifndef min
 #define min(a, b) (a < b ? a : b)
 #define max(a, b) (a > b ? a : b)
+#endif
 
 #ifndef fminf
 	#define fminf(a,b) min(a,b)
