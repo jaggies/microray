@@ -21,7 +21,7 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
             printf("Width and height must be non-zero\n");
             return 0;
         }
-        pbm->fp = fopen(path, "w");
+        pbm->fp = fopen(path, "wb");
         if (!pbm->fp) {
             printf("Couldn't open file %s for write!\n", path);
             return 0;
@@ -31,7 +31,7 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
     } else if (mode == NETPBM_READ) {
         char hdr[8];
         int n;
-        pbm->fp = fopen(path, "r");
+        pbm->fp = fopen(path, "rb");
         if (!pbm->fp) {
             printf("Couldn't open pbm file '%s'\n", path);
             return 0;
