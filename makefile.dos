@@ -34,11 +34,11 @@ OPT = -G -mh
 
 .c.obj: 
 	$(CC) $(OPT) $(CCFLAGS) $(INCLUDE) -c -o$* $< 
-	tlib ray +$*
+	tlib ray +-$*
 
 all: microray 
 
-microray: $(OBJ) ray.lib 
+microray: $(OBJ) 
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\microray\microray.c
 
 clean:
