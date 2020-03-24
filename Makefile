@@ -1,34 +1,39 @@
 SRC = \
-	./src/amigastubs.c \
-	./src/branch.c \
-	./src/bvh.c \
-	./src/checkerboardshader.c \
-	./src/dither.c \
-	./src/hit.c \
-	./src/leaf.c \
-	./src/loader.c \
-	./src/netpbm.c \
-	./src/perspectivecamera.c \
-	./src/phongshader.c \
-	./src/pointlight.c \
-	./src/range.c \
-	./src/raymath.c \
-	./src/raytrace.c \
-	./src/sphere.c \
-	./src/testload.c \
-	./src/triangle.c \
-	./src/vec2.c \
-	./src/vec3.c \
-	./src/world.c 
+	./lib/amiga.c \
+	./lib/branch.c \
+	./lib/bvh.c \
+	./lib/checkshd.c \
+	./lib/dither.c \
+	./lib/hit.c \
+	./lib/leaf.c \
+	./lib/loader.c \
+	./lib/netpbm.c \
+	./lib/perspcam.c \
+	./lib/phongshd.c \
+	./lib/pointlit.c \
+	./lib/range.c \
+	./lib/raymath.c \
+	./lib/raytrace.c \
+	./lib/sphere.c \
+	./lib/testload.c \
+	./lib/triangle.c \
+	./lib/vec2.c \
+	./lib/vec3.c \
+	./lib/world.c 
 
 OBJ = $(SRC:.c=.o)
-INCLUDE = -Isrc
+INCLUDE = -Ilib
 X11INC = -I/usr/X11/include -I/opt/local/include/
 #X11INC = -I/usr/include/X11R5 -I/usr/include/Motif1.2/
 X11LIB = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2 -lXm -lXt -lX11
 DEFINES = -DSHOW_PROGRESS
-CCFLAGS = -Aa $(DEFINES)
-CC = CC
+
+#HP9000
+#CCFLAGS = -Aa $(DEFINES)
+#CC = CC
+
+CC = gcc
+
 LIBS = -lm 
 OPT = -O 
 

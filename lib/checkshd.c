@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "hit.h"
 #include "shader.h"
-#include "checkerboardshader.h"
+#include "checkshd.h"
 #include "util.h"
 
 static void checkerEvaluate(Shader* sh, Hit* hit, Vec3* color)

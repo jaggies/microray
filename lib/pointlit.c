@@ -6,7 +6,7 @@
  */
 
 #include <stdlib.h>
-#include "pointlight.h"
+#include "pointlit.h"
 
 static void pointLightMakeRay(Light* l, Vec3* point, Ray* ray)
 {

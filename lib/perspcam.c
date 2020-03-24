@@ -6,7 +6,7 @@
  */
 
 #include <stdlib.h>
-#include "perspectivecamera.h"
+#include "perspcam.h"
 
 static void perspMakeRay(Camera* cam, float u, float v, Ray* ray) {
     PerspectiveCamera* camera = (PerspectiveCamera*) cam;

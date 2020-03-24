@@ -6,7 +6,7 @@
  */
 
 #include <stdlib.h>
-#include "phongshader.h"
+#include "phongshd.h"
 #include "hit.h"
 
 static const float _threshold = 0.01f; /* minimum factor before we'll call pow() */

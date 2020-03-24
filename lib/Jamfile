@@ -1,17 +1,18 @@
 SubDir TOP lib ;
 
 Library libmray :
+	amiga.c
 	branch.c
 	bvh.c
-	checkerboardshader.c
+	checkshd.c
 	dither.c
 	hit.c
 	leaf.c
 	loader.c
 	netpbm.c
-	perspectivecamera.c
-	phongshader.c
-	pointlight.c
+	perspcam.c
+	phongshd.c
+	pointlit.c
 	range.c
 	raymath.c
 	raytrace.c
@@ -21,5 +22,4 @@ Library libmray :
 	vec2.c
 	vec3.c
 	world.c
-	amigastubs.c 
 	;

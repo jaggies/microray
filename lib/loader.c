@@ -2,16 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vec3.h"
-#include "phongshader.h"
-#include "checkerboardshader.h"
+#include "phongshd.h"
+#include "checkshd.h"
 #include "shape.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "bvh.h"
 #include "branch.h"
 #include "leaf.h"
-#include "pointlight.h"
-#include "perspectivecamera.h"
+#include "pointlit.h"
+#include "perspcam.h"
 #include "world.h"
 
 #define MAXNAME 16

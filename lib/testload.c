@@ -7,11 +7,11 @@
 
 #include "sphere.h"
 #include "triangle.h"
-#include "pointlight.h"
+#include "pointlit.h"
 #include "hit.h"
-#include "phongshader.h"
-#include "checkerboardshader.h"
-#include "perspectivecamera.h"
+#include "phongshd.h"
+#include "checkshd.h"
+#include "perspcam.h"
 #include "world.h"
 
 static const float plane[][3] = {

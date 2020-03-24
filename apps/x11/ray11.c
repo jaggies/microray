@@ -20,11 +20,11 @@
 #include "util.h"
 #include "sphere.h"
 #include "triangle.h"
-#include "pointlight.h"
+#include "pointlit.h"
 #include "hit.h"
-#include "phongshader.h"
-#include "checkerboardshader.h"
-#include "perspectivecamera.h"
+#include "phongshd.h"
+#include "checkshd.h"
+#include "perspcam.h"
 #include "world.h"
 #include "raytrace.h"
 #include "loader.h"
@@ -59,8 +59,8 @@ Colormap cmap;
 static char* ABOUT_MSG = "MicroRay (c) 2018 Jim Miller";
 static char* HELP_MSG = "Help yourself.";
 static void startRender(const char* path);
-static const char *vic_name[] = { "StaticGray", "GrayScale", "StaticColor",
-        "PseudoColor", "TrueColor", "DirectColor" };
+//static const char *vic_name[] = { "StaticGray", "GrayScale", "StaticColor",
+//"PseudoColor", "TrueColor", "DirectColor" };
 static unsigned char pixelMap[256]; // mapping from pixels to cmap entries
 
 void load_cb(Widget dialog, XtPointer client_data, XtPointer call_data)
@@ -130,7 +130,7 @@ void unmanage_cb(Widget widget, XtPointer client_data, XtPointer call_data) {
 void file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 {
     static Widget dialog; /* make it static for reuse */
-    int item_no = (int) client_data;
+    int item_no = (size_t) client_data;
 
     if (item_no == 1) /* the "quit" item */
         exit(0);
@@ -151,7 +151,7 @@ void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
     Widget dialog;
     Arg args[5];
     int n = 0;
-    XmString msg =  XmStringCreateLtoR(((int) client_data) == 0 ?
+    XmString msg =  XmStringCreateLtoR(((size_t) client_data) == 0 ?
             HELP_MSG : ABOUT_MSG, XmFONTLIST_DEFAULT_TAG);
     XtSetArg(args[n], XmNmessageString, msg); n++;
     dialog = XmCreateInformationDialog(topLevel, "help_dialog", args, n);
