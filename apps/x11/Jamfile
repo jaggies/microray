@@ -4,7 +4,7 @@ SubDirHdrs /opt/local/include ;
 
 Depends ray11 : libmray.a ;
 
-LINKLIBS on ray11 = $(LINKLIBS) -lmray -lXm -lXt -lX11 ;
+LINKLIBS on ray11 = $(LINKLIBS) -lmray -lXm -lXt -lX11 -lm ;
 
 Main ray11 : 
 	ray11.c

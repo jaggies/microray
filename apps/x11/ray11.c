@@ -37,8 +37,8 @@
 #define DITHER_IN_FULL_COLOR
 #define DEFAULT_WIDTH 1
 #define DEFAULT_HEIGHT 1
-#define RBITS 3
-#define GBITS 3
+#define RBITS 2
+#define GBITS 2
 #define BBITS 2
 #define RMASK (((1 << RBITS) - 1) << (8 - RBITS))
 #define GMASK (((1 << GBITS) - 1) << (8 - GBITS))
@@ -204,7 +204,7 @@ int dither(int r, int g, int b, int x, int y, int depth) {
     }
 }
 
-void allocVisual(int rbits, int gbits, int bbits) {
+void allocSharedColorMap(int rbits, int gbits, int bbits) {
     Display* dpy = XtDisplay(drawingArea);
 
     /* find a visual */
@@ -246,6 +246,46 @@ void allocVisual(int rbits, int gbits, int bbits) {
             }
         }
     }
+}
+
+void allocPrivateColorMap(const int rbits, const int gbits, const int bbits) {
+    Display* dpy = XtDisplay(topLevel);
+
+    /* find a visual */
+    XVisualInfo vinfo;
+    if (!XMatchVisualInfo(dpy, 0, 8, PseudoColor, &vinfo)) {
+        fprintf(stderr, "Can't find 8-bit visual\n");
+        return;
+    }
+
+//    cmap = XCreateColormap(dpy, XtWindow(topLevel), vinfo.visual, AllocAll);
+    cmap = XCreateColormap(dpy, RootWindow(dpy, 0), DefaultVisual(dpy, 0), AllocAll);
+
+    const int rlevels = 1 << rbits;
+    const int glevels = 1 << gbits;
+    const int blevels = 1 << bbits;
+    int index = 0;
+    XColor color;
+    for (int r = 0; r < rlevels; r++) {
+        unsigned short red = 0xffff * r / (rlevels - 1);
+        for (int g = 0; g < glevels; g++) {
+            unsigned short green = 0xffff * g / (glevels - 1);
+            for (int b = 0; b < blevels; b++) {
+                unsigned short blue = 0xffff * b / (blevels - 1);
+                color.red = red;
+                color.green = green;
+                color.blue = blue;
+                color.flags = DoRed | DoGreen | DoBlue;
+                color.pixel = index++;
+                Status status = XStoreColor(dpy, cmap, &color);
+                if (status) {
+                    printf("Error storing color %d (err=%d)\n", index, status);
+                }
+            }
+        }
+    }
+//    XStoreColors(dpy, cmap, &colors[0], XtNumber(colors));
+    XSetWindowColormap(dpy, XtWindow(topLevel), cmap);
 }
 
 void createHierarchy(XtAppContext app, Widget top) {
@@ -418,7 +458,8 @@ int main(int argc, char **argv) {
     createHierarchy(app, topLevel);
     XtRealizeWidget(topLevel);
 
-    allocVisual(RBITS, GBITS, BBITS);
+//    allocSharedColorMap(RBITS, GBITS, BBITS);
+    allocPrivateColorMap(RBITS, GBITS, BBITS);
 
     if (argc > 1) {
         startRender(argv[1]);

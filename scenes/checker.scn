@@ -1,4 +1,4 @@
-resolution 1024 1024
+resolution 512 512
 pointlight 5 5 5 1 1 1 
 perspectivecamera -1 1 1  0 0 0  0 1 0 45.0 1.0
 #phong <diffuse> <specular> <ambient> <coeff> <index> <kreflect> <ktransmit>
