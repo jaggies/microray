@@ -36,10 +36,16 @@ OPT = -G -mh
 	$(CC) $(OPT) $(CCFLAGS) $(INCLUDE) -c -o$* $< 
 	tlib ray +-$*
 
-all: microray 
+all: ray.lib microray.exe
 
-microray: $(OBJ) 
+ray.lib: $(OBJ)
+	touch ray.lib
+
+microray.exe: ray.lib
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\microray\microray.c
 
 clean:
-	@del lib\*.obj microray 
+	@del ray.bak
+	@del ray.lib
+	@del microray.exe
+	@del lib\*.obj 
