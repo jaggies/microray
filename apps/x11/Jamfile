@@ -1,5 +1,5 @@
 SubDir TOP apps x11 ;
-SubDirHdrs $(TOP) src ;
+SubDirHdrs $(TOP) lib ;
 SubDirHdrs /opt/local/include ;
 
 Depends ray11 : libmray.a ;

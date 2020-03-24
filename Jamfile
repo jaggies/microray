@@ -7,5 +7,5 @@ if $(TARGET) {
     echo **** Building for $(OSFULL) **** ;
 }
     
-SubInclude TOP src ;
+SubInclude TOP lib ;
 SubInclude TOP apps ;

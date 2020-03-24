@@ -1,5 +1,5 @@
 SubDir TOP apps microray ;
-SubDirHdrs $(TOP) src ;
+SubDirHdrs $(TOP) lib ;
 
 Depends microray : libmray.a ;
 

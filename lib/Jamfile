@@ -1,4 +1,4 @@
-SubDir TOP src ;
+SubDir TOP lib ;
 
 Library libmray :
 	branch.c
