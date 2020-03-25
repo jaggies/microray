@@ -33,8 +33,6 @@ static void pixel(uint16_t x, uint16_t y, uint8_t* rgb) {
 
 static void renderToFile(World* world, const char* outpath)
 {
-    float du = 1.0f / world->width, dv = 1.0f / world->height;
-    float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
     pbm = createNetPBM(outpath);
 
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {

@@ -18,6 +18,8 @@
 
 # Libraries
 *.lib
+*.LIB
+*.BAK
 *.a
 *.la
 *.lo
@@ -30,6 +32,7 @@
 
 # Executables
 *.exe
+*.EXE
 *.out
 *.app
 *.i*86

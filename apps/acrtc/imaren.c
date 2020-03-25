@@ -36,6 +36,35 @@ static NetPBM* pbm = 0;
 #define GBITS 3
 #define BBITS 2
 
+static void makePalette(int rbits, int gbits, int bbits) {
+    int index = 0;
+    for (index = 0; index < 256; index++) {
+        int r = (index >> (gbits + bbits)) << (8-rbits);
+        int g = (index >> (bbits)) << (8-gbits);
+        int b = (index) << (8-bbits);
+        palette(index, r, g, b);
+    }
+}
+
+// This creates a brighter palette by using lower bits. Needs more testing.
+static void makePalette1(int rbits, int gbits, int bbits) {
+    const int rlevels = 1 << rbits;
+    const int glevels = 1 << gbits;
+    const int blevels = 1 << bbits;
+    int index = 0;
+    int r, g, b;
+    for (r = 0; r < rlevels; r++) {
+        uint16_t red = 0xff * r / (rlevels - 1);
+        for (g = 0; g < glevels; g++) {
+            uint16_t green = 0xff * g / (glevels - 1);
+            for (b = 0; b < blevels; b++) {
+                uint16_t blue = 0xff * b / (blevels - 1);
+                palette(index++, red, green, blue);
+            }
+        }
+    }
+}
+
 static void pixel(uint16_t x, uint16_t y, uint8_t* rgb) {
     uint8_t index;
     #ifdef USE_ERROR_DIFFUSION
@@ -48,7 +77,7 @@ static void pixel(uint16_t x, uint16_t y, uint8_t* rgb) {
     uint8_t bx = ordered_dither(1<<8, 1<<BBITS, x, y, rgb[2]);
     #endif
     index = (rx << (GBITS + BBITS)) | (gx << BBITS) | bx;
-    dot(x, y, rgb[0]);
+    dot(x, 1024-y, index);
     pbm->write(pbm, rgb);
 }
 
@@ -70,6 +99,7 @@ int main(int argc, char **argv)
     const char* outpath = "out.ppm"; /* TODO: get path from arguments */
     World* world;
     board_init();
+    makePalette(RBITS, GBITS, BBITS);
 
     printf("*** Imagraph Renderer v1.0 ***\n");
 

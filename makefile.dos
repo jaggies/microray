@@ -30,7 +30,7 @@ RAYOBJ = $(RAYSRC:.c=.obj) $(IMASRC:.c=.obj)
 DEFINES = -DDOS
 INCLUDE = -Ilib -Iapps/acrtc
 CCFLAGS = $(DEFINES)
-CC = \tools\tc3\bin\tcc -DDOS
+CC = tcc -DDOS
 LIBS = ray.lib
 OPT = -G -mh
 
@@ -50,9 +50,12 @@ imaren.exe: ray.lib
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\acrtc\imaren.c
 
 clean:
-	@del ray.bak
-	@del ray.lib
+	@del *.bak
+	@del *.lib
 	@del *.exe
+	@del *.obj
 	@del lib\*.obj 
 	@del apps\acrtc\*.obj 
 
+zip:
+	pkzip -r microray lib apps makefile.dos makefile scenes
