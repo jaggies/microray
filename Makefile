@@ -50,3 +50,6 @@ ray11: $(OBJ) apps/x11/ray11.c
 
 clean:
 	@rm -rf $(OBJ) microray ray11
+
+zip:
+	zip -r microray lib apps makefile.dos Makefile scenes *.EXE
