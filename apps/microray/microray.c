@@ -21,44 +21,31 @@
 #include "netpbm.h"
 #include "testload.h"
 
-#define MAXDEPTH 4 /* max number of reflected rays */
+#ifdef PROFILE
+long intersections = 0;
+#endif /* PROFILE */
 
-void renderImage(World* world, const char* outpath)
+static NetPBM* pbm = 0;
+
+static void pixel(uint16_t x, uint16_t y, uint8_t* rgb) {
+    pbm->write(pbm, rgb);
+}
+
+static void renderToFile(World* world, const char* outpath)
 {
-    int h, w;
-    NetPBM* pbm;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
     pbm = createNetPBM(outpath);
 
-    world->depth = 255;
-    if (!pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
+    if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
+        printf("Rendering scene (%dx%d)\n", world->width, world->height);
+        renderImage(world, pixel);
+        pbm->close(pbm);
+    } else {
         printf("Can't write image '%s'\n", outpath);
         return;
     }
-
-    printf("Rendering scene (%dx%d)\n", world->width, world->height);
-    for (h = 0; h < world->height; h++, v += dv) {
-        float u = 0.0f + du * 0.5f;
-        printf("Line %d (%ld%%)\n", h, 100L*h / world->height);
-        for (w = 0; w < world->width; w++, u += du) {
-            Ray ray;
-            Vec3 color;
-            unsigned char rgb[3];
-            world->camera->op->makeRay(world->camera, u, 1.0f-v, &ray);
-            trace(&ray, 0 /* ignore */, world, &color, MAXDEPTH);
-            rgb[0] = min(255, max(0, (int)round(color.x * 255)));
-            rgb[1] = min(255, max(0, (int)round(color.y * 255)));
-            rgb[2] = min(255, max(0, (int)round(color.z * 255)));
-            pbm->write(pbm, rgb);
-        }
-    }
-    pbm->close(pbm);
 }
-
-#ifdef PROFILE
-long intersections = 0;
-#endif /* PROFILE */
 
 int main(int argc, char **argv)
 {
@@ -86,7 +73,7 @@ int main(int argc, char **argv)
         printf("World contains no camera, exiting\n");
         return 0;
     }
-    renderImage(world, outpath);
+    renderToFile(world, outpath);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

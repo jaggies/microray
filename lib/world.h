@@ -27,6 +27,7 @@ struct World {
     int width; /* image width */
     int height; /* image height */
     int depth; /* image depth */
+    int raydepth;
 };
 
 World* createWorld();

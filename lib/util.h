@@ -10,6 +10,14 @@
 
 #include <math.h>
 
+#if !defined(uint16_t)
+typedef unsigned short uint16_t;
+#endif
+
+#if !defined(uint8_t)
+typedef unsigned char uint8_t;
+#endif
+
 #ifndef min
 #define min(a, b) (a < b ? a : b)
 #define max(a, b) (a > b ? a : b)

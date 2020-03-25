@@ -32,7 +32,7 @@
 #include "testload.h"
 #include "dither.h"
 
-#define MAXDEPTH 4 /* max number of reflected rays */
+#define MAX_RAY_DEPTH 4 /* max number of reflected rays */
 #define USE_ERROR_DIFFUSION
 #define DITHER_IN_FULL_COLOR
 #define DEFAULT_WIDTH 1
@@ -59,6 +59,8 @@ Colormap cmap;
 static char* ABOUT_MSG = "MicroRay (c) 2018 Jim Miller";
 static char* HELP_MSG = "Help yourself.";
 static void startRender(const char* path);
+static NetPBM* pbm;
+
 //static const char *vic_name[] = { "StaticGray", "GrayScale", "StaticColor",
 //"PseudoColor", "TrueColor", "DirectColor" };
 static unsigned char pixelMap[256]; // mapping from pixels to cmap entries
@@ -366,48 +368,34 @@ void createHierarchy(XtAppContext app, Widget top) {
     gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
 }
 
-static void renderImage(World* world, const char* outpath) {
-    int h, w;
-    NetPBM* pbm;
-    float du = 1.0f / world->width, dv = 1.0f / world->height;
-    float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
+static void pixel(uint16_t x, uint16_t y, uint8_t rgb[3]) {
+    Display *dpy = XtDisplay(drawingArea);
+    const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
+    XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], x, y, depth));
+    XDrawPoint(dpy, pixmap, gc, x, y);
+    pbm->write(pbm, rgb);
+
+    // Force an expose event
+    #ifdef SHOW_PROGRESS
+    XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
+    while (XPending(dpy)) {
+        XEvent event;
+        XNextEvent(dpy, &event);
+        XtDispatchEvent(&event);
+    }
+    #endif
+}
+
+static void renderX11(World* world, const char* outpath) {
     pbm = createNetPBM(outpath);
 
-    world->depth = 255;
-    if (!pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
+    if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
+        renderImage(world, pixel);
+    } else {
         printf("Can't write image '%s'\n", outpath);
         return;
     }
 
-    printf("Rendering scene (%dx%d)\n", world->width, world->height);
-    Display* dpy = XtDisplay(drawingArea);
-    const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
-    for (h = 0; h < world->height; h++, v += dv) {
-        float u = 0.0f + du * 0.5f;
-        /* printf("Line %d (%d%%)\n", h, 100 * h / world->height); */
-        for (w = 0; w < world->width; w++, u += du) {
-            Ray ray;
-            Vec3 color;
-            unsigned char rgb[3];
-            world->camera->op->makeRay(world->camera, u, 1.0f - v, &ray);
-            trace(&ray, 0 /* ignore */, world, &color, MAXDEPTH);
-            rgb[0] = min(255, max(0, (int) round(color.x * 255)));
-            rgb[1] = min(255, max(0, (int) round(color.y * 255)));
-            rgb[2] = min(255, max(0, (int) round(color.z * 255)));
-            pbm->write(pbm, rgb);
-            XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], w, h, depth));
-            XDrawPoint(dpy, pixmap, gc, w, h);
-        }
-	// Force an expose event
-        #ifdef SHOW_PROGRESS
-        XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
-        while (XPending(dpy)) {
-            XEvent event;
-            XNextEvent(dpy, &event);
-            XtDispatchEvent(&event);
-        }
-        #endif
-    }
     /* Force an expose event */
     XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
     pbm->close(pbm);
@@ -422,7 +410,7 @@ Boolean render_proc(XtPointer client_data)
 {
     World* world = (World*) client_data;
     printf("Render\n");
-    renderImage(world, "out.ppm"); /* TODO: save as same <filename>.ppm */
+    renderX11(world, "out.ppm"); /* TODO: save as same <filename>.ppm */
     return 1;
 }
 

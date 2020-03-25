@@ -5,6 +5,8 @@
  *      Author: jmiller
  */
 
+#include <stdio.h>
+#include "util.h"
 #include "vec2.h"
 #include "vec3.h"
 #include "hit.h"
@@ -12,6 +14,7 @@
 #include "shape.h"
 #include "light.h"
 #include "ray.h"
+#include "camera.h"
 #include "world.h"
 #include "raytrace.h"
 
@@ -97,3 +100,32 @@ int shadow(Ray* ray, const Shape* ignore, World* world) {
     return 0;
 }
 
+void renderImage(World* world, PixelCB pixel)
+{
+    int h, w;
+    float du = 1.0f / world->width, dv = 1.0f / world->height;
+    float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
+
+    if (!pixel) {
+        printf("No callback provided!!\n");
+        return;
+    }
+
+    world->depth = 255;
+
+    printf("Rendering scene (%dx%d)\n", world->width, world->height);
+    for (h = 0; h < world->height; h++, v += dv) {
+        float u = 0.0f + du * 0.5f;
+        for (w = 0; w < world->width; w++, u += du) {
+            Ray ray;
+            Vec3 color;
+            unsigned char rgb[3];
+            world->camera->op->makeRay(world->camera, u, 1.0f-v, &ray);
+            trace(&ray, 0 /* ignore */, world, &color, world->raydepth);
+            rgb[0] = min(255, max(0, (int)round(color.x * 255)));
+            rgb[1] = min(255, max(0, (int)round(color.y * 255)));
+            rgb[2] = min(255, max(0, (int)round(color.z * 255)));
+            (*pixel)(w, h, rgb);
+        }
+    }
+}

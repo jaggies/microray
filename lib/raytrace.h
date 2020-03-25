@@ -12,4 +12,8 @@ extern Vec3* shade(Ray* ray, World* world, Hit* hit, Vec3* color, int maxdepth);
 extern void trace(Ray* ray, const Shape* ignore, World* world, Vec3* color, int maxdepth);
 extern int shadow(Ray* ray, const Shape* ignore, World* world);
 
+
+typedef void (*PixelCB)(uint16_t x, uint16_t y, uint8_t rgb[3]);
+extern void renderImage(World* world, PixelCB pixel);
+
 #endif /* RAYTRACE_H_ */
