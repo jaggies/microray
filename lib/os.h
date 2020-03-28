@@ -4,12 +4,14 @@
 #define Number(a) (sizeof(a) / sizeof(a[0]))
 
 #ifdef DOS
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
 typedef char int8_t;
 typedef short int16_t;
+typedef long long int32_t;
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned long long uint32_t;
 #else
 #include <stdint.h>
-#endif  // DOS
+#endif
 
 #endif // OS_H
