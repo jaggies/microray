@@ -35,23 +35,15 @@ extern "C" {
 long intersections = 0;
 #endif /* PROFILE */
 
+static int centerx, centery;
+
 static NetPBM* pbm = 0;
 #define RBITS 3 // TODO: set up palette in this code
 #define GBITS 3
 #define BBITS 2
 
-static void makePalette(Vesa& vesa, int rbits, int gbits, int bbits) {
-    int index = 0;
-    for (index = 0; index < 256; index++) {
-        int r = (index >> (gbits + bbits)) << (8-rbits);
-        int g = (index >> (bbits)) << (8-gbits);
-        int b = (index) << (8-bbits);
-        vesa.palette(index, r, g, b);
-    }
-}
-
 // This creates a brighter palette by using lower bits. Needs more testing.
-static void makePalette1(Vesa& vesa, int rbits, int gbits, int bbits) {
+static void makePalette(Vesa& vesa, int rbits, int gbits, int bbits) {
     const int rlevels = 1 << rbits;
     const int glevels = 1 << gbits;
     const int blevels = 1 << bbits;
@@ -82,7 +74,7 @@ static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userData) {
     uint8_t bx = ordered_dither(1<<8, 1<<BBITS, x, y, rgb[2]);
     #endif
     index = (rx << (GBITS + BBITS)) | (gx << BBITS) | bx;
-    vesa->dot(x, y, index);
+    vesa->dot(centerx + x, centery + y, index);
     pbm->write(pbm, rgb);
 }
 
@@ -90,13 +82,16 @@ static void renderToFile(World* world, Vesa* vesa, const char* outpath)
 {
     pbm = createNetPBM(outpath);
 
-    // Pick nearest VESA mode to resolutio
+    // Pick nearest VESA mode to scene resolution
     if (!vesa->setMode(world->width, world->height, 8)) {
         printf("Image too large to set graphics mode\n");
         return;
     }
 
-    makePalette1(*vesa, RBITS, GBITS, BBITS);
+    centerx = (vesa->width() - world->width) / 2;
+    centery = (vesa->height() - world->height) / 2;
+
+    makePalette(*vesa, RBITS, GBITS, BBITS);
 
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
         renderImage(world, pixel, vesa);
