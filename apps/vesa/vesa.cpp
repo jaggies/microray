@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include "vesa.h"
 
 struct VesaInfoBlock {
@@ -59,52 +60,63 @@ struct ModeInfoBlock {
 
 Vesa::Vesa() {
     VesaInfoBlock info;
-    int16_t status;
-    #ifdef DOS
-    uint16_t segment = uint32_t(&info) >> 16;
-    uint16_t addr = uint32_t(&info) & 0xffff;
-    asm {
-        mov ax, segment
-        mov es, ax
-        mov ax, 0x4f00 // get info
-        mov di, addr
-        int 0x10
-        mov status, ax
-    }
-    #endif
-    if (status == 0x004f) {
-        ModeInfoBlock modeInfo;
-        printf("VESA = '%s', version=%04x, status = %d, capabilities=%08x\n",
-                info.signature, info.version, status, info.capabilities);
-        uint16_t* ptr = info.modes;
-        while (*ptr != 0xffff) {
-            #ifdef DOS
-            uint16_t segment = uint32_t(&modeInfo) >> 16;
-            uint16_t addr = uint32_t(&modeInfo) & 0xffff;
-            uint16_t videoMode = *ptr;
-            asm {
-                mov ax, 0x4f01 // get mode info
-                mov bx, segment
-                mov es, bx
-                mov cx, videoMode
-                mov di, addr
-                int 0x10
-                mov status, ax
-            }
-            #endif
-            printf("Mode %04x: %dx%d %dbpp\n", *ptr,
+    if (getVesaInfoBlock(&info)) {
+        uint16_t* modes = info.modes;
+        printf("VESA version=%04x, capabilities=%08x\n",
+                info.signature, info.version, info.capabilities);
+        while (*modes != 0xffff) {
+            ModeInfoBlock modeInfo;
+            getVesaModeInfo(*modes, &modeInfo);
+            printf("Mode %04x: %dx%d %d BPP\n", *modes,
                     modeInfo.horizontalRsolution,
                     modeInfo.verticalResolution,
                     modeInfo.bitsPerPixel);
-            ptr++;
+            modes++;
         }
     } else {
-        printf("VESA not supported, status=%04x\n", status);
+        printf("VESA not supported!\n");
     }
 }
 
 Vesa::~Vesa() {
 
+}
+
+VesaInfoBlock* Vesa::getVesaInfoBlock(VesaInfoBlock *blockInfo) {
+    int16_t status = 0;
+    bzero(blockInfo, sizeof(VesaInfoBlock));
+    #ifdef DOS
+    uint16_t segment = uint32_t(blockInfo) >> 16;
+    uint16_t address = uint32_t(blockInfo) & 0xffff;
+    asm {
+        mov ax, segment
+        mov es, ax
+        mov ax, 0x4f00 // get vesa block info
+        mov di, address
+        int 0x10
+        mov status, ax
+    }
+    #endif
+    return (status == 0x004f
+            && strncmp("VESA", &blockInfo->signature[0], 4) == 0) ? blockInfo : nullptr;
+}
+
+VesaInfoBlock* Vesa::getVesaModeInfo(uint16_t videoMode, ModeInfoBlock* modeInfo) {
+    int16_t status = 0;
+    #ifdef DOS
+    uint16_t segment = uint32_t(modeInfo) >> 16;
+    uint16_t addr = uint32_t(modeInfo) & 0xffff;
+    asm {
+        mov ax, 0x4f01 // get mode info
+        mov bx, segment
+        mov es, bx
+        mov cx, videoMode
+        mov di, addr
+        int 0x10
+        mov status, ax
+    }
+    #endif
+    return nullptr;
 }
 
 void Vesa::setMode(int xres, int yres, int depth) {

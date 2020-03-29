@@ -10,6 +10,9 @@
 
 #include "os.h"
 
+struct VesaInfoBlock;
+struct ModeInfoBlock;
+
 class Vesa {
     public:
         Vesa();
@@ -23,6 +26,10 @@ class Vesa {
 
         // Selects the current graphics page (usually 64kB)
         void setPage(int page);
+
+    private:
+        VesaInfoBlock* getVesaInfoBlock(VesaInfoBlock *block);
+        VesaInfoBlock* getVesaModeInfo(uint16_t mode, ModeInfoBlock* info);
 };
 
 #endif /* APPS_VESA_VESA_H_ */
