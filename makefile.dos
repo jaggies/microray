@@ -50,13 +50,13 @@ all: ray.lib microray.exe imaren.exe vesatest.exe
 ray.lib: $(RAYOBJ)
 	touch ray.lib
 
-microray.exe: ray.lib
+microray.exe: ray.lib apps\microray\microray.c
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\microray\microray.c
 
-imaren.exe: ray.lib
+imaren.exe: ray.lib apps\acrtc\imaren.c
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\acrtc\imaren.c
 
-vesatest.exe: ray.lib
+vesatest.exe: ray.lib apps\vesa\vesatest.cpp
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) $(LIBS) apps\vesa\vesatest.cpp
 
 clean:
