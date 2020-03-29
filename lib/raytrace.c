@@ -100,7 +100,7 @@ int shadow(Ray* ray, const Shape* ignore, World* world) {
     return 0;
 }
 
-void renderImage(World* world, PixelCB pixel)
+void renderImage(World* world, PixelCB pixel, void* userdata)
 {
     int h, w;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
@@ -125,7 +125,7 @@ void renderImage(World* world, PixelCB pixel)
             rgb[0] = min(255, max(0, (int)round(color.x * 255)));
             rgb[1] = min(255, max(0, (int)round(color.y * 255)));
             rgb[2] = min(255, max(0, (int)round(color.z * 255)));
-            (*pixel)(w, h, rgb);
+            (*pixel)(w, h, rgb, userdata);
         }
     }
 }

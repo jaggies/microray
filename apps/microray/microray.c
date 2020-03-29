@@ -27,7 +27,7 @@ long intersections = 0;
 
 static NetPBM* pbm = 0;
 
-static void pixel(uint16_t x, uint16_t y, uint8_t* rgb) {
+static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     pbm->write(pbm, rgb);
 }
 
@@ -37,7 +37,7 @@ static void renderToFile(World* world, const char* outpath)
 
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
         printf("Rendering scene (%dx%d)\n", world->width, world->height);
-        renderImage(world, pixel);
+        renderImage(world, pixel, NULL);
         pbm->close(pbm);
     } else {
         printf("Can't write image '%s'\n", outpath);
