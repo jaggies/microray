@@ -8,25 +8,25 @@
 #include <stdio.h>
 #include "vesa.h"
 
+static void makePalette(Vesa& vesa, int rbits, int gbits, int bbits) {
+    int index = 0;
+    for (index = 0; index < 256; index++) {
+        int r = (index >> (gbits + bbits)) << (8-rbits);
+        int g = (index >> (bbits)) << (8-gbits);
+        int b = (index) << (8-bbits);
+        vesa.palette(index, r, g, b);
+    }
+}
+
 int main(int argc, char** argv) {
     Vesa vesa;
     vesa.dump();
-    printf("Try 640x480 8bpp\n");
-    vesa.setMode(640, 480, 8);
-    int i;
-    for (i = 0; i < 480; i++) {
-        vesa.dot(i, i, i);
+    vesa.setMode(1280, 1024, 8);
+    for (int j = 0; j < vesa.height(); j++) {
+        for (int i = 0; i < vesa.width(); i++) {
+            vesa.dot(i, j, i^j);
+        }
     }
-//    printf("Try 640x480 15bpp\n");
-//    vesa.setMode(640, 480, 15);
-//    printf("Try 640x480 16bpp\n");
-//    vesa.setMode(640, 480, 16);
-//    printf("Try 720x480 15bpp\n");
-//    vesa.setMode(720, 480, 15);
-//    printf("Try 1280x1024 8bpp\n");
-//    vesa.setMode(1280, 1024, 8);
-//    printf("Try 1600x1200 8bpp\n");
-//    vesa.setMode(1600, 1200, 8);
-//    vesa.dot(0,0,0);
+    makePalette(vesa, 3, 3, 2);
 }
 

@@ -27,6 +27,14 @@ class Vesa {
         // Selects the current graphics page (usually 64kB)
         void setPage(uint16_t page);
 
+        // Sets the given palette to given red, green, blue.  If 18-bit DAC is supported,
+        // only upper 6 MSBs have an effect for 262k total colors.
+        void palette(uint8_t index, uint8_t red, uint8_t green, uint8_t blue);
+
+        uint16_t width() const { return _currentMode.horizontalRsolution; }
+
+        uint16_t height() const { return _currentMode.verticalResolution; }
+
         // Dumps (prints) all vesa mode info
         void dump() const;
 
@@ -95,7 +103,8 @@ class Vesa {
 
         VesaInfoBlock _vesaInfo;
         ModeInfoBlock _currentMode;
-
+        uint16_t    _currentPage;
+        uint8_t*    _currentFrameWindow;
 };
 
 #endif /* APPS_VESA_VESA_H_ */

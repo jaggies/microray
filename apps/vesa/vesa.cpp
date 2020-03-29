@@ -34,7 +34,7 @@ const char* modeToText[] = {
     "YUV"
 };
 
-Vesa::Vesa() {
+Vesa::Vesa() : _currentPage(0), _currentFrameWindow((uint8_t*)(0xa0000000)) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     }
@@ -102,6 +102,7 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
     if (bestMode) {
         setMode(bestMode);
         getVesaModeInfo(bestMode, &_currentMode);
+        _currentFrameWindow = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
         printf("Selected mode %04x: ");
         dumpMode(&_currentMode);
     } else {
@@ -111,10 +112,13 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
 }
 
 void Vesa::dot(int x, int y, int color) {
-    uint8_t* frame = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
     uint32_t offset = (uint32_t) y * _currentMode.bytesPerScanLine + x;
-    setPage(offset >> 16);
-    frame[offset & 0xffff] = color;
+    uint16_t page = offset >> 16;
+    if (page != _currentPage) {
+        setPage(page);
+        _currentPage = page;
+    }
+    _currentFrameWindow[offset & 0xffff] = color;
 };
 
 void Vesa::setMode(uint16_t mode) {
@@ -125,6 +129,40 @@ void Vesa::setMode(uint16_t mode) {
         mov bx, mode
         int 0x10
         mov status, ax
+    }
+    #endif
+}
+
+void Vesa::setPage(uint16_t page) {
+    // TODO: use far call instead of IRQ
+    uint16_t status = 0;
+    #ifdef DOS
+    asm {
+        mov ax, 0x4f05 // set
+        mov bx, 0 // windowA = xx00, windowB = xx01
+        mov dx, page
+        int 0x10
+        mov status, ax
+    }
+    #endif
+}
+
+void Vesa::palette(uint8_t index, uint8_t red, uint8_t green, uint8_t blue) {
+    red = red >> 2;
+    green = green >> 2;
+    blue = blue >> 2;
+    #ifdef DOS
+    asm {
+        mov dx, 0x3c8
+        mov al, index
+        out dx, al
+        inc dx
+        mov al, red
+        out dx, al
+        mov al, green
+        out dx, al
+        mov al, blue
+        out dx, al
     }
     #endif
 }
@@ -153,20 +191,6 @@ void restoreState() {
 //        mov status, ax
 //    }
 //    #endif
-}
-
-void Vesa::setPage(uint16_t page) {
-    // TODO: use far call instead of IRQ
-    uint16_t status = 0;
-    #ifdef DOS
-    asm {
-        mov ax, 0x4f05 // set
-        mov bx, 0 // windowA = xx00, windowB = xx01
-        mov dx, page
-        int 0x10
-        mov status, ax
-    }
-    #endif
 }
 
 void Vesa::dump() const {
