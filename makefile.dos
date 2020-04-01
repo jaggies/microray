@@ -4,34 +4,34 @@ IMASRC = \
 	apps\acrtc\io.c 
 
 VESASRC = \
-	apps\vesa\vesa.cpp
+	lib\vesa\vesa.cpp
 
 RAYSRC = \
-	lib\amiga.c \
-	lib\branch.c \
-	lib\bvh.c \
-	lib\checkshd.c \
-	lib\dither.c \
-	lib\hit.c \
-	lib\leaf.c \
-	lib\loader.c \
-	lib\netpbm.c \
-	lib\perspcam.c \
-	lib\phongshd.c \
-	lib\pointlit.c \
-	lib\range.c \
-	lib\raymath.c \
-	lib\raytrace.c \
-	lib\sphere.c \
-	lib\testload.c \
-	lib\triangle.c \
-	lib\vec2.c \
-	lib\vec3.c \
-	lib\world.c 
+	lib\ray\amiga.c \
+	lib\ray\branch.c \
+	lib\ray\bvh.c \
+	lib\ray\checkshd.c \
+	lib\ray\dither.c \
+	lib\ray\hit.c \
+	lib\ray\leaf.c \
+	lib\ray\loader.c \
+	lib\ray\netpbm.c \
+	lib\ray\perspcam.c \
+	lib\ray\phongshd.c \
+	lib\ray\pointlit.c \
+	lib\ray\range.c \
+	lib\ray\raymath.c \
+	lib\ray\raytrace.c \
+	lib\ray\sphere.c \
+	lib\ray\testload.c \
+	lib\ray\triangle.c \
+	lib\ray\vec2.c \
+	lib\ray\vec3.c \
+	lib\ray\world.c 
 
 RAYOBJ = $(VESASRC:.cpp=.obj) $(RAYSRC:.c=.obj) $(IMASRC:.c=.obj) 
 DEFINES = -DDOS
-INCLUDE = -Ilib -Iapps/acrtc -Iapps/vesa
+INCLUDE = -Ilib/vesa -Ilib/ray -Iapps/acrtc 
 CCFLAGS = $(DEFINES)
 CC = tcc -DDOS
 LIBS = ray.lib
@@ -68,7 +68,8 @@ clean:
 	@del *.lib
 	@del *.exe
 	@del *.obj
-	@del lib\*.obj 
+	@del lib\gfx\*.obj 
+	@del lib\ray\*.obj 
 	@del apps\acrtc\*.obj 
 	@del apps\vesa\*.obj 
 

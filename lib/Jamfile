@@ -1,25 +1,3 @@
-SubDir TOP lib ;
-
-Library libmray :
-	amiga.c
-	branch.c
-	bvh.c
-	checkshd.c
-	dither.c
-	hit.c
-	leaf.c
-	loader.c
-	netpbm.c
-	perspcam.c
-	phongshd.c
-	pointlit.c
-	range.c
-	raymath.c
-	raytrace.c
-	sphere.c
-	testload.c
-	triangle.c
-	vec2.c
-	vec3.c
-	world.c
-	;
+SubDir TOP ;
+SubInclude TOP lib gfx ;
+SubInclude TOP lib ray ;
