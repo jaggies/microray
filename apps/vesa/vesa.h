@@ -31,6 +31,9 @@ class Vesa {
         // only upper 6 MSBs have an effect for 262k total colors.
         void palette(uint8_t index, uint8_t red, uint8_t green, uint8_t blue);
 
+        // Enabled 18 or 24-bit DAC mode. Choices are 6 or 8.
+        bool setDacWidth(uint8_t width) const;
+
         uint16_t width() const { return _currentMode.horizontalRsolution; }
 
         uint16_t height() const { return _currentMode.verticalResolution; }
@@ -105,6 +108,7 @@ class Vesa {
         ModeInfoBlock _currentMode;
         uint16_t    _currentPage;
         uint8_t*    _currentFrameWindow;
+        uint8_t     _dac8supported;
 };
 
 #endif /* APPS_VESA_VESA_H_ */

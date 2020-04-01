@@ -34,7 +34,7 @@ const char* modeToText[] = {
     "YUV"
 };
 
-Vesa::Vesa() : _currentPage(0), _currentFrameWindow((uint8_t*)(0xa0000000)) {
+Vesa::Vesa() : _currentPage(0), _currentFrameWindow((uint8_t*)(0xa0000000)), _dac8supported(false) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     }
@@ -101,6 +101,8 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
     }
     if (bestMode) {
         setMode(bestMode);
+        _dac8supported = setDacWidth(8);
+        printf("24-bit DAC is %s\n", _dac8supported ? "supported" : "not supported");
         getVesaModeInfo(bestMode, &_currentMode);
         _currentFrameWindow = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
         printf("Selected mode %04x: ");
@@ -148,9 +150,11 @@ void Vesa::setPage(uint16_t page) {
 }
 
 void Vesa::palette(uint8_t index, uint8_t red, uint8_t green, uint8_t blue) {
-    red = red >> 2;
-    green = green >> 2;
-    blue = blue >> 2;
+    if (!_dac8supported) {
+        red = red >> 2;
+        green = green >> 2;
+        blue = blue >> 2;
+    }
     #ifdef DOS
     asm {
         mov dx, 0x3c8
@@ -165,6 +169,20 @@ void Vesa::palette(uint8_t index, uint8_t red, uint8_t green, uint8_t blue) {
         out dx, al
     }
     #endif
+}
+
+bool Vesa::setDacWidth(uint8_t width) const {
+    uint16_t status = 0;
+    #ifdef DOS
+    asm {
+       mov ax, 0x4f08 // get mode _vesaInfo
+       mov bl, 0
+       mov bh, width
+       int 0x10
+       mov status, ax
+    }
+    #endif
+    return status == 0x004f; // status_ok
 }
 
 void Vesa::saveState() {

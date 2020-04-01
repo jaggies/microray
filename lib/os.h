@@ -4,6 +4,8 @@
 #define Number(a) (sizeof(a) / sizeof(a[0]))
 
 #ifdef DOS
+enum {false=0, true=1};
+typedef int bool;
 typedef char int8_t;
 typedef short int16_t;
 typedef long long int32_t;
