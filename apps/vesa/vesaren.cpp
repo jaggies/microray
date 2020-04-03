@@ -74,7 +74,9 @@ static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userData) {
     uint8_t bx = ordered_dither(1<<8, 1<<BBITS, x, y, rgb[2]);
     #endif
     index = (rx << (GBITS + BBITS)) | (gx << BBITS) | bx;
-    vesa->dot(centerx + x, centery + y, index);
+    vesa->color(index);
+    vesa->moveTo(centerx + x, centery + y);
+    vesa->dot();
     pbm->write(pbm, rgb);
 }
 

@@ -34,7 +34,7 @@ const char* modeToText[] = {
     "YUV"
 };
 
-Vesa::Vesa() : _currentPage(0), _currentFrameWindow((uint8_t*)(0xa0000000)), _dac8supported(false) {
+Vesa::Vesa() : _rasterPage(0), _raster((uint8_t*)(0xa0000000)), _dac8supported(false) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     }
@@ -87,8 +87,8 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
         uint16_t mode = *modes;
         if (getVesaModeInfo(mode, &tmp)) {
             if (tmp.bitsPerPixel == depth &&
-                    tmp.horizontalRsolution >= xres && tmp.verticalResolution >= yres) {
-                uint16_t dx = abs(tmp.horizontalRsolution - xres);
+                    tmp.horizontalResolution >= xres && tmp.verticalResolution >= yres) {
+                uint16_t dx = abs(tmp.horizontalResolution - xres);
                 uint16_t dy = abs(tmp.verticalResolution - yres);
                 uint32_t score = (uint32_t) dx*dx + dy*dy;
                 if (score < bestScore) {
@@ -104,7 +104,7 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
         _dac8supported = setDacWidth(8);
         printf("24-bit DAC is %s\n", _dac8supported ? "supported" : "not supported");
         getVesaModeInfo(bestMode, &_currentMode);
-        _currentFrameWindow = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
+        _raster = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
         printf("Selected mode %04x: ");
         dumpMode(&_currentMode);
     } else {
@@ -112,16 +112,6 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
     }
     return bestMode;
 }
-
-void Vesa::dot(int x, int y, int color) {
-    uint32_t offset = (uint32_t) y * _currentMode.bytesPerScanLine + x;
-    uint16_t page = offset >> 16;
-    if (page != _currentPage) {
-        setPage(page);
-        _currentPage = page;
-    }
-    _currentFrameWindow[offset & 0xffff] = color;
-};
 
 void Vesa::setMode(uint16_t mode) {
     uint16_t status = 0;
@@ -232,7 +222,7 @@ void Vesa::dumpMode(uint16_t mode) const {
 void Vesa::dumpMode(ModeInfoBlock* info) const {
     printf("(%s) %dx%d %d BPP, MASK=%d(%d),%d(%d),%d(%d), winA=%04x, winB=%04x\n",
             info->memoryModelType < Number(modeToText) ? modeToText[info->memoryModelType] : "unknown",
-            info->horizontalRsolution,
+            info->horizontalResolution,
             info->verticalResolution,
             info->bitsPerPixel,
             info->sizeOfDirectColorRedMaskInBits,

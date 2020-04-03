@@ -4,7 +4,8 @@ IMASRC = \
 	apps\acrtc\io.c 
 
 VESASRC = \
-	lib\vesa\vesa.cpp
+	lib\vesa\vesa.cpp \
+	lib\vesa\raster.cpp
 
 RAYSRC = \
 	lib\ray\amiga.c \
@@ -70,6 +71,7 @@ clean:
 	@del *.obj
 	@del lib\gfx\*.obj 
 	@del lib\ray\*.obj 
+	@del lib\vesa\*.obj 
 	@del apps\acrtc\*.obj 
 	@del apps\vesa\*.obj 
 
