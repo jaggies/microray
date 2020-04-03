@@ -53,6 +53,9 @@ class Vesa {
         // A negative value for n means draw the other way (towards negative X).
         void span(int16_t n);
 
+        // Fills horizontal line with pixels from buffer, starting with the current raster position.
+        void span(uint8_t* buffer, uint16_t n);
+
         uint16_t width() const { return _currentMode.horizontalResolution; }
 
         uint16_t height() const { return _currentMode.verticalResolution; }
@@ -69,6 +72,9 @@ class Vesa {
         void setMode(uint16_t mode);
         void saveState();
         void restoreState();
+        // Like memset/memcpy, but copies to framebuffer memory with banking support
+        void memset24(uint32_t addr, uint8_t value, uint16_t length);
+        void memcpy24(uint32_t addr, uint8_t* mem, uint16_t length);
 
         // Move one pixel to the right
         void incX();

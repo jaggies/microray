@@ -31,7 +31,7 @@ void drawCircles(Vesa* vesa, int n) {
         color |= color << 8;
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
-        vesa->circle(rand()%512, true);
+        vesa->circle(rand() % (yres/4), true);
     }
 }
 
@@ -60,13 +60,13 @@ void drawRectangles(Vesa* vesa, int n) {
 void drawNgon(Vesa* vesa, int n) {
     vesa->color(0x03); // blue
     vesa->clear();
-    uint16_t * x = (uint16_t*) malloc(n*sizeof(uint16_t));
-    uint16_t * y = (uint16_t*) malloc(n*sizeof(uint16_t));
+    uint16_t * x = new uint16_t[n];
+    uint16_t * y = new uint16_t[n];
 
     for (int i = 0; i < n; i++) {
         float alpha = 2.0f*M_PI*i / (n-1);
-        x[i] = cos(alpha) * 512.0f + xres/2;
-        y[i] = sin(alpha) * 512.0f + yres/2;
+        x[i] = cos(alpha) * yres/2 + xres/2;
+        y[i] = sin(alpha) * yres/2 + yres/2;
     }
     vesa->color(0xff); // white
     for (int k = 0; k < n; k++) {
@@ -75,29 +75,36 @@ void drawNgon(Vesa* vesa, int n) {
             vesa->lineTo(x[j], y[j]);
         }
     }
-    free(x);
-    free(y);
+    delete[] x;
+    delete[] y;
 }
 
 void drawCheckerboard(Vesa* vesa) {
+    uint8_t* buffer = new uint8_t[xres];
+    vesa->moveTo(0, 0);
     for (int j = 0; j < vesa->height(); j++) {
         for (int i = 0; i < vesa->width(); i++) {
-            vesa->moveTo(i, j);
-            vesa->color(i^j);
-            vesa->dot();
+            buffer[i] = i^j;
         }
+        vesa->span(buffer, xres);
+        vesa->moveTo(0, j);
     }
+    delete[] buffer;
 }
 
 int main(int argc, char** argv) {
     Vesa vesa;
     vesa.dump();
-    vesa.setMode(xres, yres, 8);
+    if (!vesa.setMode(xres, yres, 8)) {
+        printf("Can't find mode for %dx%d@%d", xres, yres, 8);
+        return 0;
+    }
     makePalette(&vesa, 3, 3, 2);
     drawNgon(&vesa, 20);
     drawRectangles(&vesa, 100);
     drawCircles(&vesa, 100);
-    drawLines(&vesa, 10000);
+    drawLines(&vesa, 1000);
     drawCheckerboard(&vesa);
+    return 0;
 }
 

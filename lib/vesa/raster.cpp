@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h> // abs()
+#include <string.h>
 #include "os.h"
 #include "util.h" // min/max
 #include "vesa.h"
@@ -39,15 +40,17 @@ void Vesa::span(int16_t count) {
         return;
     }
     if (count < 0) {
-        _rasterX += count;
+        _rasterOffset += count;
         count = -count;
     }
-    while (count > 0) {
-        // TODO: use memset24()
-        dot();
-        incX();
-        count--;
+    memset24(_rasterOffset, _rasterColor, count);
+}
+
+void Vesa::span(uint8_t* buffer, uint16_t n) {
+    if (_rasterY < 0) {
+        return;
     }
+    memcpy24(_rasterOffset, buffer, n);
 }
 
 void Vesa::incX() {
@@ -175,3 +178,31 @@ void Vesa::rectangle(int16_t x1, int16_t y1, bool fill)
         moveTo(x1, y0); lineTo(x1, y1);
     }
 }
+
+// Set maximum of 64k-1 bytes to any 24-bit page
+void Vesa::memset24(uint32_t addr, uint8_t value, uint16_t length) {
+    uint16_t page = (uint16_t) (addr >> 16);
+    uint16_t offset = (uint16_t) (addr & 0xffff); // initial offset in page
+    while (length > 0) {
+        const uint16_t size = min(0x10000L - offset, length);
+        setPage(page++);
+        memset(_raster + offset, value, size); // TODO: optimize memset with 16-bit STD
+        length -= size;
+        offset = 0;
+    }
+}
+
+// Set maximum of 64k-1 bytes to any 24-bit page
+void Vesa::memcpy24(uint32_t addr, uint8_t* mem, uint16_t length) {
+    uint16_t page = (uint16_t) (addr >> 16);
+    uint16_t offset = (uint16_t) (addr & 0xffff); // initial offset in page
+    while (length > 0) {
+        const uint16_t size = min(0x10000L - offset, length);
+        setPage(page++);
+        memcpy(_raster + offset, mem, size); // TODO: optimize memset with 16-bit STD
+        mem += size;
+        length -= size;
+        offset = 0;
+    }
+}
+
