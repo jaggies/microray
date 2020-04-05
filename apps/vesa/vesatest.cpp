@@ -100,9 +100,9 @@ int main(int argc, char** argv) {
         return 0;
     }
     makePalette(&vesa, 3, 3, 2);
-    drawNgon(&vesa, 20);
-    drawRectangles(&vesa, 100);
-    drawCircles(&vesa, 100);
+    drawNgon(&vesa, 25);
+    drawRectangles(&vesa, 1000);
+    drawCircles(&vesa, 1000);
     drawLines(&vesa, 1000);
     drawCheckerboard(&vesa);
     return 0;

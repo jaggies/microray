@@ -77,16 +77,18 @@ void Vesa::lineTo(int16_t x1, int16_t y1) {
     // Always render in positive Y direction
     uint16_t x0 = _rasterX;
     uint16_t y0 = _rasterY;
-    if (_rasterY > y1) {
-        int16_t tmp = _rasterX; _rasterX = x1; x1 = tmp;
-        tmp = _rasterY; _rasterY = y1; y1 = tmp;
+    _rasterX = x1 - 1; // Line doesn't include the final pixel
+    _rasterY = y1 - 1;
+    if (y0 > y1) {
+        int16_t tmp = x0; x0 = x1; x1 = tmp;
+        tmp = y0; y0 = y1; y1 = tmp;
+        moveTo(x0, y0); // TODO: inline
     }
-    const int16_t stepX = _rasterX < x1 ? 1 : -1;
+    const int16_t stepX = x0 < x1 ? 1 : -1;
     const int16_t stepY = _currentMode.bytesPerScanLine; // always incrementing
-    const int16_t dx = abs(x1 - _rasterX);
-    const int16_t dy = _rasterY - y1; // dy is always negative
+    const int16_t dx = abs(x1 - x0);
+    const int16_t dy = y0 - y1; // dy is always negative
 
-    moveTo(_rasterX, _rasterY); // TODO: inline
     int count = max(dx, -dy);
     int16_t err = dx + dy;
     do {
@@ -94,12 +96,10 @@ void Vesa::lineTo(int16_t x1, int16_t y1) {
         int16_t e2 = err << 1;
         if (e2 < dx) {
             err += dx;
-            _rasterY++;
             _rasterOffset += stepY; // inline rasterInc/DecY
         }
         if (e2 > dy) {
             err += dy;
-            _rasterX += stepX;
             _rasterOffset += stepX;
         }
     } while (count--);
