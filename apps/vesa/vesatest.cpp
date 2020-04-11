@@ -10,8 +10,9 @@
 #include <math.h>
 #include "vesa.h"
 
-static const int xres = 1280;
-static const int yres = 1024;
+static int xres = 0;
+static int yres = 0;
+static int depth = 8;
 
 static void makePalette(Vesa* vesa, int rbits, int gbits, int bbits) {
     int index = 0;
@@ -93,11 +94,23 @@ void drawCheckerboard(Vesa* vesa) {
 }
 
 int main(int argc, char** argv) {
+    int res[][3] = { {1600,1200,8}, {1280,1024,8}, {1024,768,8}, {800,600,8}, {640,480,8}, {320,200,8} };
     Vesa vesa;
     vesa.dump();
-    if (!vesa.setMode(xres, yres, 8)) {
-        printf("Can't find mode for %dx%d@%d", xres, yres, 8);
-        return 0;
+    for (int i = 0; i < Number(res); i++) {
+        xres = res[i][0];
+        yres = res[i][1];
+        depth = res[i][2];
+        if (!vesa.setMode(xres, yres, depth)) {
+            printf("No mode for %dx%d@%d\n", xres, yres, 8);
+        } else {
+            printf("Using mode %dx%d@%d\n", xres, yres, 8);
+            break;
+        }
+    }
+    if (xres == 0 || yres == 0) {
+        printf("Can't find a video mode\n");
+        return(0);
     }
     makePalette(&vesa, 3, 3, 2);
     drawNgon(&vesa, 25);
