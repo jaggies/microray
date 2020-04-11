@@ -3,6 +3,9 @@ IMASRC = \
 	apps\acrtc\imagraph.c \
 	apps\acrtc\io.c 
 
+MATHSRC = \
+	lib\math\matrix.c 
+
 VESASRC = \
 	lib\vesa\vesa.cpp \
 	lib\vesa\raster.cpp
@@ -30,9 +33,9 @@ RAYSRC = \
 	lib\ray\vec3.c \
 	lib\ray\world.c 
 
-RAYOBJ = $(VESASRC:.cpp=.obj) $(RAYSRC:.c=.obj) $(IMASRC:.c=.obj) 
+RAYOBJ = $(VESASRC:.cpp=.obj) $(RAYSRC:.c=.obj) $(IMASRC:.c=.obj) $(MATHSRC:.c=.obj) 
 DEFINES = -DDOS
-INCLUDE = -Ilib/vesa -Ilib/ray -Iapps/acrtc 
+INCLUDE = -Ilib/vesa -Ilib/ray -Iapps/acrtc -Ilib/math
 CCFLAGS = $(DEFINES)
 CC = tcc -DDOS
 LIBS = ray.lib

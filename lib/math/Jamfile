@@ -1,0 +1,6 @@
+SubDir TOP lib math ;
+SubDirHdrs $(TOP) lib ray ;
+
+Library libmray :
+	matrix.cpp
+	;
