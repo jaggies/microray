@@ -44,3 +44,10 @@ int diffusion_dither(int inLevels, int outLevels, int grey, int* err) {
     *err += grey - result*inLevels/(outLevels-1);
     return result;
 }
+
+int dither(int rbits, int gbits, int bbits, int x, int y, uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t rx = ordered_dither(1<<8, 1<<rbits, x, y, r);
+    uint8_t gx = ordered_dither(1<<8, 1<<gbits, x, y, g);
+    uint8_t bx = ordered_dither(1<<8, 1<<bbits, x, y, b);
+    return (rx << (gbits + bbits)) | (gx << bbits) | bx;
+}

@@ -36,7 +36,7 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
             return 0;
         }
         n = fscanf(pbm->fp, "P%d %d %d %d\n", &pbm->mode, &pbm->width, &pbm->height, &pbm->depth);
-        if (pbm->mode != 5 || pbm->mode != 6) {
+        if (pbm->mode != 6 && pbm->mode != 5 && pbm->mode != 1) {
             printf("Invalid mode %d\n", pbm->mode);
             return 0;
         }
@@ -65,10 +65,24 @@ static void readNetPBM(NetPBM* pbm, PixelCallback cb, void* clientData)
         return;
     }
     for (y = 0; y < pbm->height; y++) {
+        unsigned char pix = 0; // for bitmap mode
         for (x = 0; x < pbm->width; x++) {
-            pixel[0] = fgetc(pbm->fp);
-            pixel[1] = fgetc(pbm->fp);
-            pixel[2] = fgetc(pbm->fp);
+            if (pbm->mode == 1) {
+                // Bitmap
+                if (!(x%8)) {
+                    pix = fgetc(pbm->fp);
+                }
+                pixel[0] =  pixel[1] = pixel[2] = (pix & 0x80) ? 255 : 0;
+                pix <<= 1;
+            } else if (pbm->mode == 5) {
+                // Grayscale
+                pixel[0] =  pixel[1] = pixel[2] = fgetc(pbm->fp);
+            } else if (pbm->mode == 6) {
+                // RGB
+                pixel[0] = fgetc(pbm->fp);
+                pixel[1] = fgetc(pbm->fp);
+                pixel[2] = fgetc(pbm->fp);
+            }
             (*cb)(clientData, x, y, pixel);
             if (feof(pbm->fp)) {
                 printf("EOF detected\n");
@@ -92,7 +106,7 @@ static void writeNetPBM(NetPBM* pbm, unsigned char color[3]) {
     fputc(color[2], pbm->fp);
 }
 
-NetPBM* createNetPBM(const char* path) {
+NetPBM* createNetPBM() {
     NetPBM* pbm;
     pbm = (NetPBM*) malloc(sizeof(NetPBM));
     memset(pbm, 0, sizeof(NetPBM));

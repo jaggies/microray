@@ -165,7 +165,7 @@ void help_cb(Widget widget, XtPointer client_data, XtPointer call_data)
 int min_(int a, int b) { return a < b ? a : b; }
 int max_(int a, int b) { return a > b ? a : b; }
 
-int dither(int r, int g, int b, int x, int y, int depth) {
+int localDither(int r, int g, int b, int x, int y, int depth) {
     #ifdef USE_ERROR_DIFFUSION
     static int rerr, berr, gerr;
     #endif
@@ -371,7 +371,7 @@ void createHierarchy(XtAppContext app, Widget top) {
 static void pixel(uint16_t x, uint16_t y, uint8_t rgb[3], void* data) {
     Display *dpy = XtDisplay(drawingArea);
     const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
-    XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], x, y, depth));
+    XSetForeground(dpy, gc, localDither(rgb[0], rgb[1], rgb[2], x, y, depth));
     XDrawPoint(dpy, pixmap, gc, x, y);
     pbm->write(pbm, rgb);
 

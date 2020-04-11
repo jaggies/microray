@@ -24,6 +24,6 @@ struct NetPBM {
     FILE* fp;
 };
 
-extern NetPBM* createNetPBM(const char* path);
+extern NetPBM* createNetPBM();
 
 #endif /* NETPBM_H_ */

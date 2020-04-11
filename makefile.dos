@@ -8,6 +8,7 @@ MATHSRC = \
 
 VESASRC = \
 	lib\vesa\vesa.cpp \
+	lib\vesa\vesautil.cpp \
 	lib\vesa\raster.cpp
 
 RAYSRC = \
@@ -50,7 +51,7 @@ OPT = -G -mh
 	$(CC) $(OPT) $(CCFLAGS) $(INCLUDE) -c -o$* $< 
 	$(TLIB) ray +-$*
 
-all: ray.lib microray.exe imaren.exe vesatest.exe vesaren.exe
+all: ray.lib microray.exe imaren.exe vesatest.exe vesaren.exe vesashow.exe
 
 ray.lib: $(RAYOBJ)
 	touch ray.lib
@@ -66,6 +67,9 @@ vesatest.exe: ray.lib apps\vesa\vesatest.cpp
 
 vesaren.exe: ray.lib apps\vesa\vesaren.cpp
 	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) apps\vesa\vesaren.cpp $(LIBS) 
+
+vesashow.exe: ray.lib apps\vesa\vesashow.cpp
+	$(CC) $(OPT) $(CCFLAGS) -e$@ $(CCFLAGS) $(INCLUDE) apps\vesa\vesashow.cpp $(LIBS) 
 
 clean:
 	@del *.bak
