@@ -17,6 +17,7 @@ struct NetPBM {
     void (*read)(NetPBM* pbm, PixelCallback cb, void* clientData);
     void (*close)(NetPBM* pbm);
     void (*write)(NetPBM* pbm, unsigned char color[3]);
+    int mode; // From Pn, where n is 1 (bitmap), 5 (grayscale), or 6 (RGB)
     int width;
     int height;
     int depth;
