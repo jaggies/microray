@@ -1,0 +1,2 @@
+SubDir TOP target LINUXX86_64 ;
+LINKLIBS += -lm ;

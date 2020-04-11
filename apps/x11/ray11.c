@@ -368,7 +368,7 @@ void createHierarchy(XtAppContext app, Widget top) {
     gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
 }
 
-static void pixel(uint16_t x, uint16_t y, uint8_t rgb[3]) {
+static void pixel(uint16_t x, uint16_t y, uint8_t rgb[3], void* data) {
     Display *dpy = XtDisplay(drawingArea);
     const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
     XSetForeground(dpy, gc, dither(rgb[0], rgb[1], rgb[2], x, y, depth));
@@ -390,7 +390,7 @@ static void renderX11(World* world, const char* outpath) {
     pbm = createNetPBM(outpath);
 
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
-        renderImage(world, pixel);
+        renderImage(world, pixel, NULL);
     } else {
         printf("Can't write image '%s'\n", outpath);
         return;

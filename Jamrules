@@ -3,4 +3,5 @@ CCFLAGS += -Wall ;
 OPTIM = -g -O3 ;
 LINKLIBS += -L$(TOP)/build/$(OSFULL) ;
 ALL_LOCATE_TARGET = $(TOP)/build/$(OSFULL) ;
+AR = ar cUr ;
 

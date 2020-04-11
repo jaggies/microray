@@ -1,7 +1,7 @@
 SubDir TOP ;
 if $(TARGET) {
     SubInclude TOP target $(TARGET) ;
-    echo **** Building for $(TARGET) **** ;
+    echo **** Cross-compiling for $(TARGET) **** ;
 } else {
     SubInclude TOP target $(OSFULL) ;
     echo **** Building for $(OSFULL) **** ;

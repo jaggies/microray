@@ -1,5 +1,5 @@
 SubDir TOP apps testpbm ;
-SubDirHdrs $(TOP) lib ;
+SubDirHdrs $(TOP) lib ray ;
 
 Depends testpbm : libmray.a ;
 
