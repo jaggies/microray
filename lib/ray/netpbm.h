@@ -16,14 +16,23 @@ struct NetPBM {
     int (*open)(NetPBM* pbm, const char* path, int* width, int* height, int* depth, int mode);
     void (*read)(NetPBM* pbm, PixelCallback cb, void* clientData);
     void (*close)(NetPBM* pbm);
-    void (*write)(NetPBM* pbm, unsigned char color[3]);
-    int mode; // From Pn, where n is 1 (bitmap), 5 (grayscale), or 6 (RGB)
+    void (*write)(NetPBM* pbm, const unsigned char color[3]);
+    void (*reset)(NetPBM* pbm);
+    int mode;
     int width;
     int height;
     int depth;
     FILE* fp;
 };
 
-extern NetPBM* createNetPBM();
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+NetPBM* createNetPBM();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* NETPBM_H_ */

@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
     if (pbm->mode == 6) {
         makeDitherPalette(vesa, RBITS, GBITS, BBITS);
         pbm->read(pbm, showRGB, &vesa);
-    } else if (pbm->mode == 5) {
+    } else if (pbm->mode == 5 || pbm->mode == 4) {
         makeGrayPalette(vesa, 0, 255);
         pbm->read(pbm, showGray, &vesa);
     } else {
