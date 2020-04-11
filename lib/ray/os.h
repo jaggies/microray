@@ -3,6 +3,8 @@
 
 #define Number(a) (sizeof(a) / sizeof(a[0]))
 
+enum { X = 0, Y = 1, Z = 2 };
+
 #ifdef DOS
 enum {false=0, true=1};
 typedef int bool;

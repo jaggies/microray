@@ -56,6 +56,9 @@ class Vesa {
         // Fills horizontal line with pixels from buffer, starting with the current raster position.
         void span(uint8_t* buffer, uint16_t n);
 
+        // Draws a triangle given indices into a buffer
+        void triangle(size_t p0, size_t p1, size_t p2, const int16_t *vertices);
+
         uint16_t width() const { return _currentMode.horizontalResolution; }
 
         uint16_t height() const { return _currentMode.verticalResolution; }

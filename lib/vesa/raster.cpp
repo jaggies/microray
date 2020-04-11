@@ -179,6 +179,87 @@ void Vesa::rectangle(int16_t x1, int16_t y1, bool fill)
     }
 }
 
+typedef struct _Edge {
+    int16_t x; // Current X and Y
+    int16_t y;
+    int16_t stepX; // Amount to step (1 or -1)
+    int16_t stepY;
+    int16_t err; // current error
+    int16_t dx; // total number of x pixels
+    int16_t dy; // total number of y pixels
+    uint16_t count;
+} Edge;
+
+// Creates an edge starting at v0 and ending at v1.
+static void createEdge(const int16_t* v0, const int16_t* v1, Edge* edge) {
+    edge->x = v0[X];
+    edge->y = v0[Y];
+    edge->stepX = v0[X] < v1[X] ? 1 : -1;
+    edge->stepY = v0[Y] < v1[Y] ? 1 : -1;
+    edge->dx = abs(v1[X] - v0[X]);
+    edge->dy = abs(v1[Y] - v0[Y]);
+    edge->count = max(edge->dx, edge->dy);
+    edge->err = edge->dx - edge->dy;
+}
+
+// Walks an edge using Bresenham's algorithm. Returns remaining count when Y changes.
+static bool walkEdge(Edge* edge) {
+    bool ychanged = false;
+    while (edge->count && !ychanged) {
+        edge->count--;
+        int16_t e2 = edge->err << 1;
+        if (e2 < edge->dx) {
+            edge->err += edge->dx;
+            edge->y += edge->stepY;
+            ychanged = true;
+        }
+        if (e2 > -edge->dy) {
+            edge->err -= edge->dy;
+            edge->x += edge->stepX;
+        }
+    }
+    return ychanged;
+}
+
+void Vesa::triangle(size_t p0, size_t p1, size_t p2, const int16_t* vertices) {
+    // Sort by Y coordinates.
+    const int16_t* v0 = &vertices[p0<<1];
+    const int16_t* v1 = &vertices[p1<<1];
+    const int16_t* v2 = &vertices[p2<<1];
+    if (v0[Y] > v1[Y]) {
+        const int16_t* tmp = v0; v0 = v1; v1 = tmp;
+    }
+    if (v1[Y] > v2[Y]) {
+        const int16_t* tmp = v1; v1 = v2; v2 = tmp;
+        if (v0[Y] > v1[Y]) {
+            tmp = v0; v0 = v1; v1 = tmp;
+        }
+    }
+
+    Edge edge1, edge2; // The current two edges we're walking
+    if (v0[Y] == v1[Y]) { // flat on the top (v2[Y] >= either, or degenerate)
+        createEdge(v0, v2, &edge1);
+        createEdge(v1, v2, &edge2);
+    } else {
+        createEdge(v0, v1, &edge1);
+        createEdge(v0, v2, &edge2);
+    }
+
+    do {
+        moveTo(edge1.x, edge1.y);
+        span(edge2.x - edge1.x);
+    } while (walkEdge(&edge1) && walkEdge(&edge2));
+
+    // edge2 is longest because we sort vertices by Y, so walk additional segment if not finished
+    if (edge2.count) {
+        createEdge(v1, v2, &edge1);
+        do {
+            moveTo(edge1.x, edge1.y);
+            span(edge2.x - edge1.x);
+        } while (walkEdge(&edge1) && walkEdge(&edge2));
+    }
+}
+
 // Set maximum of 64k-1 bytes to any 24-bit page
 void Vesa::memset24(uint32_t addr, uint8_t value, uint16_t length) {
     uint16_t page = (uint16_t) (addr >> 16);
