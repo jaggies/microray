@@ -18,14 +18,16 @@ extern "C" {
 #define BBITS 2
 
 static int idx;
-static int oldy = 0;
+static int oldy;
+static int offsetX;
+static int offsetY;
 static uint8_t* buffer;
 NetPBM* pbm;
 
 static void showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
-        vesa->moveTo(0, oldy);
+        vesa->moveTo(offsetX, offsetY + oldy);
         vesa->color(pixel[0]);
         vesa->span(buffer, pbm->width);
         idx = 0;
@@ -37,7 +39,7 @@ static void showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
 static void showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
-       vesa->moveTo(0, oldy);
+        vesa->moveTo(offsetX, offsetY + oldy);
        vesa->color(pixel[0]);
        vesa->span(buffer, pbm->width);
        idx = 0;
@@ -71,6 +73,9 @@ int main(int argc, char** argv) {
         printf("Couldn't allocate line buffer!!\n");
         return 0;
     }
+
+    offsetX = (vesa.width() - pbm->width) / 2;
+    offsetY = (vesa.height() - pbm->height) / 2;
 
     if (pbm->mode == 6) {
         makeDitherPalette(vesa, RBITS, GBITS, BBITS);
