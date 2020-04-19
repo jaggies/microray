@@ -66,12 +66,16 @@ int main(int argc, char** argv) {
     }
     printf("Loading %s: %dx%d pixels, mode=%d\n", argv[1], pbm->width, pbm->height, pbm->mode);
 
-    vesa.setMode(pbm->width, pbm->height, 8);
     buffer = new uint8_t[pbm->width];
 
     if (!buffer) {
         printf("Couldn't allocate line buffer!!\n");
         return 0;
+    }
+
+    if (!vesa.setMode(pbm->width, pbm->height, 8)) {
+        fprintf(stderr, "Couldn't find a suitable video mode for %dx%d\n", pbm->width, pbm->height);
+	return 0;
     }
 
     offsetX = (vesa.width() - pbm->width) / 2;
