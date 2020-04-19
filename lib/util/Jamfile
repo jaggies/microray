@@ -1,0 +1,5 @@
+SubDir TOP lib util ;
+
+Library libmray :
+	dither.cpp
+	;
