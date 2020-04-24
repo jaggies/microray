@@ -1,0 +1,11 @@
+SubDir TOP apps arm ;
+SubDirHdrs $(TOP) lib ray ;
+
+Depends microray : libmray.a ;
+
+LINKLIBS on armsimple = $(LINKLIBS) -lmray -lm -larm ;
+
+Main armsimple : 
+	armsimple.c
+	;
+

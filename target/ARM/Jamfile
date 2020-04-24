@@ -1,0 +1,19 @@
+SubDir TOP target ARM ;
+
+# Generate targets for arm-none-eabi
+AR = arm-none-eabi-ar -cUr ;
+RANLIB = arm-none-eabi-ranlib ; # TODO
+CC = arm-none-eabi-gcc ;
+C++ = arm-none-eabi-g++ ;
+LINK = $(CC) ;
+
+OPTIM = -Os ;
+CCFLAGS += -DARM ;
+ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
+
+# Optional stuff for platform targets
+LINKLIBS += -larm ;
+LINK = $(CC) $(CCFLAGS) -L$(ALL_LOCATE_TARGET) ;
+
+# Generate libarm.a
+SubInclude TOP target ARM support ;

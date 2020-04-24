@@ -1,0 +1,4 @@
+SubDir TOP target ARM support ;
+
+Library libarm : armsupport.c ;
+

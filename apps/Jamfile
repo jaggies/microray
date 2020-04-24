@@ -1,4 +1,9 @@
 SubDir TOP apps ;
-SubInclude TOP apps microray ;
-SubInclude TOP apps testpbm ;
-SubInclude TOP apps x11 ;
+
+if $(TARGET) = ARM {
+    SubInclude TOP apps arm ;
+} else {
+    SubInclude TOP apps microray ;
+	SubInclude TOP apps testpbm ;
+	SubInclude TOP apps x11 ;
+}
