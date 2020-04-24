@@ -1,5 +1,5 @@
 /*
- * io.cpp
+ * io.c
  *
  *  Created on: Mar 14, 2020
  *      Author: jmiller
@@ -13,7 +13,7 @@ void out8(uint16_t addr, uint8_t data) {
     asm {
         mov dx, addr
         mov al, data
-	out dx, al
+        out dx, al
     }
     #endif
 }
@@ -24,15 +24,13 @@ uint8_t in8(uint16_t addr) {
     asm {
         mov dx, addr
         in al, dx
-	mov result, al
+        mov result, al
     }
     #endif
     return result;
 }
 
 void out16(uint16_t addr, uint16_t data) {
-    //out8(addr, data >> 8);
-    //out8(addr+1, data & 0xff);
     #ifdef DOS
     asm {
         mov dx, addr
@@ -48,9 +46,9 @@ uint16_t in16(uint16_t addr) {
     asm {
         mov dx, addr
         in ax, dx
-	mov result, ax
+        mov result, ax
     }
     #endif
     return result;
 }
-
+	

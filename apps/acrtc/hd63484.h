@@ -21,7 +21,7 @@ enum { CL0= 0, CL1, CCMP, EDG, MASK, RPC, ADR, RWP, DP, CP };
 #define DWT 0x2800
 #define DMOD 0x2c00
 #define RD 0x4400
-#define WT 04800
+#define WT 0x4800
 #define MOD 0x4c00
 #define CLR 0x5800
 #define SCLR 0x5c00

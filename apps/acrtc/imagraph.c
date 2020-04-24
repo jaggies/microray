@@ -1,5 +1,5 @@
 /*
- * imagraph.cpp
+ * imagraph.c
  *
  *  Created on: Mar 14, 2020
  *      Author: jmiller

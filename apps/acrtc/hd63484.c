@@ -1,5 +1,5 @@
 /*
- * hd63484.cpp
+ * hd63484.c
  *
  *  Created on: Mar 14, 2020
  *      Author: jmiller
