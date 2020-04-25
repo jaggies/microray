@@ -243,6 +243,7 @@ World* loadFile(const char* fromPath)
             }
         }
     }
+    fclose(fp);
 
     if(!getenv("NO_BVH")) {
         Shape *root;
