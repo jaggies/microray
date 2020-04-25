@@ -8,7 +8,8 @@ C++ = arm-none-eabi-g++ ;
 LINK = $(CC) ;
 
 OPTIM = -Os ;
-CCFLAGS += -DARM ;
+CCFLAGS += -DARM -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mlittle-endian ;
+C++FLAGS += -DARM -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -mlittle-endian ;
 ALL_LOCATE_TARGET = $(TOP)/build/$(TARGET) ;
 
 # Optional stuff for platform targets
