@@ -34,7 +34,7 @@ const char* modeToText[] = {
     "YUV"
 };
 
-Vesa::Vesa() : _rasterPage(0), _raster((uint8_t*)(0xa0000000)), _dac8supported(false) {
+Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(false) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     }
