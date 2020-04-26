@@ -16,7 +16,7 @@ class Vesa {
 
     public:
         Vesa();
-        virtual ~Vesa() { }
+        virtual ~Vesa();
 
         // Initializes to closest video mode with given depth {1, 2, 4, 8, 16, 24 or 32}
         uint16_t setMode(int xres, int yres, int depth);
@@ -158,6 +158,7 @@ class Vesa {
         uint16_t    _rasterPage; // Cached copy of upper 16 bits of _rasterOffset
         uint8_t*    _raster; // usually 0xa000:0
         uint8_t     _dac8supported;
+        uint8_t*    _saveState;
 };
 
 #endif /* APPS_VESA_VESA_H_ */
