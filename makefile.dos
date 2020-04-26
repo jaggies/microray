@@ -12,7 +12,6 @@ VESASRC = \
 	lib\vesa\raster.cpp
 
 RAYSRC = \
-	lib\ray\amiga.c \
 	lib\ray\branch.c \
 	lib\ray\bvh.c \
 	lib\ray\checkshd.c \

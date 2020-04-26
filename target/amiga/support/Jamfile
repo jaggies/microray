@@ -1,0 +1,4 @@
+SubDir TOP target amiga support ;
+
+Library libamiga : amigasupport.c ;
+
