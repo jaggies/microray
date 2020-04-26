@@ -166,9 +166,10 @@ void Vesa::rectangle(int16_t x1, int16_t y1, bool fill)
             int16_t tmp = y0; y0 = y1; y1 = tmp;
         }
         int16_t dx = x1 - x0; // always positive
+        moveTo(x0, y0);
         do {
-            moveTo(x0, y0);
-            span(dx);
+            dx > 1 ? span(dx) : dot();
+            incY();
             y0++;
         } while (y0 < y1);
     } else { // Draw outline
