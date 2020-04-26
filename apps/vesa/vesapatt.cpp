@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#ifdef DOS
+#include <conio.h> // kbhit
+#endif
 #include "vesa.h"
 #include "vesautil.h"
 
@@ -33,15 +36,18 @@ extern "C" {
 void drawColorGrid(Vesa* vesa) {
     int16_t i,j;
     vesa->color(0xff); /* white */
-    for (j = 0; j < gridY-1; j++) {
-        int16_t y1 = (long) j * (vesa->height()-1) / (gridY-1);
-        int16_t y2 = (long) (j+1) * (vesa->height()-1) / (gridY-1);
-        for (i = 0; i < gridX-1; i++) {
-            int16_t x1 = (long) i * (vesa->width()-1) / (gridX-1);
-            int16_t x2 = (long) (i+1) * (vesa->width()-1) / (gridX-1);
+    for (j = 0; j < gridY; j++) {
+        int16_t y1 = (long) j * (vesa->height()-1) / (gridY);
+        int16_t y2 = (long) (j+1) * (vesa->height()-1) / (gridY);
+        for (i = 0; i < gridX; i++) {
+            int16_t x1 = (long) i * (vesa->width()-1) / (gridX);
+            int16_t x2 = (long) (i+1) * (vesa->width()-1) / (gridX);
             vesa->color(j*gridX + i);
             vesa->moveTo(x1+1, y1+1);
             vesa->rectangle(x2, y2, true);
+            if (kbhit()) {
+                return;
+            }
         }
     }
 }
@@ -70,6 +76,9 @@ void drawDiscreteRamp(Vesa* vesa, int levels) {
         vesa->color(gray);
         vesa->moveTo(x1, 0);
         vesa->rectangle(x2, vesa->height(), true);
+        if (kbhit()) {
+           return;
+       }
     }
 }
 
