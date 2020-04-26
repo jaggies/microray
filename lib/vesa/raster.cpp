@@ -19,7 +19,7 @@ void Vesa::moveTo(int16_t x, int16_t y) {
 
 void Vesa::clear() {
     moveTo(0,0);
-    rectangle(_currentMode.horizontalResolution-1, _currentMode.verticalResolution-1, true);
+    rectangle(_currentMode.horizontalResolution, _currentMode.verticalResolution, true);
 }
 
 void Vesa::color(uint8_t color) {
