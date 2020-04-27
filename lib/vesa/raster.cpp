@@ -170,8 +170,7 @@ void Vesa::rectangle(int16_t x1, int16_t y1, bool fill)
         do {
             dx > 1 ? span(dx) : dot();
             incY();
-            y0++;
-        } while (y0 < y1);
+        } while (_rasterY < y1);
     } else { // Draw outline
         moveTo(x0, y0); lineTo(x1, y0);
         moveTo(x0, y1); lineTo(x1, y1);
