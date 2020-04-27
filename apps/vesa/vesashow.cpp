@@ -6,6 +6,9 @@
  */
 
 #include <stdio.h>
+#ifdef DOS
+#include <conio.h> // kbhit()
+#endif
 #include "vesa.h"
 #include "vesautil.h"
 extern "C" {
@@ -40,12 +43,12 @@ static void showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);
-       vesa->color(pixel[0]);
-       vesa->span(buffer, pbm->width);
-       idx = 0;
-       oldy = y;
-   }
-   buffer[idx++] = dither(RBITS, GBITS, BBITS, x, y, pixel[0], pixel[1], pixel[2]);
+        vesa->color(pixel[0]);
+        vesa->span(buffer, pbm->width);
+        idx = 0;
+        oldy = y;
+    }
+    buffer[idx++] = dither(RBITS, GBITS, BBITS, x, y, pixel[0], pixel[1], pixel[2]);
 }
 
 void usage(const char* name) {
@@ -75,8 +78,11 @@ int main(int argc, char** argv) {
 
     if (!vesa.setMode(pbm->width, pbm->height, 8)) {
         fprintf(stderr, "Couldn't find a suitable video mode for %dx%d\n", pbm->width, pbm->height);
-	return 0;
+        return 0;
     }
+
+    vesa.color(0);
+    vesa.clear();
 
     offsetX = (vesa.width() - pbm->width) / 2;
     offsetY = (vesa.height() - pbm->height) / 2;
@@ -91,6 +97,8 @@ int main(int argc, char** argv) {
         printf("Unknown mode: %d\n", pbm->mode);
         return 0;
     }
+    while (getch() != 27)
+        ;
     return 1;
 }
 

@@ -113,7 +113,6 @@ void renderImage(World* world, PixelCB pixel, void* userdata)
 
     world->depth = 255;
 
-    printf("Rendering scene (%dx%d)\n", world->width, world->height);
     for (h = 0; h < world->height; h++, v += dv) {
         float u = 0.0f + du * 0.5f;
         for (w = 0; w < world->width; w++, u += du) {

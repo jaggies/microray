@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#ifdef DOS
+#include <conio.h>
+#endif
 #include "os.h"
 #include "io.h"
 #include "util.h"
@@ -78,6 +81,8 @@ static void renderToFile(World* world, Vesa* vesa, const char* outpath)
     makeDitherPalette(*vesa, RBITS, GBITS, BBITS);
 
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
+        vesa->color(0111);
+        vesa->clear();
         renderImage(world, pixel, vesa);
         pbm->close(pbm);
     } else {
@@ -115,6 +120,9 @@ int main(int argc, char **argv)
     }
 
     renderToFile(world, &vesa, outpath);
+
+    while (getch() != 27)
+        ;
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);
