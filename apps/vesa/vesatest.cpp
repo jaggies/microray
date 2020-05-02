@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#ifdef DOS
+#include <conio.h> // kbhit()
+#endif
 #include "vesa.h"
 
 static int xres = 0;
@@ -33,6 +36,10 @@ void drawCircles(Vesa* vesa, int n) {
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->circle(rand() % (yres/4), true);
+        if (kbhit()) {
+            getch();
+            return;
+        }
     }
 }
 
@@ -44,6 +51,10 @@ void drawLines(Vesa* vesa, int n) {
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->lineTo(rand() % xres, rand() % yres);
+        if (kbhit()) {
+            getch();
+            return;
+        }
     }
 }
 
@@ -55,6 +66,10 @@ void drawRectangles(Vesa* vesa, int n) {
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->rectangle(rand() % xres, rand() % yres, true);
+        if (kbhit()) {
+            getch();
+            return;
+        }
     }
 }
 
@@ -75,6 +90,10 @@ void drawNgon(Vesa* vesa, int n) {
             vesa->moveTo(x[k], y[k]);
             vesa->lineTo(x[j], y[j]);
         }
+        if (kbhit()) {
+            getch();
+            return;
+        }
     }
     delete[] x;
     delete[] y;
@@ -89,6 +108,10 @@ void drawCheckerboard(Vesa* vesa) {
         }
         vesa->span(buffer, xres);
         vesa->moveTo(0, j);
+        if (kbhit()) {
+            getch();
+            return;
+        }
     }
     delete[] buffer;
 }
@@ -97,7 +120,15 @@ int main(int argc, char** argv) {
     int res[][3] = { {1600,1200,8}, {1280,1024,8}, {1024,768,8}, {800,600,8}, {640,480,8}, {320,200,8} };
     Vesa vesa;
     vesa.dump();
-    for (int i = 0; i < Number(res); i++) {
+    int startMode = 0;
+    if (argc > 1) {
+        startMode = atoi(argv[1]);
+        if (startMode > Number(res) - 1) {
+            printf("Invalid mode %d\n", startMode);
+            return 0;
+        }
+    }
+    for (int i = startMode; i < Number(res); i++) {
         xres = res[i][0];
         yres = res[i][1];
         depth = res[i][2];

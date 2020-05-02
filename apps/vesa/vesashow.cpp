@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef DOS
 #include <conio.h> // kbhit()
 #endif
@@ -35,6 +36,9 @@ static void showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
         vesa->span(buffer, pbm->width);
         idx = 0;
         oldy = y;
+        if (kbhit() && (getch() == 27)) {
+            exit(0);
+        }
     }
     buffer[idx++] = pixel[0];
 }
@@ -47,6 +51,9 @@ static void showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
         vesa->span(buffer, pbm->width);
         idx = 0;
         oldy = y;
+        if (kbhit() && (getch() == 27)) {
+            exit(0);
+        }
     }
     buffer[idx++] = dither(RBITS, GBITS, BBITS, x, y, pixel[0], pixel[1], pixel[2]);
 }
