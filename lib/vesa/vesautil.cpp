@@ -27,9 +27,13 @@ void makeDitherPalette(Vesa& vesa, int rbits, int gbits, int bbits) {
     }
 }
 
-void makeGrayPalette(Vesa& vesa, int start, int end) {
+void makeGrayPalette(Vesa& vesa, int start, int end, int mask) {
     for (int i = start; i <= end; i++) {
-        vesa.palette(i-start, start+i, start+i, start+i);
+        uint8_t color = start+i;
+        vesa.palette(i-start,
+                (mask & 4) ? color : 0,
+                (mask & 2) ? color : 0,
+                (mask & 1) ? color : 0);
     }
 }
 

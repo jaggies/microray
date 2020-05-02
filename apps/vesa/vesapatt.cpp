@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     int mode = 0, modeChoice=-1;
     int test = 0;
     int ch;
-    const int NUMTESTS = 6;
+    const int NUMTESTS = 9;
     Vesa vesa;
     do {
         if (mode != modeChoice) {
@@ -117,29 +117,50 @@ int main(int argc, char** argv) {
 
             case 2:
                 makeDitherPalette(vesa, 3, 3, 2);
-                vesa.color(0xff); // white
-                vesa.clear();
-            break;
-
-            case 3:
-                makeDitherPalette(vesa, 3, 3, 2);
                 vesa.color(0);
                 vesa.clear();
                 drawDiscreteRamp(&vesa, 256);
             break;
 
-            case 4:
+            case 3:
                 makeGrayPalette(vesa, 0, 255);
                 vesa.color(0);
                 vesa.clear();
                 drawDiscreteRamp(&vesa, 16);
             break;
 
+            case 4:
+                makeGrayPalette(vesa, 0, 255, 4);
+                vesa.color(0);
+                vesa.clear();
+                drawDiscreteRamp(&vesa, 16);
+            break;
+
             case 5:
+                makeGrayPalette(vesa, 0, 255, 2);
+                vesa.color(0);
+                vesa.clear();
+                drawDiscreteRamp(&vesa, 16);
+            break;
+
+            case 6:
+                makeGrayPalette(vesa, 0, 255, 1);
+                vesa.color(0);
+                vesa.clear();
+                drawDiscreteRamp(&vesa, 16);
+            break;
+
+            case 7:
                 makeGrayPalette(vesa, 0, 255);
                 vesa.color(0);
                 vesa.clear();
                 drawDiscreteRamp(&vesa, 256);
+            break;
+
+            case 8:
+                makeDitherPalette(vesa, 3, 3, 2);
+                vesa.color(0xff); // white
+                vesa.clear();
             break;
         }
 

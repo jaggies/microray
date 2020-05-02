@@ -14,7 +14,8 @@
 extern void makeDitherPalette(Vesa& vesa, int rbits, int gbits, int bbits);
 
 // This creates a grayscale palette starting at entry 0 = (start, start, start)
-extern void makeGrayPalette(Vesa& vesa, int start, int end);
+// Mask is a bitfield indicating which channels to use (RGB = 4, 2, 1)
+extern void makeGrayPalette(Vesa& vesa, int start, int end, int mask = 7);
 
 // Generates color index for use with above function
 extern uint32_t compose(uint8_t r, uint8_t g, uint8_t b);
