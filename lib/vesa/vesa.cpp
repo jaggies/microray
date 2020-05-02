@@ -47,10 +47,10 @@ Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(
 }
 
 Vesa::~Vesa() {
+    setPage(0);
     restoreState();
     delete [] _saveState;
     system("cls"); // hack since clrscr() doesn't work
-    printf("All done!\n");
 }
 
 Vesa::VesaInfoBlock* Vesa::getVesaInfoBlock(VesaInfoBlock *blockInfo) {
@@ -176,16 +176,20 @@ void Vesa::palette(uint8_t index, uint8_t red, uint8_t green, uint8_t blue) {
 
 bool Vesa::setDacWidth(uint8_t width) const {
     uint16_t status = 0;
-    #ifdef DOS
-    asm {
-       mov ax, 0x4f08 // get mode _vesaInfo
-       mov bl, 0
-       mov bh, width
-       int 0x10
-       mov status, ax
+    if (width == 8 && (_vesaInfo.capabilities & 0x01)) { // Switchable DAC
+        #ifdef DOS
+        asm {
+           mov ax, 0x4f08 // get mode _vesaInfo
+           mov bl, 0
+           mov bh, width
+           int 0x10
+           mov status, ax
+        }
+        #endif
+        return status == 0x004f; // status_ok
+    } else {
+        return width == 6; // standard VGA
     }
-    #endif
-    return status == 0x004f; // status_ok
 }
 
 const uint16_t flags = 0x000f; // D3:0 = {SVGA, DAC, BIOS, Hardware}
@@ -193,6 +197,10 @@ const uint16_t flags = 0x000f; // D3:0 = {SVGA, DAC, BIOS, Hardware}
 void Vesa::saveState() {
     uint16_t status = 0;
     uint16_t blocks = 0; // number of 64-byte blocks
+
+    delete [] _saveState;
+    _saveState = NULL;
+
     #ifdef DOS
     asm {
         mov ax, 0x4f04 // save/restore state
@@ -204,13 +212,11 @@ void Vesa::saveState() {
     }
     #endif
 
-    delete [] _saveState;
-    _saveState = 0;
     if (blocks > 0 && status == 0x004f) {
         _saveState = new char[blocks*64];
-        const uint16_t hi = (long long) _saveState >> 16;
-        const uint16_t lo = (long long) _saveState & 0xffff;
         #ifdef DOS
+        const uint16_t hi = (uint32_t) _saveState >> 16;
+        const uint16_t lo = (uint32_t) _saveState & 0xffff;
         asm {
             mov ax, 0x4f04 // save/restore state
             mov dl, 0x01 // save state
@@ -223,15 +229,14 @@ void Vesa::saveState() {
         #endif
     } else {
         printf("Can't save SVGA state!\n");
-        exit(0);
     }
 }
 
 void Vesa::restoreState() {
     uint16_t status = 0;
     if (_saveState) {
-        const uint16_t hi = (long long) _saveState >> 16;
-        const uint16_t lo = (long long) _saveState & 0xffff;
+        const uint16_t hi = (uint32_t) _saveState >> 16;
+        const uint16_t lo = (uint32_t) _saveState & 0xffff;
         #ifdef DOS
         asm {
             mov ax, 0x4f04 // save/restore state
