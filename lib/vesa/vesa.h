@@ -159,6 +159,8 @@ class Vesa {
         uint8_t*    _raster; // usually 0xa000:0
         uint8_t     _dac8supported;
         uint8_t*    _saveState;
+        uint8_t     _pageShift;
+        uint16_t    _pageMask;
 };
 
 #endif /* APPS_VESA_VESA_H_ */

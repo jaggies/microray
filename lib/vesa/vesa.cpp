@@ -38,7 +38,7 @@ const char* modeToText[] = {
 };
 
 Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(false),
-       _saveState(NULL) {
+       _saveState(NULL), _pageShift(16), _pageMask(0xffff) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     } else {
@@ -117,6 +117,34 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
         _dac8supported = setDacWidth(8);
         printf("24-bit DAC is %s\n", _dac8supported ? "supported" : "not supported");
         getVesaModeInfo(bestMode, &_currentMode);
+        _pageShift = 10; // multiples of 1kB
+        switch (_currentMode.windowGranularity) {
+            case 64:
+                _pageShift += 6; // 64kB
+            break;
+            case 32:
+                _pageShift += 5; // 32kB
+            break;
+            case 16:
+                _pageShift += 4; // 16kB
+            break;
+            case 8:
+                _pageShift += 3; // 8kB
+            break;
+            case 4:
+                _pageShift += 2; // 4kB
+            break;
+            case 2:
+                _pageShift += 1; // 2kB
+            break;
+            case 1:
+                _pageShift += 0; // 1kB
+            break;
+            default:
+                printf("Window size of %d bytes not supported!\n", _currentMode.windowSize);
+            break;
+        }
+        _pageMask = (1L << _pageShift) - 1;
         _raster = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
         printf("Selected mode %04x: ");
         dumpMode(&_currentMode);
@@ -270,7 +298,8 @@ void Vesa::dumpMode(uint16_t mode) const {
 }
 
 void Vesa::dumpMode(ModeInfoBlock* info) const {
-    printf("(%s) %dx%d %d BPP, MASK=%d(%d),%d(%d),%d(%d), winA=%04x, winB=%04x\n",
+    printf("(%s) %dx%d %d BPP, MASK=%d(%d),%d(%d),%d(%d), granularity=%04x"
+            "\nsize=%04x, winA=%04x, winB=%04x, ptr=%p, bytesperscanline=%d\n",
             info->memoryModelType < Number(modeToText) ? modeToText[info->memoryModelType] : "unknown",
             info->horizontalResolution,
             info->verticalResolution,
@@ -281,8 +310,12 @@ void Vesa::dumpMode(ModeInfoBlock* info) const {
             info->bitPositionOfLSBofGreenMask,
             info->sizeOfDirectColorBlueMaskInBits,
             info->bitPositionOfLSBofBlueMask,
+            info->windowGranularity,
+            info->windowSize,
             info->windowAstartSegment,
-            info->windowBstartSegment);
+            info->windowBstartSegment,
+            info->windowFunction,
+            info->bytesPerScanLine);
     //info->windowFunction
 }
 
