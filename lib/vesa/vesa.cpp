@@ -38,7 +38,7 @@ const char* modeToText[] = {
 };
 
 Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(false),
-       _saveState(NULL), _pageShift(16), _pageMask(0xffff) {
+       _pageShift(16), _pageMask(0xffff) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     } else {
@@ -47,9 +47,8 @@ Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(
 }
 
 Vesa::~Vesa() {
-    setPage(0);
     restoreState();
-    delete [] _saveState;
+    delete [] _save._vesaState;
     system("cls"); // hack since clrscr() doesn't work
 }
 
@@ -91,6 +90,31 @@ Vesa::ModeInfoBlock* Vesa::getVesaModeInfo(uint16_t videoMode, ModeInfoBlock* mo
     return modeInfo;
 }
 
+uint8_t Vesa::getVgaMode() const {
+    // Get classic video mode, for restore
+    uint8_t mode = 0, columns = 80, page = 0;
+#ifdef DOS
+    asm {
+        mov ah, 0x0f // get mode
+        int 0x10
+        mov mode, al
+        mov columns, ah
+        mov page, bh
+    }
+#endif
+    return mode;
+}
+
+void Vesa::setVgaMode(uint8_t mode) const {
+#ifdef DOS
+    asm {
+        mov ah, 0x00 // set mode
+        mov al, mode
+        int 0x10
+    }
+#endif
+}
+
 uint16_t Vesa::setMode(int xres, int yres, int depth) {
     const uint16_t* modes = _vesaInfo.modes;
     ModeInfoBlock tmp;
@@ -113,7 +137,7 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
         modes++;
     }
     if (bestMode) {
-        setMode(bestMode);
+        setVesaMode(bestMode);
         _dac8supported = setDacWidth(8);
         printf("24-bit DAC is %s\n", _dac8supported ? "supported" : "not supported");
         getVesaModeInfo(bestMode, &_currentMode);
@@ -154,7 +178,7 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
     return bestMode;
 }
 
-void Vesa::setMode(uint16_t mode) {
+void Vesa::setVesaMode(uint16_t mode) {
     uint16_t status = 0;
     #ifdef DOS
     asm {
@@ -225,9 +249,11 @@ const uint16_t flags = 0x000f; // D3:0 = {SVGA, DAC, BIOS, Hardware}
 void Vesa::saveState() {
     uint16_t status = 0;
     uint16_t blocks = 0; // number of 64-byte blocks
+    _save.mode = getVgaMode();
 
-    delete [] _saveState;
-    _saveState = NULL;
+#ifdef PRESERVE_VESA_TOO
+    delete [] _save._vesaState;
+    _save._vesaState = NULL;
 
     #ifdef DOS
     asm {
@@ -241,10 +267,10 @@ void Vesa::saveState() {
     #endif
 
     if (blocks > 0 && status == 0x004f) {
-        _saveState = new char[blocks*64];
+        _save._vesaState = new char[blocks*64];
         #ifdef DOS
-        const uint16_t hi = (uint32_t) _saveState >> 16;
-        const uint16_t lo = (uint32_t) _saveState & 0xffff;
+        const uint16_t hi = (uint32_t) _save._vesaState >> 16;
+        const uint16_t lo = (uint32_t) _save._vesaState & 0xffff;
         asm {
             mov ax, 0x4f04 // save/restore state
             mov dl, 0x01 // save state
@@ -258,13 +284,15 @@ void Vesa::saveState() {
     } else {
         printf("Can't save SVGA state!\n");
     }
+#endif
 }
 
 void Vesa::restoreState() {
     uint16_t status = 0;
-    if (_saveState) {
-        const uint16_t hi = (uint32_t) _saveState >> 16;
-        const uint16_t lo = (uint32_t) _saveState & 0xffff;
+#ifdef PRESERVE_VESA_TOO
+    if (_save._vesaState) {
+        const uint16_t hi = (uint32_t) _save._vesaState >> 16;
+        const uint16_t lo = (uint32_t) _save._vesaState & 0xffff;
         #ifdef DOS
         asm {
             mov ax, 0x4f04 // save/restore state
@@ -277,6 +305,10 @@ void Vesa::restoreState() {
         }
         #endif
     }
+#endif
+    setDacWidth(6); // required by VESA standard (page 27, v3.0)
+    setVgaMode(_save.mode);
+    setPage(_save.page);
 }
 
 void Vesa::dump() const {

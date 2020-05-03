@@ -72,7 +72,9 @@ class Vesa {
     private:
         VesaInfoBlock* getVesaInfoBlock(VesaInfoBlock *block);
         ModeInfoBlock* getVesaModeInfo(uint16_t mode, ModeInfoBlock* info) const;
-        void setMode(uint16_t mode);
+        uint8_t getVgaMode() const; // Get classic video mode, for restore
+        void setVgaMode(uint8_t mode) const;
+        void setVesaMode(uint16_t mode);
         void saveState();
         void restoreState();
         // Like memset/memcpy, but copies to framebuffer memory with banking support
@@ -148,6 +150,13 @@ class Vesa {
             uint8_t reserved[216];
         };
 
+        struct VgaSaveState {
+            uint8_t mode;
+            uint8_t page;
+            uint8_t* _vesaState;
+            VgaSaveState() : mode(0), page(0), _vesaState(NULL) { }
+        };
+
         VesaInfoBlock _vesaInfo;
         ModeInfoBlock _currentMode;
 
@@ -158,9 +167,9 @@ class Vesa {
         uint16_t    _rasterPage; // Cached copy of upper 16 bits of _rasterOffset
         uint8_t*    _raster; // usually 0xa000:0
         uint8_t     _dac8supported;
-        uint8_t*    _saveState;
         uint8_t     _pageShift;
         uint16_t    _pageMask;
+        VgaSaveState _save;
 };
 
 #endif /* APPS_VESA_VESA_H_ */
