@@ -23,4 +23,7 @@ extern uint32_t compose(uint8_t r, uint8_t g, uint8_t b);
 // Decomposes packed RGB format to rgb values
 extern void decompose(uint32_t clr, uint8_t& r, uint8_t& g, uint8_t& b);
 
+// Check for the given key. Returns true if found. Passing 0 for key means any key counts.
+extern int checkforkey(int key);
+
 #endif /* LIB_VESA_VESAUTIL_H_ */

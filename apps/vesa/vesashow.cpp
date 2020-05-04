@@ -7,9 +7,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef DOS
-#include <conio.h> // kbhit()
-#endif
 #include "vesa.h"
 #include "vesautil.h"
 extern "C" {
@@ -28,7 +25,7 @@ static int offsetY;
 static uint8_t* buffer;
 NetPBM* pbm;
 
-static void showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
+static bool showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);
@@ -36,14 +33,13 @@ static void showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
         vesa->span(buffer, pbm->width);
         idx = 0;
         oldy = y;
-        if (kbhit() && (getch() == 27)) {
-            exit(0);
-        }
+        if (checkforkey(27)) return false; // don't continue
     }
     buffer[idx++] = pixel[0];
+    return true;
 }
 
-static void showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
+static bool showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);
@@ -51,11 +47,10 @@ static void showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
         vesa->span(buffer, pbm->width);
         idx = 0;
         oldy = y;
-        if (kbhit() && (getch() == 27)) {
-            exit(0);
-        }
+        if (checkforkey(27)) return false; // don't continue
     }
     buffer[idx++] = dither(RBITS, GBITS, BBITS, x, y, pixel[0], pixel[1], pixel[2]);
+    return true;
 }
 
 void usage(const char* name) {
@@ -104,7 +99,7 @@ int main(int argc, char** argv) {
         printf("Unknown mode: %d\n", pbm->mode);
         return 0;
     }
-    while (getch() != 27)
+    while (!checkforkey(27))
         ;
     return 1;
 }

@@ -8,10 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef DOS
-#include <conio.h> // kbhit()
-#endif
+#include "os.h"
 #include "vesa.h"
+#include "vesautil.h"
 
 static int xres = 0;
 static int yres = 0;
@@ -36,10 +35,7 @@ void drawCircles(Vesa* vesa, int n) {
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->circle(rand() % (yres/4), true);
-        if (kbhit()) {
-            getch();
-            return;
-        }
+        if (checkforkey(27)) return;
     }
 }
 
@@ -51,10 +47,7 @@ void drawLines(Vesa* vesa, int n) {
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->lineTo(rand() % xres, rand() % yres);
-        if (kbhit()) {
-            getch();
-            return;
-        }
+        if (checkforkey(27)) return;
     }
 }
 
@@ -66,10 +59,7 @@ void drawRectangles(Vesa* vesa, int n) {
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->rectangle(rand() % xres, rand() % yres, true);
-        if (kbhit()) {
-            getch();
-            return;
-        }
+        if (checkforkey(27)) return;
     }
 }
 
@@ -90,10 +80,7 @@ void drawNgon(Vesa* vesa, int n) {
             vesa->moveTo(x[k], y[k]);
             vesa->lineTo(x[j], y[j]);
         }
-        if (kbhit()) {
-            getch();
-            return;
-        }
+        if (checkforkey(27)) return;
     }
     delete[] x;
     delete[] y;
@@ -108,16 +95,14 @@ void drawCheckerboard(Vesa* vesa) {
         }
         vesa->span(buffer, xres);
         vesa->moveTo(0, j);
-        if (kbhit()) {
-            getch();
-            return;
-        }
+        if (checkforkey(27)) return;
     }
     delete[] buffer;
 }
 
 int main(int argc, char** argv) {
-    int res[][3] = { {1600,1200,8}, {1280,1024,8}, {1024,768,8}, {800,600,8}, {640,480,8}, {320,200,8} };
+    const int BPP = 8;
+    int res[][3] = { {1600,1200,BPP}, {1280,1024,BPP}, {1024,768,BPP}, {800,600,BPP}, {640,480,BPP}, {320,200,8} };
     Vesa vesa;
     vesa.dump();
     int startMode = 0;
@@ -147,7 +132,7 @@ int main(int argc, char** argv) {
     drawNgon(&vesa, 25);
     drawRectangles(&vesa, 1000);
     drawCircles(&vesa, 1000);
-    drawLines(&vesa, 1000);
+    drawLines(&vesa, 10000);
     drawCheckerboard(&vesa);
     return 0;
 }

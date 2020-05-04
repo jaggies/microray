@@ -65,7 +65,7 @@ static void makePalette1(int rbits, int gbits, int bbits) {
     }
 }
 
-static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
+static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     uint8_t index;
     #ifdef USE_ERROR_DIFFUSION
     int rx = diffusion_dither(1<<8, 1<<RBITS, rgb[0], &rerr);
@@ -79,6 +79,7 @@ static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     index = (rx << (GBITS + BBITS)) | (gx << BBITS) | bx;
     dot(x, 1024-y, index);
     pbm->write(pbm, rgb);
+    return true;
 }
 
 static void renderToFile(World* world, const char* outpath)

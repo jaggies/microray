@@ -8,9 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef DOS
-#include <conio.h> // kbhit
-#endif
 #include "vesa.h"
 #include "vesautil.h"
 
@@ -45,9 +42,7 @@ void drawColorGrid(Vesa* vesa) {
             vesa->color(j*gridX + i);
             vesa->moveTo(x1+1, y1+1);
             vesa->rectangle(x2, y2, true);
-            if (kbhit()) {
-                return;
-            }
+            if (checkforkey(0)) return;
         }
     }
 }
@@ -76,9 +71,7 @@ void drawDiscreteRamp(Vesa* vesa, int levels) {
         vesa->color(gray);
         vesa->moveTo(x1, 0);
         vesa->rectangle(x2, vesa->height(), true);
-        if (kbhit()) {
-           return;
-       }
+        if (checkforkey(0)) return;
     }
 }
 

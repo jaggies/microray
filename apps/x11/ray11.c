@@ -368,7 +368,7 @@ void createHierarchy(XtAppContext app, Widget top) {
     gc = XCreateGC(dpy, RootWindowOfScreen(screen), GCForeground, &gcv);
 }
 
-static void pixel(uint16_t x, uint16_t y, uint8_t rgb[3], void* data) {
+static bool pixel(uint16_t x, uint16_t y, uint8_t rgb[3], void* data) {
     Display *dpy = XtDisplay(drawingArea);
     const int depth = DefaultDepthOfScreen(XtScreen(drawingArea));
     XSetForeground(dpy, gc, localDither(rgb[0], rgb[1], rgb[2], x, y, depth));
@@ -384,6 +384,7 @@ static void pixel(uint16_t x, uint16_t y, uint8_t rgb[3], void* data) {
         XtDispatchEvent(&event);
     }
     #endif
+    return true;
 }
 
 static void renderX11(World* world, const char* outpath) {

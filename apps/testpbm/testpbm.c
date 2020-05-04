@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include "netpbm.h"
 
-static void callback(void* clientData, int x, int y, unsigned char pixel[3]) {
+static bool callback(void* clientData, int x, int y, unsigned char pixel[3]) {
     int* pixels = (int*) clientData;
     (*pixels)++;
+    return true;
 }
 
 int main(int argc, char** argv) {

@@ -124,7 +124,9 @@ void renderImage(World* world, PixelCB pixel, void* userdata)
             rgb[0] = min(255, max(0, (int)round(color.x * 255)));
             rgb[1] = min(255, max(0, (int)round(color.y * 255)));
             rgb[2] = min(255, max(0, (int)round(color.z * 255)));
-            (*pixel)(w, h, rgb, userdata);
+            if (!(*pixel)(w, h, rgb, userdata)) {
+                return;
+            }
         }
     }
 }

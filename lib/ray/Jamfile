@@ -1,7 +1,6 @@
 SubDir TOP lib ray ;
 
 Library libmray :
-	amiga.c
 	branch.c
 	bvh.c
 	checkshd.c

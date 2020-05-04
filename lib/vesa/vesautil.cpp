@@ -9,6 +9,18 @@
 #include "vesa.h"
 #include "vesautil.h"
 
+int checkforkey(int key) {
+#ifdef DOS
+    if (kbhit()) {
+        if (key == 0)
+            return true;
+        else if (key == getch())
+            return true;
+    }
+#endif
+    return false;
+}
+
 void makeDitherPalette(Vesa& vesa, int rbits, int gbits, int bbits) {
     const int rlevels = 1 << rbits;
     const int glevels = 1 << gbits;

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <assert.h>
+#include "os.h"
 #include "util.h"
 #include "sphere.h"
 #include "triangle.h"
@@ -27,8 +28,12 @@ long intersections = 0;
 
 static NetPBM* pbm = 0;
 
-static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
+static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     pbm->write(pbm, rgb);
+    if (x == 0) {
+        printf("Line %d\n", y);
+    }
+    return true;
 }
 
 static void renderToFile(World* world, const char* outpath)

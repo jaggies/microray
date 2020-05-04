@@ -46,7 +46,7 @@ static NetPBM* pbm = 0;
 #define GBITS 3
 #define BBITS 2
 
-static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userData) {
+static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userData) {
     Vesa* vesa = (Vesa*) userData;
     uint8_t index;
     #ifdef USE_ERROR_DIFFUSION
@@ -63,6 +63,7 @@ static void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userData) {
     vesa->moveTo(centerx + x, centery + y);
     vesa->dot();
     pbm->write(pbm, rgb);
+    return !checkforkey(27);
 }
 
 static void renderToFile(World* world, Vesa* vesa, const char* outpath)
@@ -120,9 +121,6 @@ int main(int argc, char **argv)
     }
 
     renderToFile(world, &vesa, outpath);
-
-    while (getch() != 27)
-        ;
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

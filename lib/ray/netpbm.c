@@ -74,13 +74,13 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
     return 0;
 }
 
-static void readNetPBM(NetPBM* pbm, PixelCallback cb, void* clientData)
+static bool readNetPBM(NetPBM* pbm, PixelCallback cb, void* clientData)
 {
     int x, y;
     unsigned char pixel[3];
     if (!pbm->fp) {
         printf("Call open() first\n");
-        return;
+        return false;
     }
     for (y = 0; y < pbm->height; y++) {
         unsigned char pix = 0; // for bitmap mode
@@ -101,13 +101,16 @@ static void readNetPBM(NetPBM* pbm, PixelCallback cb, void* clientData)
                 pixel[1] = fgetc(pbm->fp);
                 pixel[2] = fgetc(pbm->fp);
             }
-            (*cb)(clientData, x, y, pixel);
+            if (!(*cb)(clientData, x, y, pixel)) {
+                return false; // client error
+            }
             if (feof(pbm->fp)) {
                 printf("EOF detected\n");
-                return;
+                return false;
             }
         }
     }
+    return true;
 }
 
 static void closeNetPBM(NetPBM* pbm) {
