@@ -86,33 +86,21 @@ Vesa::ModeInfoBlock* Vesa::getVesaModeInfo(uint16_t videoMode, ModeInfoBlock* mo
         mov status, ax
     }
     #endif
-    // TODO: Check status!
-    return modeInfo;
+    return modeInfo; // TODO: Check status!
 }
 
-uint8_t Vesa::getVgaMode() const {
-    // Get classic video mode, for restore
-    uint8_t mode = 0, columns = 80, page = 0;
-#ifdef DOS
+uint16_t Vesa::getVesaMode() const {
+    uint16_t mode = 0;
+    uint16_t status = 0;
+    #ifdef DOS
     asm {
-        mov ah, 0x0f // get mode
+        mov ax, 0x4f03 // get VESA mode
         int 0x10
-        mov mode, al
-        mov columns, ah
-        mov page, bh
+        mov status, ax
+        mov mode, bx
     }
-#endif
-    return mode;
-}
-
-void Vesa::setVgaMode(uint8_t mode) const {
-#ifdef DOS
-    asm {
-        mov ah, 0x00 // set mode
-        mov al, mode
-        int 0x10
-    }
-#endif
+    #endif
+    return mode; // TODO: Check status!
 }
 
 uint16_t Vesa::setMode(int xres, int yres, int depth) {
@@ -249,7 +237,7 @@ const uint16_t flags = 0x000f; // D3:0 = {SVGA, DAC, BIOS, Hardware}
 void Vesa::saveState() {
     uint16_t status = 0;
     uint16_t blocks = 0; // number of 64-byte blocks
-    _save.mode = getVgaMode();
+    _save.mode = getVesaMode();
 
 #ifdef PRESERVE_VESA_TOO
     delete [] _save._vesaState;
@@ -307,7 +295,7 @@ void Vesa::restoreState() {
     }
 #endif
     setDacWidth(6); // required by VESA standard (page 27, v3.0)
-    setVgaMode(_save.mode);
+    setVesaMode(_save.mode);
     setPage(_save.page);
 }
 

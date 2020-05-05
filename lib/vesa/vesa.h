@@ -72,8 +72,7 @@ class Vesa {
     private:
         VesaInfoBlock* getVesaInfoBlock(VesaInfoBlock *block);
         ModeInfoBlock* getVesaModeInfo(uint16_t mode, ModeInfoBlock* info) const;
-        uint8_t getVgaMode() const; // Get classic video mode, for restore
-        void setVgaMode(uint8_t mode) const;
+        uint16_t getVesaMode() const; // Get current VESA mode
         void setVesaMode(uint16_t mode);
         void saveState();
         void restoreState();
