@@ -26,7 +26,7 @@ void Vesa::color(uint32_t color) {
     _rasterColor = color; // TODO: Support other bit depths
 }
 
-void Vesa::color(uint8_t red, uint8_t green, uint8_t blue) {
+uint32_t Vesa::color(uint8_t red, uint8_t green, uint8_t blue) {
     // TODO: Check if we're actually in direct color mode
     red >>= 8 - _currentMode.sizeOfDirectColorRedMaskInBits;
     green >>= 8 - _currentMode.sizeOfDirectColorGreenMaskInBits;
@@ -35,6 +35,7 @@ void Vesa::color(uint8_t red, uint8_t green, uint8_t blue) {
     _rasterColor = (uint32_t) red << _currentMode.bitPositionOfLSBofRedMask;
     _rasterColor |= (uint32_t) green << _currentMode.bitPositionOfLSBofGreenMask;
     _rasterColor |= (uint32_t) blue << _currentMode.bitPositionOfLSBofBlueMask;
+    return _rasterColor;
 }
 
 void Vesa::dot() {

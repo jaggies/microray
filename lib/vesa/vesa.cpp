@@ -36,7 +36,6 @@ Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(
 Vesa::~Vesa() {
     restoreState();
     delete [] _save._vesaState;
-    system("cls"); // hack since clrscr() doesn't work
 }
 
 Vesa::VesaInfoBlock* Vesa::getVesaInfoBlock(VesaInfoBlock *blockInfo) {
@@ -166,8 +165,6 @@ uint16_t Vesa::setMode(int xres, int yres, int depth, MemoryModel model) {
         }
         printf("Selected mode %04x: ");
         dumpMode(&_currentMode);
-    } else {
-        printf("Failed to find a mode for %dx%d@%d\n", xres, yres, depth);
     }
     return bestMode;
 }

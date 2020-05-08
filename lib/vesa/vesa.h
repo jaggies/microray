@@ -48,10 +48,16 @@ class Vesa {
         void color(uint32_t color);
 
         // Chooses nearest color based on the memory model
-        void color(uint8_t red, uint8_t green, uint8_t blue);
+        uint32_t color(uint8_t red, uint8_t green, uint8_t blue);
 
         // Draws a line from current position to (x1, y1) using the current color.
         void lineTo(int16_t x1, int16_t y1);
+
+        // Getters!
+        int getWidth() const { return _currentMode.horizontalResolution; }
+        int getHeigth() const { return _currentMode.verticalResolution; }
+        int getDepth() const { return _currentMode.bitsPerPixel; }
+        MemoryModel getMemoryModel() const { return _currentMode.memoryModelType; }
 
         // Sets the current position
         void moveTo(int16_t x, int16_t y);
