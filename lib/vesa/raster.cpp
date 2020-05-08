@@ -14,7 +14,7 @@
 void Vesa::moveTo(int16_t x, int16_t y) {
     _rasterX = x;
     _rasterY = y;
-    _rasterOffset = (uint32_t)_rasterY * _currentMode.bytesPerScanLine + _rasterX;
+    _rasterOffset = (uint32_t)_rasterY * _currentMode.bytesPerScanLine + _rasterX*_stride;
 }
 
 void Vesa::clear() {
@@ -22,8 +22,19 @@ void Vesa::clear() {
     rectangle(_currentMode.horizontalResolution, _currentMode.verticalResolution, true);
 }
 
-void Vesa::color(uint8_t color) {
+void Vesa::color(uint32_t color) {
     _rasterColor = color; // TODO: Support other bit depths
+}
+
+void Vesa::color(uint8_t red, uint8_t green, uint8_t blue) {
+    // TODO: Check if we're actually in direct color mode
+    red >>= 8 - _currentMode.sizeOfDirectColorRedMaskInBits;
+    green >>= 8 - _currentMode.sizeOfDirectColorGreenMaskInBits;
+    blue >>= 8 - _currentMode.sizeOfDirectColorBlueMaskInBits;
+
+    _rasterColor = (uint32_t) red << _currentMode.bitPositionOfLSBofRedMask;
+    _rasterColor |= (uint32_t) green << _currentMode.bitPositionOfLSBofGreenMask;
+    _rasterColor |= (uint32_t) blue << _currentMode.bitPositionOfLSBofBlueMask;
 }
 
 void Vesa::dot() {
@@ -32,7 +43,20 @@ void Vesa::dot() {
         setPage(page);
         _rasterPage = page;
     }
-    _raster[_rasterOffset & _pageMask] = _rasterColor; // TODO: handle other color depths
+    switch(_currentMode.bitsPerPixel) {
+        case 8:
+            *(uint8_t*) (_raster + (_rasterOffset & _pageMask)) = _rasterColor;
+        break;
+        case 15:
+        case 16:
+            *(uint16_t*) (_raster + (_rasterOffset & _pageMask)) = _rasterColor;
+        break;
+        case 24:
+            *(RGB*) (_raster + (_rasterOffset & _pageMask)) = *(RGB*)&_rasterColor;
+        break;
+        case 32:
+            *(uint32_t*) (_raster + (_rasterOffset & _pageMask)) = _rasterColor;
+    }
 }
 
 void Vesa::span(int16_t count) {
@@ -43,24 +67,41 @@ void Vesa::span(int16_t count) {
         _rasterOffset += count;
         count = -count;
     }
-    memset24(_rasterOffset, _rasterColor, count);
+    switch(_currentMode.bitsPerPixel) {
+        case 8:
+            memset8(_rasterOffset, _rasterColor, count);
+        break;
+
+        case 15:
+        case 16:
+            memset16(_rasterOffset, _rasterColor, count);
+        break;
+
+        case 24: // TODO
+        case 32: // TODO
+            memset16(_rasterOffset, _rasterColor, count);
+        break;
+    }
 }
 
-void Vesa::span(uint8_t* buffer, uint16_t n) {
+void Vesa::span(void* buffer, size_t elt, uint16_t n) {
     if (_rasterY < 0) {
         return;
     }
-    memcpy24(_rasterOffset, buffer, n);
+    memcpy8(_rasterOffset, (uint8_t*) buffer,
+            elt == 4 ? (4*n) :
+                    elt == 3 ? (3*n) :
+                            elt == 2 ? (2*n) : n);
 }
 
 void Vesa::incX() {
     _rasterX++;
-    _rasterOffset++;
+    _rasterOffset += _stride;
 }
 
 void Vesa::decX() {
     _rasterX--;
-    _rasterOffset--;
+    _rasterOffset -= _stride;
 }
 
 void Vesa::incY() {
@@ -84,7 +125,7 @@ void Vesa::lineTo(int16_t x1, int16_t y1) {
         tmp = y0; y0 = y1; y1 = tmp;
         moveTo(x0, y0); // TODO: inline
     }
-    const int16_t stepX = x0 < x1 ? 1 : -1;
+    const int16_t stepX = x0 < x1 ? _stride : -_stride;
     const int16_t stepY = _currentMode.bytesPerScanLine; // always incrementing
     const int16_t dx = abs(x1 - x0);
     const int16_t dy = y0 - y1; // dy is always negative
@@ -261,7 +302,7 @@ void Vesa::triangle(size_t p0, size_t p1, size_t p2, const int16_t* vertices) {
 }
 
 // Set maximum of 64k-1 bytes to any 24-bit page
-void Vesa::memset24(uint32_t addr, uint8_t value, uint16_t length) {
+void Vesa::memset8(uint32_t addr, uint8_t value, uint16_t length) {
     uint16_t page = (uint16_t) (addr >> _pageShift);
     uint16_t offset = (uint16_t) (addr & _pageMask); // initial offset in page
     while (length > 0) {
@@ -274,7 +315,37 @@ void Vesa::memset24(uint32_t addr, uint8_t value, uint16_t length) {
 }
 
 // Set maximum of 64k-1 bytes to any 24-bit page
-void Vesa::memcpy24(uint32_t addr, uint8_t* mem, uint16_t length) {
+void Vesa::memset16(uint32_t addr, uint16_t value, uint16_t length) {
+    uint16_t page = (uint16_t) (addr >> _pageShift);
+    uint16_t offset = (uint16_t) (addr & _pageMask); // initial offset in page
+    while (length > 0) {
+        const uint16_t size = min(1L<<15, min((1L << _pageShift) - offset, length));
+        setPage(page++);
+        uint16_t* ptr = (uint16_t*) (_raster + (offset & _pageMask));
+#ifdef DOS
+        // memset with 16-bit values
+        uint16_t hi = ((uint32_t) ptr) >> 16;
+        uint16_t lo = ((uint16_t) ptr);
+        asm {
+            mov ax, value
+            mov cx, size
+            mov es, hi
+            mov di, lo
+            rep stosw
+        }
+#else
+        uint16_t count = size;
+        while(count--) {
+            *ptr++ = value;
+        }
+#endif
+        length -= size;
+        offset = 0;
+    }
+}
+
+// Set maximum of 64k-1 bytes to any 24-bit page
+void Vesa::memcpy8(uint32_t addr, uint8_t* mem, uint16_t length) {
     uint16_t page = (uint16_t) (addr >> _pageShift);
     uint16_t offset = (uint16_t) (addr & _pageMask); // initial offset in page
     while (length > 0) {
@@ -286,4 +357,5 @@ void Vesa::memcpy24(uint32_t addr, uint8_t* mem, uint16_t length) {
         offset = 0;
     }
 }
+
 

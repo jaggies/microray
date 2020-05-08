@@ -30,7 +30,7 @@ static bool showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);
         vesa->color(pixel[0]);
-        vesa->span(buffer, pbm->width);
+        vesa->span(buffer, 1, pbm->width);
         idx = 0;
         oldy = y;
         if (checkforkey(27)) return false; // don't continue
@@ -44,7 +44,7 @@ static bool showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);
         vesa->color(pixel[0]);
-        vesa->span(buffer, pbm->width);
+        vesa->span(buffer, 1, pbm->width);
         idx = 0;
         oldy = y;
         if (checkforkey(27)) return false; // don't continue

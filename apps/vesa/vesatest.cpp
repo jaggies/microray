@@ -27,10 +27,10 @@ static void makePalette(Vesa* vesa, int rbits, int gbits, int bbits) {
 }
 
 void drawCircles(Vesa* vesa, int n) {
-    vesa->color(0x03); // blue
+    vesa->color(0x00, 0xff, 0x00); // blue
     vesa->clear();
     while(n--) {
-        uint16_t color = rand() & 0xff;
+        uint16_t color = rand() & 0xffffff;
         color |= color << 8;
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
@@ -40,10 +40,10 @@ void drawCircles(Vesa* vesa, int n) {
 }
 
 void drawLines(Vesa* vesa, int n) {
-    vesa->color(0x03); // blue
+    vesa->color(0xff, 0x00, 0x00); // red
     vesa->clear();
     while (n--) {
-        uint16_t color = rand() & 0xff;
+        uint16_t color = rand() & 0xffffff;
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->lineTo(rand() % xres, rand() % yres);
@@ -52,10 +52,10 @@ void drawLines(Vesa* vesa, int n) {
 }
 
 void drawRectangles(Vesa* vesa, int n) {
-    vesa->color(0x03); // blue
+    vesa->color(0x00, 0x00, 0xff); // blue
     vesa->clear();
     while(n--) {
-        uint16_t color = rand() & 0xff;
+        uint16_t color = rand() & 0xffffff;
         vesa->color(color);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->rectangle(rand() % xres, rand() % yres, true);
@@ -64,7 +64,7 @@ void drawRectangles(Vesa* vesa, int n) {
 }
 
 void drawNgon(Vesa* vesa, int n) {
-    vesa->color(0x03); // blue
+    vesa->color(0x00, 0x00, 0xff); // blue
     vesa->clear();
     uint16_t * x = new uint16_t[n];
     uint16_t * y = new uint16_t[n];
@@ -74,7 +74,7 @@ void drawNgon(Vesa* vesa, int n) {
         x[i] = cos(alpha) * yres/2 + xres/2;
         y[i] = sin(alpha) * yres/2 + yres/2;
     }
-    vesa->color(0xff); // white
+    vesa->color(0x00ffffff); // white
     for (int k = 0; k < n; k++) {
         for (int j = k+1; j < n; j++) {
             vesa->moveTo(x[k], y[k]);
@@ -87,13 +87,13 @@ void drawNgon(Vesa* vesa, int n) {
 }
 
 void drawCheckerboard(Vesa* vesa) {
-    uint8_t* buffer = new uint8_t[xres];
+    uint16_t* buffer = new uint16_t[xres];
     vesa->moveTo(0, 0);
     for (int j = 0; j < vesa->height(); j++) {
         for (int i = 0; i < vesa->width(); i++) {
             buffer[i] = i^j;
         }
-        vesa->span(buffer, xres);
+        vesa->span(buffer, 2, xres);
         vesa->moveTo(0, j);
         if (checkforkey(27)) return;
     }
@@ -101,8 +101,10 @@ void drawCheckerboard(Vesa* vesa) {
 }
 
 int main(int argc, char** argv) {
-    const int BPP = 8;
-    int res[][3] = { {1600,1200,BPP}, {1280,1024,BPP}, {1024,768,BPP}, {800,600,BPP}, {640,480,BPP}, {320,200,8} };
+    const int BPP = 15;
+    const Vesa::MemoryModel model = Vesa::Any;
+    int res[][3] = { {1600,1200,BPP}, {1280,1024,BPP}, {1024,768,BPP},
+                     {800,600,BPP}, {640,480,BPP}, {320,200,BPP} };
     Vesa vesa;
     vesa.dump();
     int startMode = 0;
@@ -113,18 +115,20 @@ int main(int argc, char** argv) {
             return 0;
         }
     }
+    bool found = false;
     for (int i = startMode; i < Number(res); i++) {
         xres = res[i][0];
         yres = res[i][1];
         depth = res[i][2];
-        if (!vesa.setMode(xres, yres, depth)) {
+        if (!vesa.setMode(xres, yres, depth, model)) {
             printf("No mode for %dx%d@%d\n", xres, yres, 8);
         } else {
             printf("Using mode %dx%d@%d\n", xres, yres, 8);
+            found = true;
             break;
         }
     }
-    if (xres == 0 || yres == 0) {
+    if (!found) {
         printf("Can't find a video mode\n");
         return(0);
     }

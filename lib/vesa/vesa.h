@@ -15,11 +15,25 @@ class Vesa {
     struct ModeInfoBlock;
 
     public:
+        enum MemoryModel {
+            TextMode = 0,
+            CGAGraphics = 1,
+            HerculesGraphics = 2,
+            PlanePlanar4bpp = 3,
+            PackedPixel = 4,
+            NonChain4or256Color = 5,
+            DirectColor = 6,
+            YUV = 7,
+            // 0x08 - 0x0f Reserved, defined by VESA
+            // 0x10 - 0xff To be defined by OEM
+            Any = 0xff // Don't care, give me anything - use for enumerating all modes
+        };
+
         Vesa();
         virtual ~Vesa();
 
         // Initializes to closest video mode with given depth {1, 2, 4, 8, 16, 24 or 32}
-        uint16_t setMode(int xres, int yres, int depth);
+        uint16_t setMode(int xres, int yres, int depth = 8, MemoryModel model = Any);
 
         // Draws a dot at the given location with the current position and color.
         void dot();
@@ -30,8 +44,11 @@ class Vesa {
         // Clears the sceen with the current color
         void clear();
 
-        // Sets the current color
-        void color(uint8_t color);
+        // Sets the current color in mode-dependent way (i.e. color indexed or RGB)
+        void color(uint32_t color);
+
+        // Chooses nearest color based on the memory model
+        void color(uint8_t red, uint8_t green, uint8_t blue);
 
         // Draws a line from current position to (x1, y1) using the current color.
         void lineTo(int16_t x1, int16_t y1);
@@ -54,7 +71,7 @@ class Vesa {
         void span(int16_t n);
 
         // Fills horizontal line with pixels from buffer, starting with the current raster position.
-        void span(uint8_t* buffer, uint16_t n);
+        void span(void* buffer, size_t elt, uint16_t n);
 
         // Draws a triangle given indices into a buffer
         void triangle(size_t p0, size_t p1, size_t p2, const int16_t *vertices);
@@ -76,9 +93,10 @@ class Vesa {
         void setVesaMode(uint16_t mode);
         void saveState();
         void restoreState();
-        // Like memset/memcpy, but copies to framebuffer memory with banking support
-        void memset24(uint32_t addr, uint8_t value, uint16_t length);
-        void memcpy24(uint32_t addr, uint8_t* mem, uint16_t length);
+        //
+        void memset8(uint32_t addr, uint8_t value, uint16_t length);
+        void memset16(uint32_t addr, uint16_t value, uint16_t length);
+        void memcpy8(uint32_t addr, uint8_t* mem, uint16_t length);
 
         // Move one pixel to the right
         void incX();
@@ -158,13 +176,19 @@ class Vesa {
 
         VesaInfoBlock _vesaInfo;
         ModeInfoBlock _currentMode;
+        struct RGB {
+            uint8_t r;
+            uint8_t g;
+            uint8_t b;
+        };
 
         int16_t     _rasterX;
         int16_t     _rasterY;
+        uint8_t     _stride; // 1, 2, 3 or 4 for depths 8, 16, 24 and 32
         uint32_t    _rasterColor;
         uint32_t    _rasterOffset; // Offset in bytes from start of frame buffer
         uint16_t    _rasterPage; // Cached copy of upper 16 bits of _rasterOffset
-        uint8_t*    _raster; // usually 0xa000:0
+        uint8_t*     _raster; // usually 0xa000:0
         uint8_t     _dac8supported;
         uint8_t     _pageShift;
         uint16_t    _pageMask;

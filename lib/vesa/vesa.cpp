@@ -13,19 +13,6 @@
 #endif
 #include "vesa.h"
 
-enum MemoryModel {
-    TextMode = 0,
-    CGAGraphics = 1,
-    HerculesGraphics = 2,
-    PlanePlanar4bpp = 3,
-    PackedPixel = 4,
-    NonChain4or256Color = 5,
-    DirectColor = 6,
-    YUV = 7
-    // 0x08 - 0x0f Reserved, defined by VESA
-    // 0x10 - 0xff To be defined by OEM
-};
-
 const char* modeToText[] = {
     "TextMode",
     "CGAGraphics",
@@ -38,7 +25,7 @@ const char* modeToText[] = {
 };
 
 Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(false),
-       _pageShift(16), _pageMask(0xffff) {
+       _pageShift(16), _pageMask(0xffff), _stride(1) {
     if (!getVesaInfoBlock(&_vesaInfo)) {
         printf("VESA not supported!\n");
     } else {
@@ -103,7 +90,7 @@ uint16_t Vesa::getVesaMode() const {
     return mode; // TODO: Check status!
 }
 
-uint16_t Vesa::setMode(int xres, int yres, int depth) {
+uint16_t Vesa::setMode(int xres, int yres, int depth, MemoryModel model) {
     const uint16_t* modes = _vesaInfo.modes;
     ModeInfoBlock tmp;
     uint16_t bestMode = 0; // undefined
@@ -111,8 +98,10 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
     while (*modes != 0xffff) {
         uint16_t mode = *modes;
         if (getVesaModeInfo(mode, &tmp)) {
-            if (tmp.bitsPerPixel == depth &&
-                    tmp.horizontalResolution >= xres && tmp.verticalResolution >= yres) {
+            if ((model == Any || model == tmp.memoryModelType)
+                    && tmp.bitsPerPixel == depth
+                    && tmp.horizontalResolution >= xres
+                    && tmp.verticalResolution >= yres) {
                 uint16_t dx = abs(tmp.horizontalResolution - xres);
                 uint16_t dy = abs(tmp.verticalResolution - yres);
                 uint32_t score = (uint32_t) dx*dx + dy*dy;
@@ -158,6 +147,23 @@ uint16_t Vesa::setMode(int xres, int yres, int depth) {
         }
         _pageMask = (1L << _pageShift) - 1;
         _raster = (uint8_t*) ((uint32_t) _currentMode.windowAstartSegment << 16);
+        switch(_currentMode.bitsPerPixel) {
+            case 1:
+            case 4:
+            case 8:
+                _stride = 1;
+            break;
+            case 15:
+            case 16:
+                _stride = 2;
+            break;
+            case 24:
+                _stride = 3;
+            break;
+            case 32:
+                _stride = 4;
+            break;
+        }
         printf("Selected mode %04x: ");
         dumpMode(&_currentMode);
     } else {
