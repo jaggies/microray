@@ -76,7 +76,7 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
 
 static bool readNetPBM(NetPBM* pbm, PixelCallback cb, void* clientData)
 {
-    int x, y;
+    uint16_t x, y;
     unsigned char pixel[3];
     if (!pbm->fp) {
         printf("Call open() first\n");
@@ -101,7 +101,7 @@ static bool readNetPBM(NetPBM* pbm, PixelCallback cb, void* clientData)
                 pixel[1] = fgetc(pbm->fp);
                 pixel[2] = fgetc(pbm->fp);
             }
-            if (!(*cb)(clientData, x, y, pixel)) {
+            if (!(*cb)(x, y, pixel, clientData)) {
                 return false; // client error
             }
             if (feof(pbm->fp)) {

@@ -25,7 +25,7 @@ static int offsetY;
 static void* buffer;
 NetPBM* pbm;
 
-static bool showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
+static bool showGray(uint16_t x, uint16_t y, uint8_t* pixel, void* clientData) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);
@@ -66,7 +66,7 @@ static bool showGray(void* clientData, int x, int y, unsigned char pixel[3]) {
     return true;
 }
 
-static bool showRGB(void* clientData, int x, int y, unsigned char pixel[3]) {
+static bool showRGB(uint16_t x, uint16_t y, uint8_t* pixel, void* clientData) {
     Vesa* vesa = (Vesa*) clientData;
     if (y != oldy) {
         vesa->moveTo(offsetX, offsetY + oldy);

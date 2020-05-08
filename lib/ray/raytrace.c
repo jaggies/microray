@@ -102,7 +102,7 @@ int shadow(Ray* ray, const Shape* ignore, World* world) {
 
 void renderImage(World* world, PixelCB pixel, void* userdata)
 {
-    int h, w;
+    uint16_t h, w;
     float du = 1.0f / world->width, dv = 1.0f / world->height;
     float v = 0.0f + dv * 0.5f; /* emit ray from pixel centers */
 

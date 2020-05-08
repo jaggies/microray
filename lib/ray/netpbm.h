@@ -10,7 +10,7 @@
 
 #include "os.h"
 
-typedef bool (*PixelCallback)(void* clientData, int x, int y, unsigned char pixel[3]);
+typedef bool (*PixelCallback)(uint16_t x, uint16_t y, uint8_t* rgb, void* userData);
 enum { NETPBM_NONE = 0, NETPBM_READ, NETPBM_WRITE };
 typedef struct NetPBM NetPBM;
 
