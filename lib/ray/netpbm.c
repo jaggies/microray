@@ -26,6 +26,11 @@ static int openNetPBM(NetPBM* pbm, const char* path, int* width, int* height, in
             fprintf(stderr, "Couldn't open file %s for write!\n", path);
             return 0;
         }
+        pbm->width = *width;
+        pbm->height = *height;
+        pbm->depth = *depth;
+        pbm->mode = mode;
+        // TODO: Actually honor mode!
         fprintf(pbm->fp, "P6 %d %d %d\n", *width, *height, *depth);
         return 1;
     } else if (mode == NETPBM_READ) {
