@@ -89,10 +89,7 @@ void Vesa::span(void* buffer, size_t elt, uint16_t n) {
     if (_rasterY < 0) {
         return;
     }
-    memcpy8(_rasterOffset, (uint8_t*) buffer,
-            elt == 4 ? (4*n) :
-                    elt == 3 ? (3*n) :
-                            elt == 2 ? (2*n) : n);
+    memcpy8(_rasterOffset, (uint8_t*) buffer, elt*n);
 }
 
 void Vesa::incX() {

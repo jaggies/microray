@@ -39,52 +39,92 @@ extern "C" {
 long intersections = 0;
 #endif /* PROFILE */
 
-static int centerx, centery;
+static int idx;
+static int oldy;
+static int offsetX;
+static int offsetY;
+static void* buffer;
 
 static NetPBM* pbm = 0;
 #define RBITS 3 // TODO: set up palette in this code
 #define GBITS 3
 #define BBITS 2
 
-static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userData) {
-    Vesa* vesa = (Vesa*) userData;
-    uint8_t index;
-    #ifdef USE_ERROR_DIFFUSION
-    int rx = diffusion_dither(1<<8, 1<<RBITS, rgb[0], &rerr);
-    int gx = diffusion_dither(1<<8, 1<<GBITS, rgb[1], &gerr);
-    int bx = diffusion_dither(1<<8, 1<<BBITS, rgb[2], &berr);
-    #else
-    uint8_t rx = ordered_dither(1<<8, 1<<RBITS, x, y, rgb[0]);
-    uint8_t gx = ordered_dither(1<<8, 1<<GBITS, x, y, rgb[1]);
-    uint8_t bx = ordered_dither(1<<8, 1<<BBITS, x, y, rgb[2]);
-    #endif
-    index = (rx << (GBITS + BBITS)) | (gx << BBITS) | bx;
-    vesa->color(index);
-    vesa->moveTo(centerx + x, centery + y);
-    vesa->dot();
-    pbm->write(pbm, rgb);
-    return !checkforkey(27);
+static bool showRGB(uint16_t x, uint16_t y, uint8_t* pixel, void* clientData) {
+    Vesa* vesa = (Vesa*) clientData;
+    if (y != oldy) {
+        vesa->moveTo(offsetX, offsetY + oldy);
+        // Hack. Add 1 to depth to round to the nearest byte, i.e. 15 -> 2, 16-> 2, etc.
+        vesa->span(buffer, (1 + vesa->getDepth()) / 8, pbm->width);
+        idx = 0;
+        oldy = y;
+        if (checkforkey(27)) return false; // don't continue
+    }
+    switch (vesa->getDepth()) {
+        case 8:
+            ((uint8_t*) buffer)[idx++] = dither(RBITS, GBITS, BBITS, x, y, pixel[0], pixel[1], pixel[2]);
+        break;
+
+        case 15:
+        case 16:
+            ((uint16_t*) buffer)[idx++] = vesa->color(pixel[0], pixel[1], pixel[2]);
+        break;
+
+        case 24:
+            ((uint8_t*) buffer)[idx++] = pixel[0];
+            ((uint8_t*) buffer)[idx++] = pixel[1];
+            ((uint8_t*) buffer)[idx++] = pixel[2];
+        break;
+
+        case 32:
+            ((uint8_t*) buffer)[idx++] = pixel[2];
+            ((uint8_t*) buffer)[idx++] = pixel[1];
+            ((uint8_t*) buffer)[idx++] = pixel[0];
+            ((uint8_t*) buffer)[idx++] = 0;
+        break;
+    }
+    pbm->write(pbm, pixel);
+    return true;
 }
 
 static void renderToFile(World* world, Vesa* vesa, const char* outpath)
 {
     pbm = createNetPBM();
 
-    // Pick nearest VESA mode to scene resolution
-    if (!vesa->setMode(world->width, world->height, 8)) {
-        printf("Image too large to set graphics mode\n");
+    // Depths ranked by quality
+    const uint8_t depths[] = {32, 24, 16, 15, 8};
+
+    bool found = false;
+    for (int i = 0; i < Number(depths); i++) {
+        if (vesa->setMode(world->width, world->height, depths[i], Vesa::Any)) {
+            found = true;
+            break;
+        }
+    }
+
+    if (!found) {
+        fprintf(stderr, "Couldn't find a suitable video mode for %dx%d\n", world->width, world->height);
         return;
     }
 
-    centerx = (vesa->width() - world->width) / 2;
-    centery = (vesa->height() - world->height) / 2;
-
-    makeDitherPalette(*vesa, RBITS, GBITS, BBITS);
+    offsetX = (vesa->width() - world->width) / 2;
+    offsetY = (vesa->height() - world->height) / 2;
 
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
-        vesa->color(0111);
+        if (vesa->getDepth() == 8) {
+            vesa->color(0111);
+            makeDitherPalette(*vesa, RBITS, GBITS, BBITS);
+        } else {
+            vesa->color(20,20,20);
+        }
         vesa->clear();
-        renderImage(world, pixel, vesa);
+        uint32_t bufferSize = (uint32_t)(pbm->width) * (vesa->getDepth() + 1) / 8;
+        buffer = new uint8_t[bufferSize];
+        if (!buffer) {
+            printf("Couldn't allocate line buffer (size=%d)!!\n", bufferSize);
+        } else {
+            renderImage(world, showRGB, vesa);
+        }
         pbm->close(pbm);
     } else {
         printf("Can't write image '%s'\n", outpath);
