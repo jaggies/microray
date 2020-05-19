@@ -61,7 +61,7 @@ void Vesa::dot() {
 }
 
 void Vesa::span(int16_t count) {
-    if (_rasterY < 0) {
+    if (_rasterY < 0 || _rasterY > _currentMode.verticalResolution) {
         return;
     }
     if (count < 0) {
@@ -79,8 +79,11 @@ void Vesa::span(int16_t count) {
         break;
 
         case 24: // TODO
-        case 32: // TODO
             memset16(_rasterOffset, _rasterColor, count);
+        break;
+
+        case 32:
+            memset32(_rasterOffset, _rasterColor, count);
         break;
     }
 }
@@ -317,7 +320,7 @@ void Vesa::memset16(uint32_t addr, uint16_t value, uint16_t length) {
     uint16_t page = (uint16_t) (addr >> _pageShift);
     uint16_t offset = (uint16_t) (addr & _pageMask); // initial offset in page
     while (length > 0) {
-        const uint16_t size = min(1L<<15, min((1L << _pageShift) - offset, length));
+        const uint16_t size = min(((1L << _pageShift) - offset) / sizeof(uint16_t), length);
         setPage(page++);
         uint16_t* ptr = (uint16_t*) (_raster + (offset & _pageMask));
 #ifdef DOS
@@ -341,6 +344,37 @@ void Vesa::memset16(uint32_t addr, uint16_t value, uint16_t length) {
         offset = 0;
     }
 }
+
+// Set maximum of 64k-1 bytes to any 24-bit page
+void Vesa::memset32(uint32_t addr, uint32_t value, uint16_t length) {
+    uint16_t page = (uint16_t) (addr >> _pageShift);
+    uint16_t offset = (uint16_t) (addr & _pageMask); // initial offset in page
+    while (length > 0) {
+        const uint16_t size = min(((1L << _pageShift) - offset) / sizeof(uint32_t), length);
+        setPage(page++);
+        uint32_t* ptr = (uint32_t*) (_raster + (offset & _pageMask));
+#ifdef DOS32
+        // memset with 16-bit values
+        uint16_t hi = ((uint32_t) ptr) >> 16;
+        uint16_t lo = ((uint16_t) ptr);
+        asm {
+            mov eax, value
+            mov ecx, size
+            mov es, hi
+            mov di, lo
+            rep stosd
+        }
+#else
+        uint16_t count = size;
+        while(count--) {
+            *ptr++ = value;
+        }
+#endif
+        length -= size;
+        offset = 0;
+    }
+}
+
 
 // Set maximum of 64k-1 bytes to any 24-bit page
 void Vesa::memcpy8(uint32_t addr, uint8_t* mem, uint16_t length) {

@@ -102,6 +102,7 @@ class Vesa {
         //
         void memset8(uint32_t addr, uint8_t value, uint16_t length);
         void memset16(uint32_t addr, uint16_t value, uint16_t length);
+        void memset32(uint32_t addr, uint32_t value, uint16_t length);
         void memcpy8(uint32_t addr, uint8_t* mem, uint16_t length);
 
         // Move one pixel to the right
