@@ -30,9 +30,7 @@ void drawCircles(Vesa* vesa, int n) {
     vesa->color(0x00, 0xff, 0x00); // blue
     vesa->clear();
     while(n--) {
-        uint16_t color = rand() & 0xffffff;
-        color |= color << 8;
-        vesa->color(color);
+        vesa->color(rand() & 0xff, rand() & 0xff, rand() & 0xff);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->circle(rand() % (yres/4), true);
         if (checkforkey(27)) return;
@@ -43,8 +41,7 @@ void drawLines(Vesa* vesa, int n) {
     vesa->color(0xff, 0x00, 0x00); // red
     vesa->clear();
     while (n--) {
-        uint16_t color = rand() & 0xffffff;
-        vesa->color(color);
+        vesa->color(rand() & 0xff, rand() & 0xff, rand() & 0xff);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->lineTo(rand() % xres, rand() % yres);
         if (checkforkey(27)) return;
@@ -55,8 +52,7 @@ void drawRectangles(Vesa* vesa, int n) {
     vesa->color(0x00, 0x00, 0xff); // blue
     vesa->clear();
     while(n--) {
-        uint16_t color = rand() & 0xffffff;
-        vesa->color(color);
+        vesa->color(rand() & 0xff, rand() & 0xff, rand() & 0xff);
         vesa->moveTo(rand() % xres, rand() % yres);
         vesa->rectangle(rand() % xres, rand() % yres, true);
         if (checkforkey(27)) return;
@@ -87,13 +83,13 @@ void drawNgon(Vesa* vesa, int n) {
 }
 
 void drawCheckerboard(Vesa* vesa) {
-    uint16_t* buffer = new uint16_t[xres];
+    uint32_t* buffer = new uint32_t[xres];
     vesa->moveTo(0, 0);
     for (int j = 0; j < vesa->height(); j++) {
         for (int i = 0; i < vesa->width(); i++) {
             buffer[i] = i^j;
         }
-        vesa->span(buffer, 2, xres);
+        vesa->span(buffer, sizeof(uint32_t), xres);
         vesa->moveTo(0, j);
         if (checkforkey(27)) return;
     }
@@ -101,10 +97,12 @@ void drawCheckerboard(Vesa* vesa) {
 }
 
 int main(int argc, char** argv) {
-    const int BPP = 15;
     const Vesa::MemoryModel model = Vesa::Any;
-    int res[][3] = { {1600,1200,BPP}, {1280,1024,BPP}, {1024,768,BPP},
-                     {800,600,BPP}, {640,480,BPP}, {320,200,BPP} };
+    const int res[][2] = {
+        {1600,1200}, {1280,1024}, {1024,768}, {800,600}, {640,480}, {320,200}
+    };
+    const int depths[] = { 32, 24, 16, 15, 8 };
+
     Vesa vesa;
     vesa.dump();
     int startMode = 0;
@@ -116,16 +114,18 @@ int main(int argc, char** argv) {
         }
     }
     bool found = false;
-    for (int i = startMode; i < Number(res); i++) {
-        xres = res[i][0];
-        yres = res[i][1];
-        depth = res[i][2];
-        if (!vesa.setMode(xres, yres, depth, model)) {
-            printf("No mode for %dx%d@%d\n", xres, yres, 8);
-        } else {
-            printf("Using mode %dx%d@%d\n", xres, yres, 8);
-            found = true;
-            break;
+    for (int d = 0 ; d < Number(depths) && !found; d++) {
+        int depth = depths[d];
+        for (int i = startMode; i < Number(res); i++) {
+            xres = res[i][0];
+            yres = res[i][1];
+            if (!vesa.setMode(xres, yres, depth, model)) {
+                printf("No mode for %dx%d@%d\n", xres, yres, depth);
+            } else {
+                printf("Using mode %dx%d@%d\n", xres, yres, depth);
+                found = true;
+                break;
+            }
         }
     }
     if (!found) {
