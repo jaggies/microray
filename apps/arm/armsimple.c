@@ -83,6 +83,7 @@ int main(int argc, char **argv)
 
 	// Renders image, calling above pixel() routine for each pixel
     renderImage(world, pixel, NULL);
+    destroyWorld(world);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

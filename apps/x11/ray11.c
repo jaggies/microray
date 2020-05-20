@@ -135,7 +135,7 @@ void file_cb(Widget widget, XtPointer client_data, XtPointer call_data)
     int item_no = (size_t) client_data;
 
     if (item_no == 1) /* the "quit" item */
-        exit(0);
+        exit(0); // TODO: This should do a graceful shutdown
 
     /* "Open" was selected.  Create a Motif FileSelectionDialog w/callback */
     if (!dialog) {
@@ -412,6 +412,7 @@ Boolean render_proc(XtPointer client_data)
     World* world = (World*) client_data;
     printf("Render\n");
     renderX11(world, "out.ppm"); /* TODO: save as same <filename>.ppm */
+    destroyWorld(world);
     return 1;
 }
 

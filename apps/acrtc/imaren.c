@@ -124,6 +124,7 @@ int main(int argc, char **argv)
         return 0;
     }
     renderToFile(world, outpath);
+    destroyWorld(world);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);
