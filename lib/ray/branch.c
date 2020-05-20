@@ -93,14 +93,10 @@ void Branch_destroy(Shape* shape) {
 
     // We only destroy Branch and Leaf nodes. Shapes are destroyed in BVH container.
     Shape* closer = branch->closerChild.shape;
-    if (closer->op == &_BranchOps || closer->op == &_LeafOps) {
-        closer->op->destroy(closer);
-    }
+    closer->op->destroy(closer);
 
     Shape* farther = branch->fartherChild.shape;
-    if (farther->op == &_BranchOps || farther->op == &_LeafOps) {
-        farther->op->destroy(farther);
-    }
+    farther->op->destroy(farther);
 
     free(branch);
 }

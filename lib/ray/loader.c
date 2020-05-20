@@ -224,8 +224,12 @@ World* loadFile(const char* fromPath)
             root = createLeaf(world->shapes, world->nShapes);
         }
         printf("done!\n");
-        world->shapes[0] = root;
-        world->nShapes = 1;
+
+        // TODO: This is a messy and non-obvious way to clear the list of objects from world.
+        free(world->shapes); // shapes is now replicated in above BVH or Leaf node.
+        world->nShapes = 0;
+        world->shapes = NULL; // ensure this is reallocated.
+        addShape(world, root);
     }
 
     // Fix up aspect

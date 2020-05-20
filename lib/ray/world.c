@@ -18,16 +18,16 @@ World* createWorld() {
 }
 
 void destroyWorld(World* world) {
-    for (size_t i = 0; i < world->nShaders; i++) {
-        free(world->shaderNames[i]);
-        free(world->shaders[i]); // TODO: call shader->destroy
-    }
     for (size_t i = 0; i < world->nShapes; i++) {
         Shape* shape = world->shapes[i];
         shape->op->destroy(shape);
     }
     for (size_t i = 0; i < world->nLights; i++) {
         free(world->lights[i]); // TODO: call light->destroy
+    }
+    for (size_t i = 0; i < world->nShaders; i++) {
+        free(world->shaderNames[i]);
+        free(world->shaders[i]); // TODO: call shader->destroy
     }
     free(world->shaderNames);
     free(world->shaders);

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h> // memcpy()
 #include <float.h>
 #include <assert.h>
 #ifdef PROFILE
@@ -97,6 +98,7 @@ int shape_sort(const void *p1, const void *p2)
     return result;
 }
 
+// Creates a tree composed of Branches and Leaf nodes.
 Shape* make_tree(Shape** shapes, int nShapes, int level)
 {
     Vec3 boxmin, boxmax, boxdim;
@@ -222,9 +224,10 @@ static
 void bvhDestroy(Shape* shape) {
     BVH* bvh = (BVH*) shape;
     for (size_t i = 0; i < bvh->nShapes; i++) {
-        Shape* shape = bvh->shapes[i];
-        shape->op->destroy(shape);
+        Shape* toDestroy = bvh->shapes[i];
+        toDestroy->op->destroy(toDestroy);
     }
+    free(bvh->shapes);
     bvh->root->op->destroy(bvh->root);
     free(bvh);
 }
@@ -251,7 +254,8 @@ Shape *createBVH(Shape** shapes, int nShapes)
 	bvh->root = make_tree(shapes, nShapes, 0);
 
 	// Note: these are only used for memory housekeeping.
-	bvh->shapes = shapes;
+	bvh->shapes = (Shape**) malloc(nShapes * sizeof(Shape*));
+	memcpy(bvh->shapes, shapes, nShapes * sizeof(Shape*));
 	bvh->nShapes = nShapes;
 
 #ifdef PROFILE
