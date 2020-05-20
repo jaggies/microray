@@ -20,6 +20,7 @@ typedef int bool;
 #endif
 #else
 #include <stdint.h>
+#include <stddef.h> // size_t
 #endif
 
 #if !defined(__cplusplus)

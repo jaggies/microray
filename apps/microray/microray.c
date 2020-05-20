@@ -26,9 +26,8 @@
 long intersections = 0;
 #endif /* PROFILE */
 
-static NetPBM* pbm = 0;
-
 static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
+    NetPBM* pbm = (NetPBM*) userdata;
     pbm->write(pbm, rgb);
     if (x == 0) {
         printf("Line %d\n", y);
@@ -38,16 +37,16 @@ static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
 
 static void renderToFile(World* world, const char* outpath)
 {
-    pbm = createNetPBM(outpath);
-
+    NetPBM* pbm = createNetPBM(outpath);
     if (pbm->open(pbm, outpath, &world->width, &world->height, &world->depth, NETPBM_WRITE)) {
         printf("Rendering scene (%dx%d)\n", world->width, world->height);
-        renderImage(world, pixel, NULL);
+        renderImage(world, pixel, pbm);
         pbm->close(pbm);
     } else {
         printf("Can't write image '%s'\n", outpath);
         return;
     }
+    destroyPBM(pbm);
 }
 
 int main(int argc, char **argv)
@@ -77,6 +76,7 @@ int main(int argc, char **argv)
         return 0;
     }
     renderToFile(world, outpath);
+    destroyWorld(world);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

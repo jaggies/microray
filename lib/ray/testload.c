@@ -5,6 +5,7 @@
  *      Author: jmiller
  */
 
+#include "os.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "pointlit.h"

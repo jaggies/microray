@@ -32,6 +32,7 @@ extern "C" {
 #endif
 
 NetPBM* createNetPBM();
+void destroyPBM(NetPBM*);
 
 #ifdef __cplusplus
 }

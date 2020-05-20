@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
+#include <assert.h>
 #ifdef PROFILE
 #include <time.h>
 #endif
@@ -73,7 +74,7 @@ int shape_sort(const void *p1, const void *p2)
     Vec3 s2center;
     Vec3 diff;
 	float dot;
-    
+
     s1->op->bounds(s1, &s1boxmin, &s1boxmax);
     add3(&s1boxmin, &s1boxmax, &s1center);
     mult3(&s1center, .5f, &s1center);
@@ -191,18 +192,72 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
     return g;
 }
 
+static
+int bvhIntersect(Shape* shape, Ray* ray, Hit* hit) {
+    BVH* bvh = (BVH*) shape;
+    return bvh->root->op->intersect(bvh->root, ray, hit);
+}
+
+static
+void bvhNormal(Shape* shape, Hit* hit, Vec3 *n) {
+    BVH* bvh = (BVH*) shape;
+    assert(0); // should never be called
+    return bvh->root->op->normal(bvh->root, hit, n);
+}
+
+static
+void bvhUV(Shape* shape, Hit* hit, Vec2 * uv) {
+    BVH* bvh = (BVH*) shape;
+    assert(0); // should never be called
+    return bvh->root->op->uv(bvh->root, hit, uv);
+}
+
+static
+void bvhBounds(Shape* shape, Vec3* min, Vec3* max) {
+    BVH* bvh = (BVH*) shape;
+    return bvh->root->op->bounds(bvh->root, min, max); // TODO
+}
+
+static
+void bvhDestroy(Shape* shape) {
+    BVH* bvh = (BVH*) shape;
+    for (size_t i = 0; i < bvh->nShapes; i++) {
+        Shape* shape = bvh->shapes[i];
+        shape->op->destroy(shape);
+    }
+    bvh->root->op->destroy(bvh->root);
+    free(bvh);
+}
+
+static ShapeOps _bvhOps;
+
+// Returns a BVH object as the top level in the scene graph. This is a little
+// wasteful, but allows hierarchical BVH nodes.
 Shape *createBVH(Shape** shapes, int nShapes)
 {
-    Shape* s; 
+    BVH* bvh = (BVH*) malloc(sizeof(BVH));
 
-	initialize_BVH_parameters();
+    initialize_BVH_parameters();
 
-    s = make_tree(shapes, nShapes, 0);
+	if (!_bvhOps.intersect) {
+	    _bvhOps.intersect = bvhIntersect;
+	    _bvhOps.normal = bvhNormal;
+	    _bvhOps.uv = bvhUV;
+	    _bvhOps.bounds = bvhBounds;
+	    _bvhOps.destroy = bvhDestroy;
+    }
+
+	bvh->op = &_bvhOps;
+	bvh->root = make_tree(shapes, nShapes, 0);
+
+	// Note: these are only used for memory housekeeping.
+	bvh->shapes = shapes;
+	bvh->nShapes = nShapes;
 
 #ifdef PROFILE
     print_tree_stats();
 #endif /* PROFILE */
 
-    return s;
+    return (Shape*) bvh;
 }
 

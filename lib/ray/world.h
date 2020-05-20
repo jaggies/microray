@@ -3,10 +3,6 @@
 
 #include "vec3.h"
 
-#define MAXSHAPES 100
-#define MAXSHADERS 20
-#define MAXLIGHTS 8
-
 typedef struct World World;
 typedef struct Shape Shape;
 typedef struct Shader Shader;
@@ -14,14 +10,14 @@ typedef struct Light Light;
 typedef struct Camera Camera;
 
 struct World {
-    Shape* shapes[MAXSHAPES];
-    Shader* shaders[MAXSHADERS];
-    const char* shaderNames[MAXSHADERS];
-    Light* lights[MAXLIGHTS];
+    Shape** shapes;
+    Shader** shaders;
+    char** shaderNames;
+    Light** lights;
     Camera* camera;
-    int nShapes;
-    int nShaders;
-    int nLights;
+    size_t nShapes;
+    size_t nShaders;
+    size_t nLights;
     Vec3 background; /* background colors */
     float epsilon; /* intersection slop */
     int width; /* image width */
@@ -31,6 +27,11 @@ struct World {
 };
 
 World* createWorld();
+void destroyWorld(World*);
+
+void addLight(World* world, Light* light);
+void addShape(World* world, Shape* shape);
+void addShader(World* world, char* shaderName, Shader* shader);
 
 #endif /* WORLD_H */
 

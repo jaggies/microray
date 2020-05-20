@@ -17,7 +17,7 @@ typedef struct ShapeOps ShapeOps;
 
 struct Shape {
     ShapeOps *op; /* These must be first in all "subclasses" */
-    Shader* shader; 
+    Shader* shader;
 };
 
 struct ShapeOps {
@@ -25,6 +25,7 @@ struct ShapeOps {
     void (*normal)(Shape* shape, Hit* hit, Vec3 *n);
     void (*uv)(Shape* shape, Hit* hit, Vec2 * uv);
     void (*bounds)(Shape*, Vec3* min, Vec3* max);
+    void (*destroy)(Shape*);
 };
 
 #endif /* SHAPE_H_ */

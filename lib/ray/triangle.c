@@ -27,7 +27,7 @@ static
 int triangleIntersect(Shape* shape, Ray* ray, Hit *hit) {
     Triangle* triangle;
     float div, invDiv, alpha, beta, t;
-    Vec3 d, s1, s2; 
+    Vec3 d, s1, s2;
 
     if(shape == hit->ignore)
         return 0;
@@ -105,6 +105,12 @@ void triangleUV(Shape* shape, Hit* hit, Vec2 * uv) {
     addscaled2(uv, hitData.beta, &edge20, uv);
 }
 
+static
+void triangleDestroy(Shape* shape) {
+    Triangle* triangle = (Triangle*) shape;
+    free(triangle);
+}
+
 static ShapeOps _triangleOps;
 
 Shape* createTriangle(
@@ -117,6 +123,7 @@ Shape* createTriangle(
         _triangleOps.normal = triangleNormal;
         _triangleOps.uv = triangleUV;
         _triangleOps.bounds = triangleBounds;
+        _triangleOps.destroy = triangleDestroy;
     }
     triangle->op = &_triangleOps;
     triangle->shader = shader;

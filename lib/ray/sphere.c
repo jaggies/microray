@@ -81,6 +81,12 @@ void sphereBounds(Shape* shape, Vec3* min, Vec3* max) {
     max->z = sphere->position.z + sphere->radius;
 }
 
+static
+void sphereDestroy(Shape* shape) {
+    Sphere* sphere = (Sphere*) shape;
+    free(sphere);
+}
+
 static ShapeOps _sphereOps;
 
 Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
@@ -90,6 +96,7 @@ Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
         _sphereOps.normal = sphereNormal;
         _sphereOps.uv = sphereUV;
         _sphereOps.bounds = sphereBounds;
+        _sphereOps.destroy = sphereDestroy;
     }
     sphere->op = &_sphereOps;
     sphere->shader = shader;

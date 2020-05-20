@@ -7,7 +7,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "branch.h"
+#include "leaf.h"
 #include "hit.h"
 #include "shader.h"
 #include "shape.h"
@@ -59,14 +61,12 @@ int Branch_intersect(Shape* shape, Ray* ray, Hit* hit) {
 
 static
 void Branch_normal(Shape* shape, Hit* hit, Vec3 *n) {
-
-    /* empty - never called */
+    assert(0); /* empty - never called */
 }
 
 static
 void Branch_uv(Shape* shape, Hit* hit, Vec2 * uv) {
-
-    /* empty - never called */
+    assert(0); /* empty - never called */
 }
 
 static
@@ -85,6 +85,25 @@ void Branch_bounds(Shape* shape, Vec3* boxmin, Vec3* boxmax) {
 }
 
 static ShapeOps _BranchOps;
+extern ShapeOps _LeafOps;
+
+static
+void Branch_destroy(Shape* shape) {
+    Branch* branch = (Branch*) shape;
+
+    // We only destroy Branch and Leaf nodes. Shapes are destroyed in BVH container.
+    Shape* closer = branch->closerChild.shape;
+    if (closer->op == &_BranchOps || closer->op == &_LeafOps) {
+        closer->op->destroy(closer);
+    }
+
+    Shape* farther = branch->fartherChild.shape;
+    if (farther->op == &_BranchOps || farther->op == &_LeafOps) {
+        farther->op->destroy(farther);
+    }
+
+    free(branch);
+}
 
 Shape* createBranch(Shape* closer, Shape* farther, Vec3 *dir) {
     Branch* branch = (Branch*) malloc(sizeof(Branch));
@@ -94,14 +113,16 @@ Shape* createBranch(Shape* closer, Shape* farther, Vec3 *dir) {
         _BranchOps.normal = Branch_normal;
         _BranchOps.uv = Branch_uv;
         _BranchOps.bounds = Branch_bounds;
+        _BranchOps.destroy = Branch_destroy;
     }
+
     branch->op = &_BranchOps;
 
     branch->closerChild.shape = closer;
-    closer->op->bounds(closer, &branch->closerChild.boxmin, &branch->closerChild.boxmax); 
+    closer->op->bounds(closer, &branch->closerChild.boxmin, &branch->closerChild.boxmax);
 
     branch->fartherChild.shape = farther;
-    farther->op->bounds(farther, &branch->fartherChild.boxmin, &branch->fartherChild.boxmax); 
+    farther->op->bounds(farther, &branch->fartherChild.boxmin, &branch->fartherChild.boxmax);
 
     branch->dir = *dir;
 

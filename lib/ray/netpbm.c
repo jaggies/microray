@@ -148,3 +148,7 @@ NetPBM* createNetPBM() {
     return pbm;
 }
 
+void destroyPBM(NetPBM* netPbm) {
+    free(netPbm);
+}
+

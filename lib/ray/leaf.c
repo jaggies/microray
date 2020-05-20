@@ -79,7 +79,16 @@ void Leaf_bounds(Shape* shape, Vec3* boxmin, Vec3* boxmax) {
     }
 }
 
-static ShapeOps _LeafOps;
+static
+void Leaf_destroy(Shape* shape) {
+    Leaf* leaf = (Leaf*) shape;
+    // Note: shapes are shared, so only free array of Shape pointers for this node.
+    // Actual shapes are destroyed in top-level BVH node.
+    free(leaf->shapes);
+    free(leaf);
+}
+
+ShapeOps _LeafOps;
 
 Shape* createLeaf(Shape** shapes, int nShapes) {
     Leaf* leaf;
@@ -93,6 +102,7 @@ Shape* createLeaf(Shape** shapes, int nShapes) {
         _LeafOps.normal = Leaf_normal;
         _LeafOps.uv = Leaf_uv;
         _LeafOps.bounds = Leaf_bounds;
+        _LeafOps.destroy = Leaf_destroy;
     }
     leaf->op = &_LeafOps;
 

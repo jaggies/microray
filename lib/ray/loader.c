@@ -27,26 +27,6 @@ static Shader* defaultShader = 0;
 extern char* strdup(const char* str);
 #endif
 
-static void addLight(World* world, Light* light) {
-    if (light) {
-        if (world->nLights < MAXLIGHTS) {
-            world->lights[world->nLights++] = light;
-        } else {
-            printf("Too many lights (%d)!\n", world->nLights);
-        }
-    }
-}
-
-static void addShape(World* world, Shape* shape) {
-    if (shape) {
-        if (world->nShapes < MAXSHAPES) {
-            world->shapes[world->nShapes++] = shape;
-        } else {
-            printf("Too many shapes (%d)!\n", world->nShapes);
-        }
-    }
-}
-
 static Shader* getShader(World* world, const char* shaderName) {
     int i;
     for (i = 0; i < world->nShaders; i++) {
@@ -63,18 +43,6 @@ static Shader* getShader(World* world, const char* shaderName) {
         defaultShader = createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
     }
     return defaultShader;
-}
-
-static void addShader(World* world, const char* shaderName, Shader* shader) {
-    if (shader) {
-        if (world->nShaders < MAXSHADERS) {
-            world->shaders[world->nShaders] = shader;
-            world->shaderNames[world->nShaders] = shaderName; /* allocated in loadPhongShader */
-            world->nShaders++;
-        } else {
-            printf("Too many shaders(%d)!\n", world->nShaders);
-        }
-    }
 }
 
 static Vec3 loadBackground(char* args) {
@@ -243,6 +211,8 @@ World* loadFile(const char* fromPath)
             }
         }
     }
+
+    fclose(fp);
 
     if(!getenv("NO_BVH")) {
         Shape *root;
