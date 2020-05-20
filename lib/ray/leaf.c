@@ -91,9 +91,8 @@ void Leaf_destroy(Shape* shape) {
 ShapeOps _LeafOps;
 
 Shape* createLeaf(Shape** shapes, int nShapes) {
-    assert(nShapes > 0);
-
     Leaf* leaf = (Leaf*) malloc(sizeof(Leaf));
+    assert(nShapes > 0);
 
     if (!_LeafOps.intersect) {
         _LeafOps.intersect = Leaf_intersect;

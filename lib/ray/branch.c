@@ -90,12 +90,11 @@ extern ShapeOps _LeafOps;
 static
 void Branch_destroy(Shape* shape) {
     Branch* branch = (Branch*) shape;
+    Shape* closer = branch->closerChild.shape;
+    Shape* farther = branch->fartherChild.shape;
 
     // We only destroy Branch and Leaf nodes. Shapes are destroyed in BVH container.
-    Shape* closer = branch->closerChild.shape;
     closer->op->destroy(closer);
-
-    Shape* farther = branch->fartherChild.shape;
     farther->op->destroy(farther);
 
     free(branch);

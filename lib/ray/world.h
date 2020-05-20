@@ -1,6 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <stddef.h>
 #include "vec3.h"
 
 typedef struct World World;

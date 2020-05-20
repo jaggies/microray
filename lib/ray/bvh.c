@@ -204,26 +204,27 @@ static
 void bvhNormal(Shape* shape, Hit* hit, Vec3 *n) {
     BVH* bvh = (BVH*) shape;
     assert(0); // should never be called
-    return bvh->root->op->normal(bvh->root, hit, n);
+    bvh->root->op->normal(bvh->root, hit, n);
 }
 
 static
 void bvhUV(Shape* shape, Hit* hit, Vec2 * uv) {
     BVH* bvh = (BVH*) shape;
     assert(0); // should never be called
-    return bvh->root->op->uv(bvh->root, hit, uv);
+    bvh->root->op->uv(bvh->root, hit, uv);
 }
 
 static
 void bvhBounds(Shape* shape, Vec3* min, Vec3* max) {
     BVH* bvh = (BVH*) shape;
-    return bvh->root->op->bounds(bvh->root, min, max); // TODO
+    bvh->root->op->bounds(bvh->root, min, max); // TODO
 }
 
 static
 void bvhDestroy(Shape* shape) {
     BVH* bvh = (BVH*) shape;
-    for (size_t i = 0; i < bvh->nShapes; i++) {
+    size_t i;
+    for (i = 0; i < bvh->nShapes; i++) {
         Shape* toDestroy = bvh->shapes[i];
         toDestroy->op->destroy(toDestroy);
     }
