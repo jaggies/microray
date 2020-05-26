@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "os.h"
 #include "vec3.h"
 #include "hit.h"
 #include "phongshd.h"
@@ -14,6 +15,7 @@
 #include "pointlit.h"
 #include "perspcam.h"
 #include "world.h"
+#include "loader.h"
 
 #define MAXNAME 16
 #define DEFAULT_WIDTH 320
@@ -239,5 +241,25 @@ World* loadFile(const char* fromPath)
         world->height = DEFAULT_HEIGHT;
     }
 
+    dumpStats(stdout);
+
     return world;
+}
+
+void dumpStats(FILE* fp) {
+#ifdef PROFILE
+    extern size_t sphereAllocations;
+    extern size_t triangleAllocations;
+    extern size_t bvh_leaf_count;
+    extern size_t bvh_branch_count;
+    fprintf(fp, "Total sphere allocations: %lu (%lu bytes)\n",
+            sphereAllocations, sphereAllocations*sizeof(Sphere));
+    fprintf(fp, "Total triangle allocations: %lu (%lu bytes)\n",
+            triangleAllocations, triangleAllocations*sizeof(Triangle));
+    fprintf(fp, "BVH Branch allocations: %lu (%lu bytes)\n",
+            bvh_branch_count, bvh_branch_count*sizeof(Branch));
+    fprintf(fp, "BVH Leaf allocations: %lu (%lu bytes)\n",
+            bvh_leaf_count, bvh_leaf_count*sizeof(Leaf));
+
+#endif
 }

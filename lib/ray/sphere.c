@@ -17,6 +17,7 @@
 
 #ifdef PROFILE
 extern long intersections;
+size_t sphereAllocations;
 #endif /* PROFILE */
 
 static
@@ -107,5 +108,8 @@ Shape* createSphere(float x, float y, float z, float r, Shader* shader) {
     sphere->position.z = z;
     sphere->radius = r;
     sphere->radius2 = r * r;
+#ifdef PROFILE
+    sphereAllocations++;
+#endif
     return (Shape*) sphere;
 }

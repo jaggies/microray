@@ -5,12 +5,17 @@
  *      Author: jmiller
  */
 #include <stdlib.h>
+#include "os.h"
 #include "hit.h"
 #include "shader.h"
 #include "triangle.h"
 #include "util.h"
 
 #define tmin (0.0f)
+
+#ifdef PROFILE
+size_t triangleAllocations;
+#endif // PROFILE
 
 typedef struct _TriangleHit {
     float alpha;
@@ -136,5 +141,8 @@ Shape* createTriangle(
     copy2(uv2, &triangle->uv[2]);
     cross(&triangle->edge[0], &triangle->edge[1], &triangle->normal[0]);
     normalize3(&triangle->normal[0]);
+#ifdef PROFILE
+    triangleAllocations++;
+#endif
     return (Shape*) triangle;
 }

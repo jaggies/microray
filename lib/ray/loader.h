@@ -9,5 +9,6 @@
 #define LOADER_H_
 
 World* loadFile(const char* fromPath);
+void dumpStats(FILE* fp);
 
 #endif /* LOADER_H_ */

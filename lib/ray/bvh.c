@@ -42,14 +42,15 @@ static int total_treed = 0;
 static time_t previous;
 static int bvh_level_counts[MAX_MAX_BVH_DEPTH];
 /* Each element N of this array is the number of leafs with N children */
-static int bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT + 1];
-static int bvh_node_count = 0;
-static int bvh_leaf_count = 0;
+size_t bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT + 1];
+size_t bvh_node_count = 0;
+size_t bvh_branch_count = 0;
+size_t bvh_leaf_count = 0;
 
 void print_tree_stats()
 {
-    fprintf(stderr, "%d bvh nodes\n", bvh_node_count);
-    fprintf(stderr, "%d of those are leaves\n", bvh_leaf_count);
+    fprintf(stderr, "%lu bvh nodes\n", bvh_node_count);
+    fprintf(stderr, "%lu of those are leaves\n", bvh_leaf_count);
     for(int i = 0; i < bvh_max_depth + 1; i++) {
         fprintf(stderr, "bvh level %2d: %6d nodes\n", i, bvh_level_counts[i]);
     }
@@ -58,10 +59,10 @@ void print_tree_stats()
         largest_leaf_count--;
 
     for(int i = 0; i <= largest_leaf_count; i++) {
-        fprintf(stderr, "%2d shapes in %6d leaves\n", i, bvh_leaf_size_counts[i]);
+        fprintf(stderr, "%2d shapes in %6lu leaves\n", i, bvh_leaf_size_counts[i]);
     }
     if(bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT] > 0)
-        fprintf(stderr, "%d or more shapes in %6d leaves\n", MAX_LEAF_SIZE_COUNT, bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT]);
+        fprintf(stderr, "%d or more shapes in %6lu leaves\n", MAX_LEAF_SIZE_COUNT, bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT]);
 }
 #endif /* PROFILE */
 
@@ -180,7 +181,9 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
         Shape *g1 = make_tree(shapes + startA, countA, level + 1);
         Shape *g2 = make_tree(shapes + startB, countB, level + 1);
         g = createBranch(g1, g2, split_plane_normal);
-
+#ifdef PROFILE
+        bvh_branch_count++;
+#endif
     } else {
 
         g = createLeaf(shapes, nShapes);
