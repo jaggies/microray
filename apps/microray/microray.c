@@ -6,6 +6,8 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h> /* free */
 #include <assert.h>
 #include "os.h"
 #include "util.h"
@@ -31,7 +33,8 @@ static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     NetPBM* pbm = (NetPBM*) userdata;
     pbm->write(pbm, rgb);
     if (x == 0) {
-        printf("Line %d\n", y);
+        fprintf(stdout, "Line %d\r", y);
+		fflush(stdout);
     }
     return true;
 }
@@ -52,8 +55,9 @@ static void renderToFile(World* world, const char* outpath)
 
 int main(int argc, char **argv)
 {
-    World* world;
-    const char* outpath = "out.ppm"; /* TODO: get path from arguments */
+    World* world = NULL;
+    char* outpath = NULL;
+    char* ptr = NULL; /* for finding/replacing extension */
 
     printf("*** MICRORAY ***\n");
 
@@ -76,8 +80,15 @@ int main(int argc, char **argv)
         printf("World contains no camera, exiting\n");
         return 0;
     }
-    renderToFile(world, outpath);
+
+    ptr = strrchr(argv[1], '.');
+    size_t pos = ptr ? (ptr - argv[1]) : strlen(argv[1]);
+    outpath = (char*) malloc((5 + pos) * sizeof(char)); /* 5 for including trailing null */
+    strncpy(outpath, argv[1], pos);
+    strncpy(outpath + pos, ".ppm", 5);
+    renderToFile(world, basename(outpath));
     destroyWorld(world);
+    free(outpath);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

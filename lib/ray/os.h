@@ -21,6 +21,8 @@ typedef int bool;
 #else
 #include <stdint.h>
 #include <stddef.h> // size_t
+#include <linux/limits.h> // PATH_MAX
+#include <libgen.h> // basename()
 #endif
 
 #if !defined(__cplusplus)
