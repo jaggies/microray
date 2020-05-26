@@ -10,10 +10,12 @@
 
 #include "shape.h"
 
+/* Container for the root of a BVH tree */
 struct BVH {
     ShapeOps* op; /* these must be first */
-    Shape* root; // pointer to root of tree
-    Shape** shapes; // for housekeeping (cleanup)
+    Shader* shader; /* not currently used */
+    Shape* root; /* pointer to root of tree */
+    Shape** shapes; /* for housekeeping (cleanup) */
     size_t nShapes;
 };
 
