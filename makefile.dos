@@ -20,6 +20,7 @@ RAYSRC = \
 	lib\ray\leaf.c \
 	lib\ray\loader.c \
 	lib\ray\netpbm.c \
+	lib\ray\os.c \
 	lib\ray\perspcam.c \
 	lib\ray\phongshd.c \
 	lib\ray\pointlit.c \

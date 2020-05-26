@@ -18,6 +18,7 @@ typedef unsigned long long uint32_t;
 #if !defined(bool) // Couldn't get this to work in both TC & Linux. DOS it doesn't exist; Linux only C++
 typedef int bool;
 #endif
+extern const char* basename(const char *path);
 #else
 #include <stdint.h>
 #include <stddef.h> // size_t

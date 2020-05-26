@@ -17,6 +17,9 @@
 #include "util.h"
 
 extern "C" {
+#include "hit.h"
+#include "shader.h"
+#include "shape.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "pointlit.h"

@@ -58,6 +58,7 @@ int main(int argc, char **argv)
     World* world = NULL;
     char* outpath = NULL;
     char* ptr = NULL; /* for finding/replacing extension */
+    size_t pos;
 
     printf("*** MICRORAY ***\n");
 
@@ -82,7 +83,7 @@ int main(int argc, char **argv)
     }
 
     ptr = strrchr(argv[1], '.');
-    size_t pos = ptr ? (ptr - argv[1]) : strlen(argv[1]);
+    pos = ptr ? (ptr - argv[1]) : strlen(argv[1]);
     outpath = (char*) malloc((5 + pos) * sizeof(char)); /* 5 for including trailing null */
     strncpy(outpath, argv[1], pos);
     strncpy(outpath + pos, ".ppm", 5);
