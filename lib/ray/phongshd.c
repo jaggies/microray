@@ -6,8 +6,9 @@
  */
 
 #include <stdlib.h>
-#include "phongshd.h"
 #include "hit.h"
+#include "vec3.h"
+#include "phongshd.h"
 
 static const float _threshold = 0.01f; /* minimum factor before we'll call pow() */
 

@@ -7,8 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "sphere.h"
+#include "vec3.h"
+#include "hit.h"
 #include "shader.h"
+#include "sphere.h"
 #include "hit.h"
 
 #define tmin (0.0f)

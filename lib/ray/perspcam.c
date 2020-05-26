@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h>
+#include "ray.h"
 #include "perspcam.h"
 
 static void perspMakeRay(Camera* cam, float u, float v, Ray* ray) {

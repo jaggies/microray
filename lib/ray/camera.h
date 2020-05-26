@@ -8,7 +8,6 @@
 #ifndef CAMERA_H_
 #define CAMERA_H_
 
-typedef struct Ray Ray;
 typedef struct Camera Camera;
 typedef struct CameraOps CameraOps;
 

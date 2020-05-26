@@ -1,8 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "world.h"
+#include "hit.h"
+#include "light.h"
+#include "shader.h"
+#include "camera.h"
 #include "shape.h"
+#include "world.h"
 
 #define MAX_RAY_DEPTH 4 /* max number of reflected rays */
 #define MAX_IMAGE_DEPTH 255

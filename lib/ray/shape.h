@@ -11,8 +11,6 @@
 #include "ray.h"
 #include "hit.h"
 
-typedef struct Shader Shader;
-typedef struct Shape Shape;
 typedef struct ShapeOps ShapeOps;
 
 struct Shape {
