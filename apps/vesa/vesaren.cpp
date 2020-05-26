@@ -137,7 +137,7 @@ static void renderToFile(World* world, Vesa* vesa, const char* outpath)
 
 int main(int argc, char **argv)
 {
-    const char* outpath = "out.ppm"; /* TODO: get path from arguments */
+    char* outpath;
     World* world;
     Vesa vesa;
 
@@ -163,8 +163,10 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    renderToFile(world, &vesa, outpath);
+    outpath = getImagePath(argv[1]);
+    renderToFile(world, &vesa, basename(outpath));
     destroyWorld(world);
+    free(outpath);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

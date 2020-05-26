@@ -98,8 +98,8 @@ static void renderToFile(World* world, const char* outpath)
 
 int main(int argc, char **argv)
 {
-    const char* outpath = "out.ppm"; /* TODO: get path from arguments */
     World* world;
+    char* outpath;
     board_init();
     makePalette(RBITS, GBITS, BBITS);
 
@@ -124,8 +124,10 @@ int main(int argc, char **argv)
         printf("World contains no camera, exiting\n");
         return 0;
     }
-    renderToFile(world, outpath);
+    outpath = getImagePath(argv[1]);
+    renderToFile(world, basename(outpath));
     destroyWorld(world);
+    free(outpath);
 
 #ifdef PROFILE
     printf("%ld intersections\n", intersections);

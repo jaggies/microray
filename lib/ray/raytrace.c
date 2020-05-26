@@ -6,6 +6,8 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "util.h"
 #include "vec2.h"
 #include "vec3.h"
@@ -130,3 +132,14 @@ void renderImage(World* world, PixelCB pixel, void* userdata)
         }
     }
 }
+
+char* getImagePath(const char* path) {
+    char* result;
+    const char* ptr = strrchr(path, '.');
+    size_t pos = ptr ? (ptr - path) : strlen(path);
+    result = (char*) malloc((5 + pos) * sizeof(char)); /* 5 for including trailing null */
+    strncpy(result, path, pos);
+    strncpy(result + pos, ".ppm", 5);
+    return result;
+}
+

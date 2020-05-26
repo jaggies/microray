@@ -16,5 +16,6 @@ extern int shadow(Ray* ray, const Shape* ignore, World* world);
 
 typedef bool (*PixelCB)(uint16_t x, uint16_t y, uint8_t rgb[3], void* userdata);
 extern void renderImage(World* world, PixelCB pixel, void* data);
+extern char* getImagePath(const char* path); // Caller is responsible for allocation
 
 #endif /* RAYTRACE_H_ */
