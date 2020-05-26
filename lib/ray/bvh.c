@@ -19,6 +19,10 @@
 static int bvh_max_depth = 8;
 static unsigned int bvh_leaf_max = 4;
 
+static const Vec3 SplitX = { 1.0f, 0.0f, 0.0f };
+static const Vec3 SplitY = { 0.0f, 1.0f, 0.0f };
+static const Vec3 SplitZ = { 0.0f, 0.0f, 1.0f };
+
 static void initialize_BVH_parameters()
 {
     if(getenv("BVH_MAX_DEPTH") != 0) {
@@ -61,7 +65,7 @@ void print_tree_stats()
 }
 #endif /* PROFILE */
 
-Vec3 sort_dir;
+const Vec3* sort_dir;
 int shape_sort(const void *p1, const void *p2)
 {
     int result;
@@ -88,7 +92,7 @@ int shape_sort(const void *p1, const void *p2)
 
     sub3(&s2center, &s1center, &diff);
 
-    dot = dot3(&diff, &sort_dir);
+    dot = dot3(&diff, sort_dir);
 
     if(dot < 0)
         result = 1; /* s1 should be after s2 */
@@ -104,8 +108,8 @@ int shape_sort(const void *p1, const void *p2)
 Shape* make_tree(Shape** shapes, int nShapes, int level)
 {
     Vec3 boxmin, boxmax, boxdim;
-    Vec3 split_plane_normal;
-	int i, startA, countA, startB, countB;
+    const Vec3* split_plane_normal;
+    int i, startA, countA, startB, countB;
     Shape *g;
 
 #ifdef PROFILE
@@ -155,11 +159,11 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
     sub3(&boxmax, &boxmin, &boxdim);
 
     if(boxdim.x > boxdim.y && boxdim.x > boxdim.z) {
-        vec3(1, 0, 0, &split_plane_normal);
+        split_plane_normal = &SplitX;
     } else if(boxdim.y > boxdim.z) {
-        vec3(0, 1, 0, &split_plane_normal);
+        split_plane_normal = &SplitY;
     } else {
-        vec3(0, 0, 1, &split_plane_normal);
+        split_plane_normal = &SplitZ;
     }
 
     sort_dir = split_plane_normal;
@@ -175,7 +179,7 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
         /* construct children */
         Shape *g1 = make_tree(shapes + startA, countA, level + 1);
         Shape *g2 = make_tree(shapes + startB, countB, level + 1);
-        g = createBranch(g1, g2, &split_plane_normal);
+        g = createBranch(g1, g2, split_plane_normal);
 
     } else {
 

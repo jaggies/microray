@@ -37,7 +37,7 @@ int Branch_intersect(Shape* shape, Ray* ray, Hit* hit) {
     intersections++;
 #endif /* PROFILE */
 
-    if(dot3(&ray->dir, &branch->dir) > 0) {
+    if(dot3(&ray->dir, branch->dir) > 0) {
         child0 = &branch->closerChild;
         child1 = &branch->fartherChild;
     } else {
@@ -101,7 +101,7 @@ void Branch_destroy(Shape* shape) {
     free(branch);
 }
 
-Shape* createBranch(Shape* closer, Shape* farther, Vec3 *dir) {
+Shape* createBranch(Shape* closer, Shape* farther, const Vec3* dir) {
     Branch* branch = (Branch*) malloc(sizeof(Branch));
 
     if (!_BranchOps.intersect) {
@@ -120,7 +120,7 @@ Shape* createBranch(Shape* closer, Shape* farther, Vec3 *dir) {
     branch->fartherChild.shape = farther;
     farther->op->bounds(farther, &branch->fartherChild.boxmin, &branch->fartherChild.boxmax);
 
-    branch->dir = *dir;
+    branch->dir = dir;
 
     return (Shape*) branch;
 }

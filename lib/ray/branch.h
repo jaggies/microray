@@ -29,11 +29,12 @@ typedef struct _BoundedShape {
 /* Two shapes and their bounds with a spatial ordering */
 typedef struct _Branch {
     ShapeOps* op; /* these must be first */
-    Vec3 dir;
+    // Shader* shader; // TODO: Branch is not a shape, this could crash
+    const Vec3* dir; // pointer to one of the standard axis
     BoundedShape closerChild;
     BoundedShape fartherChild;
 } Branch;
 
-extern Shape* createBranch(Shape *closer, Shape *farther, Vec3 *dir);
+extern Shape* createBranch(Shape *closer, Shape *farther, const Vec3 *dir);
 
 #endif /* BRANCH_H_ */
