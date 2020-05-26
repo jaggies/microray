@@ -10,6 +10,8 @@
 #include <string.h>
 #include <float.h>
 #include <assert.h>
+#include "hit.h"
+#include "shader.h"
 #include "leaf.h"
 #include "shader.h"
 #include "hit.h"

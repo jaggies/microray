@@ -18,10 +18,11 @@
 #include <Xm/DrawingA.h>
 #include <Xm/ScrolledW.h>
 #include "util.h"
+#include "hit.h"
+#include "shader.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "pointlit.h"
-#include "hit.h"
 #include "phongshd.h"
 #include "checkshd.h"
 #include "perspcam.h"
@@ -34,7 +35,8 @@
 
 #define MAX_RAY_DEPTH 4 /* max number of reflected rays */
 #define USE_ERROR_DIFFUSION
-#define DITHER_IN_FULL_COLOR
+//#define DITHER_IN_FULL_COLOR
+#define SHOW_PROGRESS
 #define DEFAULT_WIDTH 1
 #define DEFAULT_HEIGHT 1
 #define RBITS 2
@@ -377,12 +379,14 @@ static bool pixel(uint16_t x, uint16_t y, uint8_t rgb[3], void* data) {
 
     // Force an expose event
     #ifdef SHOW_PROGRESS
-    XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
-    while (XPending(dpy)) {
-        XEvent event;
-        XNextEvent(dpy, &event);
-        XtDispatchEvent(&event);
-    }
+    //XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
+	if (x == 0) { // newline
+    	while (XPending(dpy)) {
+        	XEvent event;
+        	XNextEvent(dpy, &event);
+        	XtDispatchEvent(&event);
+    	}
+	}
     #endif
     return true;
 }

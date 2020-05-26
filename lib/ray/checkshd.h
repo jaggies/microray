@@ -11,7 +11,6 @@
 #include "vec2.h"
 #include "vec3.h"
 
-typedef struct Shader Shader;
 typedef struct CheckerboardShader CheckerboardShader;
 
 struct CheckerboardShader {

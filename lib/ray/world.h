@@ -5,10 +5,6 @@
 #include "vec3.h"
 
 typedef struct World World;
-typedef struct Shape Shape;
-typedef struct Shader Shader;
-typedef struct Light Light;
-typedef struct Camera Camera;
 
 struct World {
     Shape** shapes;

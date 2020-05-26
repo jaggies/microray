@@ -9,10 +9,11 @@
 #include <assert.h>
 #include "os.h"
 #include "util.h"
+#include "hit.h"
+#include "shader.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "pointlit.h"
-#include "hit.h"
 #include "phongshd.h"
 #include "checkshd.h"
 #include "perspcam.h"

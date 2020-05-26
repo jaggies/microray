@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vec3.h"
+#include "hit.h"
 #include "phongshd.h"
 #include "checkshd.h"
 #include "shape.h"

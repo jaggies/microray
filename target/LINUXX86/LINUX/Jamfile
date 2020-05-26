@@ -1,0 +1,4 @@
+SubDir TOP target LINUXX86 LINUX ;
+LINKLIBS += -lm ;
+AR = ar cur ;
+CCFLAGS += -std=gnu99 ;

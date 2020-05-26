@@ -5,8 +5,9 @@
  *      Author: jmiller
  */
 #include <stdlib.h>
-#include "triangle.h"
 #include "hit.h"
+#include "shader.h"
+#include "triangle.h"
 #include "util.h"
 
 #define tmin (0.0f)

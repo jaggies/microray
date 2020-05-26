@@ -6,6 +6,8 @@
 #ifdef PROFILE
 #include <time.h>
 #endif
+#include "hit.h"
+#include "shader.h"
 #include "bvh.h"
 #include "branch.h"
 #include "leaf.h"

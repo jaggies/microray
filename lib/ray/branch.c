@@ -8,11 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "branch.h"
-#include "leaf.h"
+#include "vec3.h"
 #include "hit.h"
 #include "shader.h"
 #include "shape.h"
+#include "branch.h"
+#include "leaf.h"
 #include "range.h"
 #include "util.h"
 

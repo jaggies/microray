@@ -8,14 +8,13 @@
 #ifndef SHADER_H_
 #define SHADER_H_
 
-typedef struct Hit Hit;
-typedef struct Vec3 Vec3;
-typedef struct Shader Shader;
 typedef struct ShaderOps ShaderOps;
 
 struct Shader {
     ShaderOps* op; /* these must be first in all "inherited" classes */
 };
+
+typedef struct Shader Shader;
 
 struct ShaderOps {
     void (*evaluate)(Shader*, Hit* hit, Vec3* color);
