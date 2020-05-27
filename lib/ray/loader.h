@@ -8,7 +8,7 @@
 #ifndef LOADER_H_
 #define LOADER_H_
 
-World* loadFile(const char* fromPath);
-void dumpStats(FILE* fp);
+// Loads file, adding contents to the world
+bool loadWorld(World* world, const char* fromPath);
 
 #endif /* LOADER_H_ */

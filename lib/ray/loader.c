@@ -17,18 +17,39 @@
 #include "world.h"
 #include "loader.h"
 
+#include "waveload.h"
+
 #define MAXNAME 16
 #define DEFAULT_WIDTH 320
 #define DEFAULT_HEIGHT 200
 
-enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA, POINTLIGHT, CHECKERBOARD, BACKGROUND, RESOLUTION };
-const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera", "pointlight", "checkerboard", "background", "resolution" };
-const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
+enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA,
+        POINTLIGHT, CHECKERBOARD, BACKGROUND, RESOLUTION };
+const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera",
+        "pointlight", "checkerboard", "background", "resolution" };
+
+static const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
 static const char* DELIM = " \t";
 static Shader* defaultShader = 0;
+
+// hacky workaround for not loading string.h on DOS for some reason...
 #ifndef strdup
 extern char* strdup(const char* str);
 #endif
+
+static bool loadNative(World* world, const char* fromPath);
+
+bool loadWorld(World* world, const char* fromPath) {
+    char* suffix = strrchr(fromPath, '.');
+    if (suffix && 0 == strcasecmp(suffix, ".obj")) {
+        return loadWavefront(world, fromPath, "");
+    } else if (suffix && 0 == strcasecmp(suffix, ".scn")) {
+        return loadNative(world, fromPath);
+    } else {
+        printf("Unknown file type '%s'\n", fromPath);
+    }
+    return false;
+}
 
 static Shader* getShader(World* world, const char* shaderName) {
     int i;
@@ -43,7 +64,7 @@ static Shader* getShader(World* world, const char* shaderName) {
         vec3(1.0f,1.0f,1.0f,&diffuse);
         vec3(1.0f,1.0f,1.0f,&specular);
         vec3(0.0f,0.0f,0.0f,&ambient);
-        defaultShader = createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
+        defaultShader = (Shader*) createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
     }
     return defaultShader;
 }
@@ -61,7 +82,7 @@ void loadResolution(World* world, char* args) {
     world->height = atoi(strtok(0, DELIM));
 }
 
-static Shader* loadPhongShader(char* args, char** outname) {
+static PhongShader* loadPhongShader(char* args, char** outname) {
     Vec3 diffuse, specular, ambient;
     float exponent, index, reflect, transmit;
     *outname = (char*) strdup(strtok(args, DELIM));
@@ -141,17 +162,16 @@ static Light* loadPointLight(char* args) {
     return createPointLight(&position, &color);
 }
 
-World* loadFile(const char* fromPath)
+bool loadNative(World* world, const char* fromPath)
 {
     int line = 0;
     char buffer[100];
-    World* world = createWorld();
     FILE *fp;
-    printf("Opening file %s\n", fromPath);
     fp = fopen(fromPath, "r");
     if (!fp) {
         return 0;
     }
+    printf("Reading native file %s\n", fromPath);
     while (!feof(fp)) {
         int i;
         char* ptr;
@@ -193,7 +213,7 @@ World* loadFile(const char* fromPath)
                     addLight(world, loadPointLight(ptr));
                     break;
                 case PHONG:
-                    shader = loadPhongShader(ptr, &name);
+                    shader = (Shader*) loadPhongShader(ptr, &name);
                     addShader(world, name, shader);
                     break;
                 case BACKGROUND:
@@ -235,31 +255,12 @@ World* loadFile(const char* fromPath)
         addShape(world, root);
     }
 
-    // Fix up aspect
+    // Fix aspect
     if (world->height == 0 || world->width == 0) {
         world->width = DEFAULT_WIDTH;
         world->height = DEFAULT_HEIGHT;
     }
 
-    dumpStats(stdout);
-
-    return world;
+    return true;
 }
 
-void dumpStats(FILE* fp) {
-#ifdef PROFILE
-    extern size_t sphereAllocations;
-    extern size_t triangleAllocations;
-    extern size_t bvh_leaf_count;
-    extern size_t bvh_branch_count;
-    fprintf(fp, "Total sphere allocations: %lu (%lu bytes)\n",
-            sphereAllocations, sphereAllocations*sizeof(Sphere));
-    fprintf(fp, "Total triangle allocations: %lu (%lu bytes)\n",
-            triangleAllocations, triangleAllocations*sizeof(Triangle));
-    fprintf(fp, "BVH Branch allocations: %lu (%lu bytes)\n",
-            bvh_branch_count, bvh_branch_count*sizeof(Branch));
-    fprintf(fp, "BVH Leaf allocations: %lu (%lu bytes)\n",
-            bvh_leaf_count, bvh_leaf_count*sizeof(Leaf));
-
-#endif
-}

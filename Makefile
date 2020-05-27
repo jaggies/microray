@@ -1,24 +1,29 @@
 SRC = \
-	lib/ray/loader.c \
+	lib/ray/branch.c \
+	lib/ray/bvh.c \
+	lib/ray/checkshd.c \
+	lib/ray/dither.c \
+	lib/ray/face.c \
+	lib/ray/hit.c \
 	lib/ray/leaf.c \
+	lib/ray/loader.c \
+	lib/ray/netpbm.c \
+	lib/ray/perspcam.c \
+	lib/ray/phongshd.c \
+	lib/ray/pointlit.c \
+	lib/ray/range.c \
+	lib/ray/raymath.c \
+	lib/ray/raytrace.c \
+	lib/ray/sphere.c \
+	lib/ray/stats.c \
+	lib/ray/testload.c \
+	lib/ray/triangle.c \
 	lib/ray/vec2.c \
 	lib/ray/vec3.c \
-	lib/ray/hit.c \
-	lib/ray/branch.c \
-	lib/ray/triangle.c \
-	lib/ray/perspcam.c \
-	lib/ray/dither.c \
-	lib/ray/checkshd.c \
-	lib/ray/phongshd.c \
-	lib/ray/testload.c \
-	lib/ray/raytrace.c \
-	lib/ray/bvh.c \
-	lib/ray/range.c \
-	lib/ray/sphere.c \
+	lib/ray/waveload.c \
+	lib/ray/wavematl.c \
+	lib/ray/waveutil.c \
 	lib/ray/world.c \
-	lib/ray/raymath.c \
-	lib/ray/netpbm.c \
-	lib/ray/pointlit.c
 
 OBJ = $(SRC:.c=.o)
 INCLUDE = -Ilib/ray

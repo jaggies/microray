@@ -24,7 +24,7 @@ struct PhongShader {
     float transmit; /* amount of transmission */
 };
 
-extern Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent,
+extern PhongShader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent,
         float index, float reflect, float transmit);
 
 #endif /* PHONESHADER_H_ */

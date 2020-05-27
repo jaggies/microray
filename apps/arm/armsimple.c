@@ -60,10 +60,10 @@ void pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
 
 int main(int argc, char **argv)
 {
-    World* world;
+    World* world = createWorld();
     if (argc > 1) {
         printf("Loading %s\n", argv[1]);
-        world = loadFile(argv[1]);
+        loadWorld(world, argv[1]);
     } else {
         printf("Loading default scene\n");
         world = testLoad(100, 100);

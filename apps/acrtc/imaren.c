@@ -98,7 +98,7 @@ static void renderToFile(World* world, const char* outpath)
 
 int main(int argc, char **argv)
 {
-    World* world;
+    World* world = createWorld();
     char* outpath;
     board_init();
     makePalette(RBITS, GBITS, BBITS);
@@ -107,22 +107,22 @@ int main(int argc, char **argv)
 
     if (argc > 1) {
         printf("Loading %s\n", argv[1]);
-        world = loadFile(argv[1]);
-    } else {
-        printf("Loading default scene\n");
-        world = testLoad(100, 100);
-    }
-    if (world->nShapes == 0) {
-        printf("World contains no shapes, exiting\n");
-        return 0;
-    }
-    if (world->nLights == 0) {
-        printf("World contains no lights, exiting\n");
-        return 0;
-    }
-    if (!world->camera) {
-        printf("World contains no camera, exiting\n");
-        return 0;
+        if (!loadWorld(world, argv[1])) {
+            printf("Failed to load scene '%s'\n", argv[1]);
+            return 0;
+        }
+        if (world->nShapes == 0) {
+            printf("World contains no shapes, exiting\n");
+            return 0;
+        }
+        if (world->nLights == 0) {
+            printf("World contains no lights, exiting\n");
+            return 0;
+        }
+        if (!world->camera) {
+            printf("World contains no camera, exiting\n");
+            return 0;
+        }
     }
     outpath = getImagePath(argv[1]);
     renderToFile(world, basename(outpath));

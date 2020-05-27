@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 
     if (argc > 1) {
         printf("Loading %s\n", argv[1]);
-        world = loadFile(argv[1]);
+        world = loadWorld(argv[1]);
     } else {
         printf("Loading default scene\n");
         world = testLoad(100, 100);

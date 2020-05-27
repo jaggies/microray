@@ -25,10 +25,6 @@
 #include "netpbm.h"
 #include "testload.h"
 
-#ifdef PROFILE
-long intersections = 0;
-#endif /* PROFILE */
-
 static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     NetPBM* pbm = (NetPBM*) userdata;
     pbm->write(pbm, rgb);
@@ -55,39 +51,38 @@ static void renderToFile(World* world, const char* outpath)
 
 int main(int argc, char **argv)
 {
-    World* world = NULL;
-    char* outpath = NULL;
+    World* world;
 
     printf("*** MICRORAY ***\n");
 
-    if (argc > 1) {
-        printf("Loading %s\n", argv[1]);
-        world = loadFile(argv[1]);
+    if (argc < 2) {
+        printf("Usage: %s <file>\n", argv[0]);
+        return 0;
+    }
+
+    if (loadWorld(world = createWorld(), argv[1])) {
+        char* outpath = getImagePath(argv[1]);
+
+        if (world->nShapes == 0) {
+            printf("World contains no shapes\n");
+        }
+        if (world->nLights == 0) {
+            printf("World contains no lights\n");
+        }
+        if (!world->camera) {
+            printf("World contains no camera, exiting\n");
+        }
+
+        renderToFile(world, outpath);
+        dumpStats(stderr);
+
+        free(outpath);
     } else {
-        printf("Loading default scene\n");
-        world = testLoad(100, 100);
-    }
-    if (world->nShapes == 0) {
-        printf("World contains no shapes, exiting\n");
-        return 0;
-    }
-    if (world->nLights == 0) {
-        printf("World contains no lights, exiting\n");
-        return 0;
-    }
-    if (!world->camera) {
-        printf("World contains no camera, exiting\n");
-        return 0;
+        printf("Failed to load file '%s'\n", argv[1]);
     }
 
-    outpath = getImagePath(argv[1]);
-    renderToFile(world, basename(outpath));
     destroyWorld(world);
-    free(outpath);
 
-#ifdef PROFILE
-    printf("%ld intersections\n", intersections);
-#endif /* PROFILE */
     return 0;
 }
 

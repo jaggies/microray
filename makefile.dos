@@ -16,6 +16,7 @@ RAYSRC = \
 	lib\ray\bvh.c \
 	lib\ray\checkshd.c \
 	lib\ray\dither.c \
+	lib\ray\face.c \
 	lib\ray\hit.c \
 	lib\ray\leaf.c \
 	lib\ray\loader.c \
@@ -28,11 +29,16 @@ RAYSRC = \
 	lib\ray\raymath.c \
 	lib\ray\raytrace.c \
 	lib\ray\sphere.c \
+	lib\ray\stats.c \
 	lib\ray\testload.c \
 	lib\ray\triangle.c \
 	lib\ray\vec2.c \
 	lib\ray\vec3.c \
-	lib\ray\world.c 
+	lib\ray\waveload.c \
+	lib\ray\wavematl.c \
+	lib\ray\waveutil.c \
+	lib\ray\world.c  \
+
 
 RAYOBJ = $(VESASRC:.cpp=.obj) $(RAYSRC:.c=.obj) $(IMASRC:.c=.obj) $(MATHSRC:.c=.obj) 
 DEFINES = -DDOS

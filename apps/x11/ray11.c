@@ -46,10 +46,6 @@
 #define GMASK (((1 << GBITS) - 1) << (8 - GBITS))
 #define BMASK (((1 << BBITS) - 1) << (8 - BBITS))
 
-#ifdef PROFILE
-    long intersections = 0;
-#endif /* PROFILE */
-
 XtAppContext app;
 Widget topLevel;
 Widget drawingArea;
@@ -58,6 +54,7 @@ GC gc;
 Pixmap pixmap; // backing store for XmDrawingArea
 Colormap cmap;
 
+static World* world;
 static char* ABOUT_MSG = "MicroRay (c) 2018 Jim Miller";
 static char* HELP_MSG = "Help yourself.";
 static void startRender(const char* path);
@@ -405,10 +402,7 @@ static void renderX11(World* world, const char* outpath) {
     XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
     pbm->close(pbm);
 
-    #ifdef PROFILE
-        printf("%ld intersections\n", intersections);
-        intersections = 0;
-    #endif /* PROFILE */
+    dumpStats(stderr);
 }
 
 Boolean render_proc(XtPointer client_data)
@@ -421,29 +415,29 @@ Boolean render_proc(XtPointer client_data)
 }
 
 static void startRender(const char* path) {
-    printf("Loading %s\n", path);
-    World* world = loadFile(path);
-    if (!world) {
-        printf("Failed to load %s\n", path);
-        return;
-    }
-    if (world->nShapes == 0) {
-        printf("World contains no shapes\n");
-        return;
-    }
-    if (world->nLights == 0) {
-        printf("World contains no lights\n");
-        return;
-    }
-    if (!world->camera) {
-        printf("World contains no camera\n");
-        return;
-    }
-    XtVaSetValues(drawingArea,
-            XmNwidth, world->width,
-            XmNheight, world->height, NULL);
+    if (loadWorld(world = createWorld(), path)) {
+        char* outpath = getImagePath(path);
 
-    XtAppAddWorkProc(app, render_proc, world);
+        if (world->nShapes == 0) {
+            printf("World contains no shapes\n");
+        }
+        if (world->nLights == 0) {
+            printf("World contains no lights\n");
+        }
+        if (!world->camera) {
+            printf("World contains no camera, exiting\n");
+        }
+
+        XtVaSetValues(drawingArea,
+                XmNwidth, world->width,
+                XmNheight, world->height, NULL);
+
+        XtAppAddWorkProc(app, render_proc, world);
+
+        free(outpath);
+    } else {
+        printf("Failed to load file '%s'\n", path);
+    }
 }
 
 int main(int argc, char **argv) {

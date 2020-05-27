@@ -5,6 +5,7 @@ Library libmray :
 	bvh.c
 	checkshd.c
 	dither.c
+	face.c
 	hit.c
 	leaf.c
 	loader.c
@@ -16,9 +17,13 @@ Library libmray :
 	raymath.c
 	raytrace.c
 	sphere.c
+	stats.c
 	testload.c
 	triangle.c
 	vec2.c
 	vec3.c
+	waveload.c
+	wavematl.c
+	waveutil.c
 	world.c
 	;

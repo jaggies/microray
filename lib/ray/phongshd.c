@@ -50,7 +50,7 @@ static float phongGetIndexOfRefraction(Shader* sh) {
 
 static ShaderOps _phongOps;
 
-Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index,
+PhongShader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float exponent, float index,
         float reflect, float transmit) {
     PhongShader* shader = (PhongShader*) malloc(sizeof(PhongShader));
     if (!_phongOps.evaluate) {
@@ -67,5 +67,5 @@ Shader* createPhongShader(Vec3* diffuse, Vec3* specular, Vec3* ambient, float ex
     shader->index = index;
     shader->reflect = reflect;
     shader->transmit = transmit;
-    return (Shader*) shader;
+    return shader;
 }

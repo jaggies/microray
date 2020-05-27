@@ -5,6 +5,7 @@
  *      Author: jmiller
  */
 
+#include <stdio.h>
 #include "os.h"
 #include "hit.h"
 #include "shader.h"
@@ -43,18 +44,18 @@ World* testLoad(int xres, int yres) {
     vec3(0.5f,0.5f,0.5f,&specular);
     vec3(0.0f,0.0f,0.0f,&ambient);
     vec3(0.0f,0.0f,0.0f,&diffuse);
-    red = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
+    red = (Shader*) createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
     vec3(0.0f,0.0f,0.0f,&diffuse);
-    blu = createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
+    blu = (Shader*) createPhongShader(&diffuse,  &specular,  &ambient, 20.0f, 1.1f, 0.5f, 0.5f);
     vec3(0.5f,0.5f,0.5f,&diffuse);
     /* Shader* mirror */ (void) createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4f, 0.5f, 0.0f);
     vec3(1.0f,0.0f,0.0f, &diffuse);
-    odd = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4f, 0.5f, 0.0f);
+    odd = (Shader*) createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4f, 0.5f, 0.0f);
     vec3(0.0f,1.0f,0.0f, &diffuse);
-    even = createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4f, 0.5f, 0.0f);
+    even = (Shader*) createPhongShader(&diffuse, &specular, &ambient, 10.0f, 1.4f, 0.5f, 0.0f);
     vec2(10.0f,10.0f,&scale);
     vec2(0.0f,0.0f,&bias);
-    checker = createCheckerboardShader(odd, even, &scale, &bias);
+    checker = (Shader*) createCheckerboardShader(odd, even, &scale, &bias);
     world->shapes[world->nShapes++] = createSphere(0.25f, 0.0f, 0.0f, 0.25f, red);
     world->shapes[world->nShapes++] = createSphere(-0.25f, 0.0f, 0.0f, 0.25f, blu);
     world->shapes[world->nShapes++] = createTriangle(

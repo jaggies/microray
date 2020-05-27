@@ -8,6 +8,8 @@
 #ifndef SHADER_H_
 #define SHADER_H_
 
+#include "hit.h"
+
 typedef struct ShaderOps ShaderOps;
 
 struct Shader {
