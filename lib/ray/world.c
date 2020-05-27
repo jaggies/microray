@@ -35,6 +35,9 @@ void destroyWorld(World* world) {
         free(world->shaderNames[i]);
         free(world->shaders[i]); // TODO: call shader->destroy
     }
+    for (i = 0; i < world->nFaces; i++) {
+        destroyFace(world->faces[i]);
+    }
     free(world->shapes);
     free(world->shaders);
     free(world->shaderNames);
@@ -43,6 +46,7 @@ void destroyWorld(World* world) {
     free(world->points);
     free(world->normals);
     free(world->uvs);
+    free(world->faces);
 
     world->shaderNames = NULL;
     world->shaders = NULL;
@@ -72,7 +76,7 @@ size_t addShape(World* world, Shape* shape) {
     return -1; // couldn't be added
 }
 
-size_t addShader(World* world, char* shaderName, Shader* shader) {
+size_t addShader(World* world, const char* shaderName, Shader* shader) {
     if (shader) {
         // TODO: insert shader in proper location to avoid sorting later...
         world->shaders = (Shader**) realloc(world->shaders, (world->nShaders+1)*sizeof(Shader*));
@@ -80,7 +84,7 @@ size_t addShader(World* world, char* shaderName, Shader* shader) {
         assert(world->shaders);
         assert(world->shaderNames);
         world->shaders[world->nShaders] = shader;
-        world->shaderNames[world->nShaders] = shaderName; /* allocated in loadPhongShader */
+        world->shaderNames[world->nShaders] = strdup(shaderName);
         return world->nShaders++;
     }
     return -1; // couldn't be added
@@ -118,9 +122,9 @@ size_t addUv(World* world, Vec2* uv) {
 
 size_t addFace(World* world, Face* face) {
     if (face) {
-        world->faces = (Face*) realloc(world->faces, (world->nFaces+1)*sizeof(Face));
+        world->faces = (Face**) realloc(world->faces, (world->nFaces+1)*sizeof(Face*));
         assert(world->faces);
-        world->faces[world->nFaces] = *face;
+        world->faces[world->nFaces] = face;
         return world->nFaces++;
     }
     return -1; // couldn't be added

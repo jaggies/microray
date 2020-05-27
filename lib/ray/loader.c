@@ -32,11 +32,6 @@ static const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
 static const char* DELIM = " \t";
 static Shader* defaultShader = 0;
 
-// hacky workaround for not loading string.h on DOS for some reason...
-#ifndef strdup
-extern char* strdup(const char* str);
-#endif
-
 static bool loadNative(World* world, const char* fromPath);
 
 bool loadWorld(World* world, const char* fromPath) {
@@ -85,7 +80,7 @@ void loadResolution(World* world, char* args) {
 static PhongShader* loadPhongShader(char* args, char** outname) {
     Vec3 diffuse, specular, ambient;
     float exponent, index, reflect, transmit;
-    *outname = (char*) strdup(strtok(args, DELIM));
+    *outname = strtok(args, DELIM);
 	diffuse.x = atof(strtok(0, DELIM));
 	diffuse.y = atof(strtok(0, DELIM));
 	diffuse.z = atof(strtok(0, DELIM));
@@ -103,18 +98,16 @@ static PhongShader* loadPhongShader(char* args, char** outname) {
 }
 
 static Shader* loadCheckerboardShader(World* world, char* args, char** outname) {
-    char* name;
     char* oddName;
     char* evenName;
     Vec2 scale, bias;
-	name = strtok(args, DELIM);
+    *outname = strtok(args, DELIM);
 	oddName = strtok(0, DELIM);
 	evenName = strtok(0, DELIM);
     scale.x = atof(strtok(0, DELIM));
 	scale.y = atof(strtok(0, DELIM));
 	bias.x = atof(strtok(0, DELIM));
 	bias.y = atof(strtok(0, DELIM));
-    *outname = (char*) strdup(name);
     return createCheckerboardShader(getShader(world, oddName), getShader(world, evenName), &scale, &bias);
 }
 

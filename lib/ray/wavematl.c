@@ -54,6 +54,8 @@ bool loadMaterialLibrary(World* world, const char* path, const char* name)
     char* filename = fullpath(path, name);
     FILE *infile = fopen(filename, "r");
 
+    fprintf(stderr, "Loading material file '%s'\n", filename);
+
     if (infile) {
         int linecount = 1;  // FIXME: inaccurate if lines are escaped
         PhongShader* currentShader = NULL;
@@ -69,7 +71,7 @@ bool loadMaterialLibrary(World* world, const char* path, const char* name)
                         nargs = split(line, args, MAX_ARGS);
                         if (nargs > 0 && strcmp(args[0], "newmtl") == 0) {
                             currentShader = createDefaultShader();
-                            char* name = strdup(nargs > 1 && strlen(args[1]) ? args[1] : "NoName");
+                            const char* name = nargs > 1 && strlen(args[1]) ? args[1] : "unknown";
                             addShader(world, name, (Shader*) currentShader);
                         } else {
                             fprintf(stderr, "Unknown token %s\n", args[0]);

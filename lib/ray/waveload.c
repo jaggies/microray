@@ -38,20 +38,22 @@ typedef struct Curve {
 typedef struct State {
     Shader* shader; // current shader
     Curve curve;
-    char* filepath;
+    const char* filepath;
 } State;
 
 bool
 loadWavefront(World* world, const char *filename, const char *options)
 {
+    bool result = false;
     State state;
     char *tmpstr = strdup(filename);
     FILE *infile = NULL;
     bzero(&state, sizeof(State));
 
     state.shader = (Shader*) createDefaultShader();
-    state.filepath = strcat(dirname(tmpstr), "/");
-    free(tmpstr);
+    addShader(world, "default", state.shader);
+
+    state.filepath = dirname(tmpstr);
 
     // Parse Wavefront obj file
     int linecount = 0;
@@ -59,7 +61,7 @@ loadWavefront(World* world, const char *filename, const char *options)
         fprintf(stderr, "Loading Wavefront file '%s'\n", filename);
         do {
             char str[WAVE_MAX_LINE];
-//            char args[MAX_ARGS];
+            const char* args[MAX_ARGS];
             linecount += waveGetLine(infile, str, WAVE_MAX_LINE);
 
             // strategy:
@@ -169,14 +171,12 @@ loadWavefront(World* world, const char *filename, const char *options)
 
                 case 'm':
                 {
-#if 0
                     size_t nargs = split(str, args, MAX_ARGS);
                     if ( nargs > 1 && strcmp(args[0], "mtllib") == 0 ) {
-                        loadMaterialLibrary(state.filepath, args[1], world);
+                        loadMaterialLibrary(world, state.filepath, args[1]);
                     } else {
-                        warn("Unsupported: " << str << "\n");
+                        fprintf(stderr, "Unsupported: '%s'\n", str);
                     }
-#endif
                 }
                 break;
 
@@ -318,9 +318,7 @@ loadWavefront(World* world, const char *filename, const char *options)
             }
         } while (!feof(infile));
         fclose(infile);
-        return true;
-    } else {
-        return false;
+        result = true;
     }
 
     // Build objects
@@ -347,5 +345,7 @@ loadWavefront(World* world, const char *filename, const char *options)
     root->getBounds(min, max);
     return root;
 #endif
+    free(tmpstr);
+    return result;
 }
 

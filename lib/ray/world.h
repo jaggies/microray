@@ -30,7 +30,7 @@ struct World {
     Vec3* points;
     Vec3* normals;
     Vec2* uvs;
-    Face* faces;
+    Face** faces;
     size_t nPoints;
     size_t nNormals;
     size_t nUvs;
@@ -57,7 +57,7 @@ void dumpStats(FILE* fp);
 // Returns the index position of the item stored or -1 if it fails.
 size_t addLight(World* world, Light* light);
 size_t addShape(World* world, Shape* shape);
-size_t addShader(World* world, char* shaderName, Shader* shader);
+size_t addShader(World* world, const char* shaderName, Shader* shader);
 size_t addPoint(World*, Vec3* point);
 size_t addNormal(World*, Vec3* normal);
 size_t addUv(World*, Vec2* uv);

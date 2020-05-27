@@ -25,7 +25,7 @@ void destroyFace(Face* face) {
 
 void addFaceVertex(Face* face, size_t vertexIdx) {
     if (vertexIdx != -1) {
-        face->vertexIndex = (size_t*) malloc((face->nVertexIndex+1) * sizeof(size_t));
+        face->vertexIndex = (size_t*) realloc(face->vertexIndex, (face->nVertexIndex+1) * sizeof(size_t));
         assert(face->vertexIndex);
         face->vertexIndex[face->nVertexIndex++] = vertexIdx;
     }
@@ -33,7 +33,7 @@ void addFaceVertex(Face* face, size_t vertexIdx) {
 
 void addFaceNormal(Face* face, size_t normalIdx) {
     if (normalIdx != -1) {
-        face->normalIndex = (size_t*) malloc((face->nNormalIndex+1) * sizeof(size_t));
+        face->normalIndex = (size_t*) realloc(face->normalIndex, (face->nNormalIndex+1) * sizeof(size_t));
         assert(face->normalIndex);
         face->normalIndex[face->nNormalIndex++] = normalIdx;
     }
@@ -41,7 +41,7 @@ void addFaceNormal(Face* face, size_t normalIdx) {
 
 void addFaceTexture(Face* face, size_t textureIdx) {
     if (textureIdx != -1) {
-        face->textureIndex = (size_t*) malloc((face->nTextureIndex+1) * sizeof(size_t));
+        face->textureIndex = (size_t*) realloc(face->textureIndex, (face->nTextureIndex+1) * sizeof(size_t));
         assert(face->textureIndex);
         face->textureIndex[face->nTextureIndex++] = textureIdx;
     }

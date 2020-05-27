@@ -44,7 +44,6 @@ static void renderToFile(World* world, const char* outpath)
         pbm->close(pbm);
     } else {
         printf("Can't write image '%s'\n", outpath);
-        return;
     }
     destroyPBM(pbm);
 }
