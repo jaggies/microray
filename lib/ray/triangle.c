@@ -120,9 +120,9 @@ void triangleDestroy(Shape* shape) {
 static ShapeOps _triangleOps;
 
 Shape* createTriangle(
-        Vec3* p0, Vec3* p1, Vec3* p2,
-        Vec2* uv0, Vec2* uv1, Vec2* uv2,
-        Shader* shader) {
+        const Vec3* p0, const Vec3* p1, const Vec3* p2,
+        const Vec2* uv0, const Vec2* uv1, const Vec2* uv2,
+        const Shader* shader) {
     Triangle* triangle = (Triangle*) malloc(sizeof(Triangle));
     if (!_triangleOps.intersect) {
         _triangleOps.intersect = triangleIntersect;

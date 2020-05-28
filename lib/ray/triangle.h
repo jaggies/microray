@@ -14,14 +14,14 @@ typedef struct Triangle Triangle;
 
 struct Triangle {
     ShapeOps* op;
-    Shader* shader;
+    const Shader* shader;
     Vec3  point[1];
     Vec3  normal[1];
     Vec3  edge[2];
     Vec2  uv[3];
 };
 
-extern Shape* createTriangle(Vec3* p0, Vec3* p1, Vec3* p2,
-        Vec2* uv0, Vec2* uv1, Vec2* uv2, Shader* shader);
+extern Shape* createTriangle(const Vec3* p0, const Vec3* p1, const Vec3* p2,
+        const Vec2* uv0, const Vec2* uv1, const Vec2* uv2, const Shader* shader);
 
 #endif /* TRIANGLE_H_ */

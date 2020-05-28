@@ -48,6 +48,8 @@ loadWavefront(World* world, const char *filename, const char *options)
     State state;
     char *tmpstr = strdup(filename);
     FILE *infile = NULL;
+    int linecount = 0;
+
     bzero(&state, sizeof(State));
 
     state.shader = (Shader*) createDefaultShader();
@@ -56,7 +58,6 @@ loadWavefront(World* world, const char *filename, const char *options)
     state.filepath = dirname(tmpstr);
 
     // Parse Wavefront obj file
-    int linecount = 0;
     if ( (infile = fopen(filename, "r")) ) {
         fprintf(stderr, "Loading Wavefront file '%s'\n", filename);
         do {
@@ -151,7 +152,8 @@ loadWavefront(World* world, const char *filename, const char *options)
                 {
                     Face* face = createFace();
                     readFace(str, face);
-                    addFace(world, face);
+                    addFace(world, face); // TODO: Remove
+                    generateTriangles(world, face, state.shader);
                 }
                 break;
 
@@ -233,22 +235,16 @@ loadWavefront(World* world, const char *filename, const char *options)
 
                 case 'u':
                 {
-#if 0
-                    vector<string> items = split(str);
-                    if (items.size() > 1 && items[0] == "usemtl" ) {
-                        // We must add a new mesh since we don't support per-face shaders.
-                        state.mesh = NULL;
-                        map<string, sptr<Shader> >::iterator it = state.shaders.find(items[1]);
-                        if (state.shaders.end() != it) {
-                            state.shader = it->second;
-                        } else {
-                            debug("failed to find shader '%s'!\n" << items[1]);
-                            state.shader = defaultShader;
+                    size_t nargs = split(str, args, MAX_ARGS);
+                    if (nargs == 2 && strcmp(args[0], "usemtl") == 0) {
+                        state.shader = findShader(args[1], world);
+                        if (!state.shader) {
+                            fprintf(stderr, "Failed to find shader '%s'!\n", args[1]);
+                            state.shader = findShader("default", world);
                         }
                     } else {
-                        warn("Unsupported: " << str << "\n");
+                        fprintf(stderr, "Unsupported: '%s'\n", str);
                     }
-#endif
                 }
                 break;
 
@@ -321,30 +317,6 @@ loadWavefront(World* world, const char *filename, const char *options)
         result = true;
     }
 
-    // Build objects
-#if 0
-    sptr<Group> root = new Group;
-    char *tmp = strdup(filename);
-    string name = basename(tmp);
-    free(tmp);
-    root->setName(name.substr(0, name.rfind(".")));
-    for (size_t i = 0; i < state.objects.size(); i++) {
-        if (state.objects[i]->isValid(state)) {
-            assert(state.objects[i]->shader != NULL);
-            sptr<Shape> shape = state.objects[i]->createShape(state);
-            root->addChild(shape.ptr()); // TODO: hierarchy
-        } else {
-            warn("Invalid object " << i << "\n");
-        }
-    }
-
-    debug("Loaded " << root->children.item().size() << " items" << endl);
-
-    // Compute bounds once since we evaluate bounds lazily.
-    Vec3f min, max;
-    root->getBounds(min, max);
-    return root;
-#endif
     free(tmpstr);
     return result;
 }

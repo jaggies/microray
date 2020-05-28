@@ -70,8 +70,8 @@ bool loadMaterialLibrary(World* world, const char* path, const char* name)
                     case 'n': // newmtl
                         nargs = split(line, args, MAX_ARGS);
                         if (nargs > 0 && strcmp(args[0], "newmtl") == 0) {
-                            currentShader = createDefaultShader();
                             const char* name = nargs > 1 && strlen(args[1]) ? args[1] : "unknown";
+                            currentShader = createDefaultShader();
                             addShader(world, name, (Shader*) currentShader);
                         } else {
                             fprintf(stderr, "Unknown token %s\n", args[0]);

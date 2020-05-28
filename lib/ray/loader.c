@@ -24,26 +24,38 @@
 #define DEFAULT_HEIGHT 200
 
 enum { COMMENT = 0, SPHERE, TRIANGLE, PHONG, PERSPECTIVECAMERA,
-        POINTLIGHT, CHECKERBOARD, BACKGROUND, RESOLUTION };
+        POINTLIGHT, CHECKERBOARD, BACKGROUND, RESOLUTION, LOAD };
 const char *tokens[] = { "#", "sphere", "triangle", "phongshader", "perspectivecamera",
-        "pointlight", "checkerboard", "background", "resolution" };
+        "pointlight", "checkerboard", "background", "resolution", "load" };
 
 static const int kTokens = (sizeof(tokens) / sizeof(tokens[0]));
-static const char* DELIM = " \t";
+static const char* DELIM = " \t\n";
 static Shader* defaultShader = 0;
 
 static bool loadNative(World* world, const char* fromPath);
 
 bool loadWorld(World* world, const char* fromPath) {
+    bool result = false;
     char* suffix = strrchr(fromPath, '.');
     if (suffix && 0 == strcasecmp(suffix, ".obj")) {
-        return loadWavefront(world, fromPath, "");
+        result = loadWavefront(world, fromPath, "");
     } else if (suffix && 0 == strcasecmp(suffix, ".scn")) {
-        return loadNative(world, fromPath);
+        result = loadNative(world, fromPath);
     } else {
         printf("Unknown file type '%s'\n", fromPath);
     }
-    return false;
+#ifdef DEBUG
+    if (world->nShapes == 0) {
+        printf("World contains no shapes\n");
+    }
+    if (world->nLights == 0) {
+        printf("World contains no lights\n");
+    }
+    if (!world->camera) {
+        printf("World contains no camera\n");
+    }
+#endif
+    return result;
 }
 
 static Shader* getShader(World* world, const char* shaderName) {
@@ -75,6 +87,11 @@ static Vec3 loadBackground(char* args) {
 void loadResolution(World* world, char* args) {
     world->width = atoi(strtok(args, DELIM));
     world->height = atoi(strtok(0, DELIM));
+}
+
+void loadFile(World* world, char* args) {
+    char* fname = strtok(args, DELIM);
+    loadWorld(world, fname);
 }
 
 static PhongShader* loadPhongShader(char* args, char** outname) {
@@ -222,7 +239,9 @@ bool loadNative(World* world, const char* fromPath)
                 case RESOLUTION:
                     loadResolution(world, ptr);
                     break;
-                default:
+                case LOAD:
+                    loadFile(world, ptr);
+                    break;
                     printf("Unimplemented token %s, args:%s", tokens[foundToken], ptr);
             }
         }

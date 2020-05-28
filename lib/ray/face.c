@@ -5,8 +5,9 @@
  *      Author: jmiller
  */
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
-#include "face.h"
+#include "world.h"
 
 Face* createFace() {
     Face* result = (Face*) calloc(1, sizeof(Face));
@@ -46,3 +47,4 @@ void addFaceTexture(Face* face, size_t textureIdx) {
         face->textureIndex[face->nTextureIndex++] = textureIdx;
     }
 }
+
