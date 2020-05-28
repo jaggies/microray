@@ -21,6 +21,7 @@ ray11
 *.lib
 *.LIB
 *.BAK
+*.OBJ
 *.a
 *.la
 *.lo
@@ -32,7 +33,6 @@ ray11
 *.dylib
 
 # Executables
-*.exe
 *.EXE
 *.out
 *.app
