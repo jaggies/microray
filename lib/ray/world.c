@@ -135,13 +135,16 @@ size_t addFace(World* world, Face* face) {
 void generateTriangles(World* world, Face* face, Shader* shader) {
     static const Vec2 uv = {0.0f, 0.0f}; // default coordinate if none specified
     const Vec3* p0 = &world->points[face->vertexIndex[0]];
-    const Vec2* uv0 = face->textureIndex[0] >= 0 ? &world->uvs[face->textureIndex[0]] : &uv;
+    const Vec2* uv0 = face->nTextureIndex > 0
+            && face->textureIndex[0] >= 0 ? &world->uvs[face->textureIndex[0]] : &uv;
     size_t i;
     for (i = 1; i < face->nVertexIndex - 1; i++) {
         const Vec3* p1 = &world->points[face->vertexIndex[i]];
         const Vec3* p2 = &world->points[face->vertexIndex[i+1]];
-        const Vec2* uv1 = face->textureIndex[i] >= 0 ? &world->uvs[face->textureIndex[i]] : &uv;
-        const Vec2* uv2 = face->textureIndex[i+1] >= 0 ? &world->uvs[face->textureIndex[i+1]] : &uv;
+        const Vec2* uv1 = face->nTextureIndex > 0
+                && face->textureIndex[i] >= 0 ? &world->uvs[face->textureIndex[i]] : &uv;
+        const Vec2* uv2 = face->nTextureIndex > 0
+                && face->textureIndex[i+1] >= 0 ? &world->uvs[face->textureIndex[i+1]] : &uv;
         addShape(world, createTriangle(p0, p1, p2, uv0, uv1, uv2, shader));
     }
 }
