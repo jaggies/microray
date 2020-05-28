@@ -28,10 +28,6 @@
 #include "netpbm.h"
 #include "testload.h"
 
-#ifdef PROFILE
-long intersections = 0;
-#endif /* PROFILE */
-
 static NetPBM* pbm = 0;
 #define RBITS 3 // TODO: set up palette in this code
 #define GBITS 3
@@ -106,31 +102,17 @@ int main(int argc, char **argv)
     printf("*** Imagraph Renderer v1.0 ***\n");
 
     if (argc > 1) {
-        printf("Loading %s\n", argv[1]);
-        if (!loadWorld(world, argv[1])) {
+        if (loadWorld(world, argv[1])) {
+            outpath = getImagePath(argv[1]);
+            renderToFile(world, basename(outpath));
+            dumpStats(stderr);
+            free(outpath);
+        } else {
             printf("Failed to load scene '%s'\n", argv[1]);
-            return 0;
-        }
-        if (world->nShapes == 0) {
-            printf("World contains no shapes, exiting\n");
-            return 0;
-        }
-        if (world->nLights == 0) {
-            printf("World contains no lights, exiting\n");
-            return 0;
-        }
-        if (!world->camera) {
-            printf("World contains no camera, exiting\n");
-            return 0;
         }
     }
-    outpath = getImagePath(argv[1]);
-    renderToFile(world, basename(outpath));
-    destroyWorld(world);
-    free(outpath);
 
-#ifdef PROFILE
-    printf("%ld intersections\n", intersections);
-#endif /* PROFILE */
+    destroyWorld(world);
+
     return 0;
 }

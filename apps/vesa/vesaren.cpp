@@ -143,34 +143,23 @@ int main(int argc, char **argv)
 
     printf("*** VESA Renderer v1.0 ***\n");
 
-    if (argc > 1) {
-        printf("Loading %s\n", argv[1]);
-        world = loadWorld(argv[1]);
+    if (argc < 2) {
+        printf("Usage: %s <file>\n", argv[0]);
+        return 0;
+    }
+
+    if (loadWorld(world = createWorld(), argv[1])) {
+        char* outpath = getImagePath(argv[1]);
+
+        renderToFile(world, &vesa, outpath);
+        dumpStats(stderr);
+
+        free(outpath);
     } else {
-        printf("Loading default scene\n");
-        world = testLoad(100, 100);
-    }
-    if (world->nShapes == 0) {
-        printf("World contains no shapes, exiting\n");
-        return 0;
-    }
-    if (world->nLights == 0) {
-        printf("World contains no lights, exiting\n");
-        return 0;
-    }
-    if (!world->camera) {
-        printf("World contains no camera, exiting\n");
-        return 0;
+        printf("Failed to load file '%s'\n", argv[1]);
     }
 
-    outpath = getImagePath(argv[1]);
-    renderToFile(world, &vesa, basename(outpath));
     destroyWorld(world);
-    free(outpath);
-
-#ifdef PROFILE
-    printf("%ld intersections\n", intersections);
-#endif /* PROFILE */
     return 0;
 }
 

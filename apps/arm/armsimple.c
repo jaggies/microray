@@ -68,26 +68,12 @@ int main(int argc, char **argv)
         printf("Loading default scene\n");
         world = testLoad(100, 100);
     }
-    if (world->nShapes == 0) {
-        printf("World contains no shapes, exiting\n");
-        return 0;
-    }
-    if (world->nLights == 0) {
-        printf("World contains no lights, exiting\n");
-        return 0;
-    }
-    if (!world->camera) {
-        printf("World contains no camera, exiting\n");
-        return 0;
-    }
 
 	// Renders image, calling above pixel() routine for each pixel
     renderImage(world, pixel, NULL);
+    dumpStats(stderr);
     destroyWorld(world);
 
-#ifdef PROFILE
-    printf("%ld intersections\n", intersections);
-#endif /* PROFILE */
     return 0;
 }
 

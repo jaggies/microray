@@ -62,16 +62,6 @@ int main(int argc, char **argv)
     if (loadWorld(world = createWorld(), argv[1])) {
         char* outpath = getImagePath(argv[1]);
 
-        if (world->nShapes == 0) {
-            printf("World contains no shapes\n");
-        }
-        if (world->nLights == 0) {
-            printf("World contains no lights\n");
-        }
-        if (!world->camera) {
-            printf("World contains no camera, exiting\n");
-        }
-
         renderToFile(world, outpath);
         dumpStats(stderr);
 
