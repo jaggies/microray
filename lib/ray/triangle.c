@@ -49,7 +49,7 @@ int triangleIntersect(Shape* shape, Ray* ray, Hit *hit) {
     if (div == 0.0f) return 0;  /* ray parallel to plane. */
 
     invDiv = 1.0f / div;
-    sub3(&ray->point, &triangle->point[0], &d);
+    sub3(&ray->point, &triangle->point, &d);
 
     /* Compute barycentric coordinate 1 */
     alpha = dot3(&d, &s1) * invDiv;
@@ -74,17 +74,17 @@ int triangleIntersect(Shape* shape, Ray* ray, Hit *hit) {
 
 static
 void triangleNormal(Shape* shape, Hit* hit, Vec3 *n) {
-    copy3(&((Triangle*) shape)->normal[0], n);
+    copy3(&((Triangle*) shape)->normal, n);
 }
 
 static void triangleBounds(Shape* shape, Vec3* min, Vec3* max) {
     Triangle* triangle = (Triangle*) shape;
     Vec3 point1, point2;
 
-    *max = triangle->point[0];
-    *min = triangle->point[0];
+    *max = triangle->point;
+    *min = triangle->point;
 
-    add3(&triangle->point[0], &triangle->edge[0], &point1);
+    add3(&triangle->point, &triangle->edge[0], &point1);
     min->x = fminf(min->x, point1.x);
     min->y = fminf(min->y, point1.y);
     min->z = fminf(min->z, point1.z);
@@ -92,7 +92,7 @@ static void triangleBounds(Shape* shape, Vec3* min, Vec3* max) {
     max->y = fmaxf(max->y, point1.y);
     max->z = fmaxf(max->z, point1.z);
 
-    add3(&triangle->point[0], &triangle->edge[1], &point2);
+    add3(&triangle->point, &triangle->edge[1], &point2);
     min->x = fminf(min->x, point2.x);
     min->y = fminf(min->y, point2.y);
     min->z = fminf(min->z, point2.z);
@@ -133,14 +133,14 @@ Shape* createTriangle(
     }
     triangle->op = &_triangleOps;
     triangle->shader = shader;
-    copy3(p0, &triangle->point[0]);
+    copy3(p0, &triangle->point);
     sub3(p1, p0, &triangle->edge[0]);
     sub3(p2, p0, &triangle->edge[1]);
     copy2(uv0, &triangle->uv[0]);
     copy2(uv1, &triangle->uv[1]);
     copy2(uv2, &triangle->uv[2]);
-    cross(&triangle->edge[0], &triangle->edge[1], &triangle->normal[0]);
-    normalize3(&triangle->normal[0]);
+    cross(&triangle->edge[0], &triangle->edge[1], &triangle->normal);
+    normalize3(&triangle->normal);
 #ifdef PROFILE
     triangleAllocations++;
 #endif

@@ -15,8 +15,8 @@ typedef struct Triangle Triangle;
 struct Triangle {
     ShapeOps* op;
     const Shader* shader;
-    Vec3  point[1];
-    Vec3  normal[1];
+    Vec3  point;
+    Vec3  normal;
     Vec3  edge[2];
     Vec2  uv[3];
 };
