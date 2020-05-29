@@ -34,7 +34,9 @@ Vesa::Vesa() : _rasterPage(-1), _raster((uint8_t*)(0xa0000000)), _dac8supported(
 }
 
 Vesa::~Vesa() {
-    restoreState();
+    if (_save.mode != getVesaMode()) {
+        restoreState();
+    }
     delete [] _save._vesaState;
 }
 
