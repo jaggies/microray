@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // malloc
+#include <sys/stat.h>
+#include <math.h>
 #include "os.h"
 #include "vec2.h"
 #include "vec3.h"
@@ -49,6 +51,7 @@ loadWavefront(World* world, const char *filename, const char *options)
     char *tmpstr = strdup(filename);
     FILE *infile = NULL;
     int linecount = 0;
+    struct stat st;
 
     bzero(&state, sizeof(State));
 
@@ -57,13 +60,30 @@ loadWavefront(World* world, const char *filename, const char *options)
 
     state.filepath = dirname(tmpstr);
 
+    if (stat(filename, &st)) {
+        printf("Can't open %s\n", filename);
+        return false;
+    }
+
     // Parse Wavefront obj file
     if ( (infile = fopen(filename, "r")) ) {
         fprintf(stderr, "Loading Wavefront file '%s'\n", filename);
         do {
             char str[WAVE_MAX_LINE];
             const char* args[MAX_ARGS];
+            int completed = 0;
+            int progress = (int) (100.0f * ftell(infile) / st.st_size);
+
             linecount += waveGetLine(infile, str, WAVE_MAX_LINE);
+
+            if (progress > completed) {
+                fprintf(stderr, "\rLoading: %d%%", progress);
+                fflush(stderr);
+                completed = progress;
+                if (progress == 100) {
+                    fputc('\n', stderr);
+                }
+            }
 
             // strategy:
             //  g -> changes the state group path and starts a new mesh/surface.
@@ -177,7 +197,7 @@ loadWavefront(World* world, const char *filename, const char *options)
                     if ( nargs > 1 && strcmp(args[0], "mtllib") == 0 ) {
                         loadMaterialLibrary(world, state.filepath, args[1]);
                     } else {
-                        fprintf(stderr, "Unsupported: '%s'\n", str);
+                        fprintf(stderr, "\rUnsupported: '%s'\n", str);
                     }
                 }
                 break;
@@ -239,11 +259,11 @@ loadWavefront(World* world, const char *filename, const char *options)
                     if (nargs == 2 && strcmp(args[0], "usemtl") == 0) {
                         state.shader = findShader(args[1], world);
                         if (!state.shader) {
-                            fprintf(stderr, "Failed to find shader '%s'!\n", args[1]);
+                            fprintf(stderr, "\rFailed to find shader '%s'!\n", args[1]);
                             state.shader = findShader("default", world);
                         }
                     } else {
-                        fprintf(stderr, "Unsupported: '%s'\n", str);
+                        fprintf(stderr, "\rUnsupported: '%s'\n", str);
                     }
                 }
                 break;
@@ -293,13 +313,13 @@ loadWavefront(World* world, const char *filename, const char *options)
                         break;
 
                         default:
-                            fprintf(stderr, "Unsupported vertex token '%s'\n", str);
+                            fprintf(stderr, "\rUnsupported vertex token '%s'\n", str);
                         break;
                     }
                 break;
 
                 case '#':
-                    fprintf(stderr, "%s", str);   // echo comment to stderr
+                    fprintf(stderr, "\r%s", str);   // echo comment to stderr
                 break;
 
                 case '\0':  // getline sometimes returns empty string
@@ -309,7 +329,7 @@ loadWavefront(World* world, const char *filename, const char *options)
                 break;
 
                 default:
-                    fprintf(stderr, "Unsupported token '%s' at line %d\n", str , linecount);
+                    fprintf(stderr, "\rUnsupported token '%s' at line %d\n", str , linecount);
                 break;
             }
         } while (!feof(infile));
@@ -318,6 +338,7 @@ loadWavefront(World* world, const char *filename, const char *options)
     }
 
     free(tmpstr);
+    fputc('\r', stderr);
     return result;
 }
 
