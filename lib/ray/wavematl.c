@@ -44,7 +44,7 @@ PhongShader* createDefaultShader() {
     Vec3 ambient = { 0.1f, 0.1f, 0.1f };
     float exp = 2.0f;
     float index = 1.0f;
-    float reflect = 0.5f;
+    float reflect = 0.0f;
     float transmit = 0.0f;
     return createPhongShader(&diffuse, &specular, &ambient, exp, index, reflect, transmit);
 }
@@ -71,6 +71,7 @@ bool loadMaterialLibrary(World* world, const char* path, const char* name)
                         nargs = split(line, args, MAX_ARGS);
                         if (nargs > 0 && strcmp(args[0], "newmtl") == 0) {
                             const char* name = nargs > 1 && strlen(args[1]) ? args[1] : "unknown";
+                            fprintf(stderr, "Found material '%s'\n", name);
                             currentShader = createDefaultShader();
                             addShader(world, name, (Shader*) currentShader);
                         } else {
@@ -191,7 +192,9 @@ bool loadMaterialLibrary(World* world, const char* path, const char* name)
         fprintf(stderr, "Couldn't open material file '%s'\n", filename);
     }
 
-    fclose(infile);
+    if (infile) {
+        fclose(infile);
+    }
     free(filename);
     return true;
 }
