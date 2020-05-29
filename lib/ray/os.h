@@ -13,6 +13,12 @@ typedef long long int32_t;
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned long long uint32_t;
+
+extern float fmodf(float x, float y);
+extern char* dirname(char* path);
+extern int isblank(char c);
+extern int strcasecmp(const char *s1, const char *s2);
+
 #define nullptr ((void*) 0)
 #define bzero(ptr, size) memset(ptr, 0, size)
 #if !defined(bool) // Couldn't get this to work in both TC & Linux. DOS it doesn't exist; Linux only C++
@@ -29,7 +35,8 @@ extern const char* basename(const char *path);
 }
 #endif
 
-#else
+#else // DOS
+
 #include <stdint.h>
 #include <stddef.h> // size_t
 #include <linux/limits.h> // PATH_MAX
