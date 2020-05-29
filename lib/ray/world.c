@@ -11,6 +11,9 @@
 #include "triangle.h"
 #include "world.h"
 
+#define CHUNKSIZE (1<<5)
+#define MASK (CHUNKSIZE - 1)
+
 #define MAX_RAY_DEPTH 4 /* max number of reflected rays */
 #define MAX_IMAGE_DEPTH 255
 #define RAY_EPSILON 1.0e-5f
@@ -70,8 +73,11 @@ size_t addLight(World* world, Light* light) {
 
 size_t addShape(World* world, Shape* shape) {
     if (shape) {
-        world->shapes = (Shape**) realloc(world->shapes, (world->nShapes+1)*sizeof(Shape*));
-        assert(world->shapes);
+        if ((world->nShapes & MASK) == 0) {
+            world->shapes = (Shape**) realloc(world->shapes,
+                    (world->nShapes+CHUNKSIZE)*sizeof(Shape*));
+            assert(world->shapes);
+        }
         world->shapes[world->nShapes] = shape;
         return world->nShapes++;
     }
@@ -80,11 +86,15 @@ size_t addShape(World* world, Shape* shape) {
 
 size_t addShader(World* world, const char* shaderName, Shader* shader) {
     if (shader) {
-        // TODO: insert shader in proper location to avoid sorting later...
-        world->shaders = (Shader**) realloc(world->shaders, (world->nShaders+1)*sizeof(Shader*));
-        world->shaderNames = (char**) realloc(world->shaderNames, (world->nShaders+1)*sizeof(const char*));
+        if ((world->nShaders & MASK) == 0) {
+            world->shaders = (Shader**) realloc(world->shaders,
+                    (world->nShaders+CHUNKSIZE)*sizeof(Shader*));
+            world->shaderNames = (char**) realloc(world->shaderNames,
+                    (world->nShaders+CHUNKSIZE)*sizeof(const char*));
+        }
         assert(world->shaders);
         assert(world->shaderNames);
+        // TODO: insert shader in proper location to avoid sorting later...
         world->shaders[world->nShaders] = shader;
         world->shaderNames[world->nShaders] = strdup(shaderName);
         return world->nShaders++;
@@ -94,8 +104,11 @@ size_t addShader(World* world, const char* shaderName, Shader* shader) {
 
 size_t addPoint(World* world, Vec3* point) {
     if (point) {
-        world->points = (Vec3*) realloc(world->points, (world->nPoints+1)*sizeof(Vec3));
-        assert(world->points);
+        if ((world->nPoints & MASK) == 0) {
+            world->points = (Vec3*) realloc(world->points,
+                    (world->nPoints+CHUNKSIZE)*sizeof(Vec3));
+            assert(world->points);
+        }
         world->points[world->nPoints] = *point;
         return world->nPoints++;
     }
@@ -104,8 +117,11 @@ size_t addPoint(World* world, Vec3* point) {
 
 size_t addNormal(World* world, Vec3* normal) {
     if (normal) {
-        world->normals = (Vec3*) realloc(world->normals, (world->nNormals+1)*sizeof(Vec3));
-        assert(world->normals);
+        if ((world->nNormals & MASK) == 0) {
+            world->normals = (Vec3*) realloc(world->normals,
+                    (world->nNormals+CHUNKSIZE)*sizeof(Vec3));
+            assert(world->normals);
+        }
         world->normals[world->nNormals] = *normal;
         return world->nNormals++;
     }
@@ -114,8 +130,11 @@ size_t addNormal(World* world, Vec3* normal) {
 
 size_t addUv(World* world, Vec2* uv) {
     if (uv) {
-        world->uvs = (Vec2*) realloc(world->uvs, (world->nUvs+1)*sizeof(Vec2));
-        assert(world->uvs);
+        if ((world->nUvs & MASK) == 0) {
+            world->uvs = (Vec2*) realloc(world->uvs,
+                    (world->nUvs+CHUNKSIZE)*sizeof(Vec2));
+            assert(world->uvs);
+        }
         world->uvs[world->nUvs] = *uv;
         return world->nUvs++;
     }
@@ -124,8 +143,11 @@ size_t addUv(World* world, Vec2* uv) {
 
 size_t addFace(World* world, Face* face) {
     if (face) {
-        world->faces = (Face**) realloc(world->faces, (world->nFaces+1)*sizeof(Face*));
-        assert(world->faces);
+        if ((world->nFaces & MASK) == 0) {
+            world->faces = (Face**) realloc(world->faces,
+                    (world->nFaces+CHUNKSIZE)*sizeof(Face*));
+            assert(world->faces);
+        }
         world->faces[world->nFaces] = face;
         return world->nFaces++;
     }

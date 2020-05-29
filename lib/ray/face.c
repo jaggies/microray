@@ -9,6 +9,9 @@
 #include <assert.h>
 #include "world.h"
 
+#define CHUNKSIZE (1<<2)
+#define MASK (CHUNKSIZE - 1)
+
 Face* createFace() {
     Face* result = (Face*) calloc(1, sizeof(Face));
     return result;
@@ -26,7 +29,10 @@ void destroyFace(Face* face) {
 
 void addFaceVertex(Face* face, size_t vertexIdx) {
     if (vertexIdx != -1) {
-        face->vertexIndex = (size_t*) realloc(face->vertexIndex, (face->nVertexIndex+1) * sizeof(size_t));
+        if ((face->nVertexIndex & MASK) == 0) {
+            face->vertexIndex = (size_t*) realloc(face->vertexIndex,
+                    (face->nVertexIndex+CHUNKSIZE) * sizeof(size_t));
+        }
         assert(face->vertexIndex);
         face->vertexIndex[face->nVertexIndex++] = vertexIdx;
     }
@@ -34,16 +40,22 @@ void addFaceVertex(Face* face, size_t vertexIdx) {
 
 void addFaceNormal(Face* face, size_t normalIdx) {
     if (normalIdx != -1) {
-        face->normalIndex = (size_t*) realloc(face->normalIndex, (face->nNormalIndex+1) * sizeof(size_t));
-        assert(face->normalIndex);
+        if ((face->nNormalIndex & MASK) == 0) {
+            face->normalIndex = (size_t*) realloc(face->normalIndex,
+                    (face->nNormalIndex+CHUNKSIZE) * sizeof(size_t));
+            assert(face->normalIndex);
+        }
         face->normalIndex[face->nNormalIndex++] = normalIdx;
     }
 }
 
 void addFaceTexture(Face* face, size_t textureIdx) {
     if (textureIdx != -1) {
-        face->textureIndex = (size_t*) realloc(face->textureIndex, (face->nTextureIndex+1) * sizeof(size_t));
-        assert(face->textureIndex);
+        if ((face->nTextureIndex & MASK) == 0) {
+            face->textureIndex = (size_t*) realloc(face->textureIndex,
+                    (face->nTextureIndex+CHUNKSIZE) * sizeof(size_t));
+            assert(face->textureIndex);
+        }
         face->textureIndex[face->nTextureIndex++] = textureIdx;
     }
 }
