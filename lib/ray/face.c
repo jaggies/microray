@@ -27,6 +27,15 @@ void destroyFace(Face* face) {
     free(face);
 }
 
+void cleanup(Face* face) {
+    face->vertexIndex = (size_t*) realloc(face->vertexIndex,
+            face->nVertexIndex * sizeof(size_t));
+    face->normalIndex = (size_t*) realloc(face->normalIndex,
+            face->nNormalIndex * sizeof(size_t));
+    face->textureIndex = (size_t*) realloc(face->textureIndex,
+            face->nTextureIndex * sizeof(size_t));
+}
+
 void addFaceVertex(Face* face, size_t vertexIdx) {
     if (vertexIdx != -1) {
         if ((face->nVertexIndex & MASK) == 0) {

@@ -20,6 +20,7 @@ typedef struct _Face {
 
 Face* createFace();
 void destroyFace(Face*);
+void cleanup(Face* face);
 void addFaceVertex(Face* face, size_t vertexIdx);
 void addFaceNormal(Face* face, size_t normalIdx);
 void addFaceTexture(Face* face, size_t textureIdx);

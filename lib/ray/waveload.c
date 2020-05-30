@@ -172,6 +172,7 @@ loadWavefront(World* world, const char *filename, const char *options)
                 {
                     Face* face = createFace();
                     readFace(str, face);
+                    cleanup(face);
                     addFace(world, face); // TODO: Remove
                     generateTriangles(world, face, state.shader);
                 }
