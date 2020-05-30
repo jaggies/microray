@@ -251,6 +251,7 @@ bool loadNative(World* world, const char* fromPath)
             }
         }
     }
+    fclose(fp);
 
     fclose(fp);
 
