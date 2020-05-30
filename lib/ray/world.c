@@ -154,6 +154,26 @@ size_t addFace(World* world, Face* face) {
     return -1; // couldn't be added
 }
 
+Shader* getShader(World* world, const char* shaderName) {
+    int i;
+    for (i = 0; i < world->nShaders; i++) {
+        if (strcmp(shaderName, world->shaderNames[i]) == 0) {
+            return world->shaders[i];
+        }
+    }
+    return NULL;
+}
+
+const char* getShaderName(World* world, const Shader* shader) {
+    int i;
+    for (i = 0; i < world->nShaders; i++) {
+        if (shader == world->shaders[i]) {
+            return world->shaderNames[i];
+        }
+    }
+    return NULL;
+}
+
 void generateTriangles(World* world, Face* face, Shader* shader) {
     static const Vec2 uv = {0.0f, 0.0f}; // default coordinate if none specified
     const Vec3* p0 = &world->points[face->vertexIndex[0]];

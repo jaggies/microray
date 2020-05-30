@@ -58,22 +58,19 @@ bool loadWorld(World* world, const char* fromPath) {
     return result;
 }
 
-static Shader* getShader(World* world, const char* shaderName) {
-    int i;
-    for (i = 0; i < world->nShaders; i++) {
-        if (strcmp(shaderName, world->shaderNames[i]) == 0) {
-            return world->shaders[i];
+static Shader* getShaderOrDefault(World* world, const char* shaderName) {
+    Shader* shader = getShader(world, shaderName);
+    if (!shader) {
+        if (!defaultShader) {
+            Vec3 diffuse, specular, ambient;
+            vec3(1.0f,1.0f,1.0f,&diffuse);
+            vec3(1.0f,1.0f,1.0f,&specular);
+            vec3(0.0f,0.0f,0.0f,&ambient);
+            defaultShader = (Shader*) createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
         }
+        return defaultShader;
     }
-    printf("Shader %s not found\n", shaderName);
-    if (!defaultShader) {
-        Vec3 diffuse, specular, ambient;
-        vec3(1.0f,1.0f,1.0f,&diffuse);
-        vec3(1.0f,1.0f,1.0f,&specular);
-        vec3(0.0f,0.0f,0.0f,&ambient);
-        defaultShader = (Shader*) createPhongShader(&diffuse, &specular, &ambient, 20.0f, 1.0f, 0.0f, 0.0f);
-    }
-    return defaultShader;
+    return shader;
 }
 
 static Vec3 loadBackground(char* args) {
@@ -130,24 +127,32 @@ static Shader* loadCheckerboardShader(World* world, char* args, char** outname) 
 
 static Shape* loadSphere(World* world, char* args) {
     char* material = strtok(args, DELIM);
-	float x = atof(strtok(0, DELIM));
-	float y = atof(strtok(0, DELIM));
-	float z = atof(strtok(0, DELIM));
-	float r = atof(strtok(0, DELIM));
-    return createSphere(x, y, z, r, getShader(world, material));
+    float x = atof(strtok(0, DELIM));
+    float y = atof(strtok(0, DELIM));
+    float z = atof(strtok(0, DELIM));
+    float r = atof(strtok(0, DELIM));
+    return createSphere(x, y, z, r, getShaderOrDefault(world, material));
 }
 
-static Shape* loadTriangle(World* world, char* args) {
+static void loadTriangle(World* world, char* args) {
     Vec3 p1, p2, p3;
     Vec2 uv1, uv2, uv3;
     char* material = strtok(args, DELIM);
-	p1.x = atof(strtok(0, DELIM)); p1.y = atof(strtok(0, DELIM)); p1.z = atof(strtok(0, DELIM));
-	p2.x = atof(strtok(0, DELIM)); p2.y = atof(strtok(0, DELIM)); p2.z = atof(strtok(0, DELIM));
-	p3.x = atof(strtok(0, DELIM)); p3.y = atof(strtok(0, DELIM)); p3.z = atof(strtok(0, DELIM));
-	uv1.x = atof(strtok(0, DELIM)); uv1.y = atof(strtok(0, DELIM));
-	uv2.x = atof(strtok(0, DELIM)); uv2.y = atof(strtok(0, DELIM));
-	uv3.x = atof(strtok(0, DELIM)); uv3.y = atof(strtok(0, DELIM));
-    return createTriangle(&p1, &p2, &p3, &uv1, &uv2, &uv3, getShader(world, material));
+    Face* face = createFace();
+    vec3(atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), &p1);
+    vec3(atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), &p2);
+    vec3(atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), &p3);
+    addFaceVertex(face, addPoint(world, &p1));
+    addFaceVertex(face, addPoint(world, &p2));
+    addFaceVertex(face, addPoint(world, &p3));
+    vec2(atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), &uv1);
+    vec2(atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), &uv2);
+    vec2(atof(strtok(0, DELIM)), atof(strtok(0, DELIM)), &uv3);
+    addFaceTexture(face, addUv(world, &uv1));
+    addFaceTexture(face, addUv(world, &uv2));
+    addFaceTexture(face, addUv(world, &uv3));
+    generateTriangles(world, face, getShaderOrDefault(world, material));
+    destroyFace(face);
 }
 
 static Camera* loadPerspectiveCamera(World* world, char* args) {
@@ -230,7 +235,7 @@ bool loadNative(World* world, const char* fromPath)
                     world->background = loadBackground(ptr);
                     break;
                 case TRIANGLE:
-                    addShape(world, loadTriangle(world, ptr));
+                    loadTriangle(world, ptr);
                     break;
                 case CHECKERBOARD:
                     shader = loadCheckerboardShader(world, ptr, &name);

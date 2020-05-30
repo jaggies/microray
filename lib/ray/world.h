@@ -63,6 +63,9 @@ size_t addNormal(World*, Vec3* normal);
 size_t addUv(World*, Vec2* uv);
 size_t addFace(World*, Face* face);
 
+Shader* getShader(World* world, const char* shaderName);
+const char* getShaderName(World* world, const Shader* shader);
+
 void generateTriangles(World* world, Face* face, Shader* shader);
 
 #endif /* WORLD_H */
