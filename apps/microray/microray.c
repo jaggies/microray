@@ -24,6 +24,7 @@
 #include "loader.h"
 #include "netpbm.h"
 #include "testload.h"
+#include "stats.h"
 
 static bool pixel(uint16_t x, uint16_t y, uint8_t* rgb, void* userdata) {
     NetPBM* pbm = (NetPBM*) userdata;
@@ -63,7 +64,7 @@ int main(int argc, char **argv)
         char* outpath = getImagePath(argv[1]);
 
         renderToFile(world, outpath);
-        dumpStats(stderr);
+        dumpStats(stderr, world);
 
         free(outpath);
     } else {

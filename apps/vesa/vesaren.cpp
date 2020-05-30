@@ -33,6 +33,7 @@ extern "C" {
 #include "netpbm.h"
 #include "testload.h"
 #include "dither.h"
+#include "stats.h"
 };
 
 #include "vesa.h"
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
         char* outpath = getImagePath(argv[1]);
 
         renderToFile(world, &vesa, outpath);
-        dumpStats(stderr);
+        dumpStats(stderr, world);
 
         free(outpath);
     } else {

@@ -27,6 +27,7 @@
 #include "loader.h"
 #include "netpbm.h"
 #include "testload.h"
+#include "stats.h"
 
 static NetPBM* pbm = 0;
 #define RBITS 3 // TODO: set up palette in this code
@@ -105,7 +106,7 @@ int main(int argc, char **argv)
         if (loadWorld(world, argv[1])) {
             outpath = getImagePath(argv[1]);
             renderToFile(world, basename(outpath));
-            dumpStats(stderr);
+            dumpStats(stderr, world);
             free(outpath);
         } else {
             printf("Failed to load scene '%s'\n", argv[1]);

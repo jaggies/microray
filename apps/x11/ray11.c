@@ -32,6 +32,7 @@
 #include "netpbm.h"
 #include "testload.h"
 #include "dither.h"
+#include "stats.h"
 
 #define MAX_RAY_DEPTH 4 /* max number of reflected rays */
 #define USE_ERROR_DIFFUSION
@@ -402,7 +403,7 @@ static void renderX11(World* world, const char* outpath) {
     XClearArea(XtDisplay(drawingArea), XtWindow(drawingArea), 0, 0, 1, 1, 1);
     pbm->close(pbm);
 
-    dumpStats(stderr);
+    dumpStats(stderr, world);
 }
 
 Boolean render_proc(XtPointer client_data)

@@ -18,7 +18,7 @@
 #include "util.h"
 
 #ifdef PROFILE
-extern long intersections;
+extern size_t intersections;
 #endif /* PROFILE */
 
 static

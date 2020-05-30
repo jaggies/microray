@@ -21,6 +21,7 @@
 #include "netpbm.h"
 #include "testload.h"
 #include "dither.h"
+#include "stats.h"
 
 #define RBITS 3
 #define GBITS 3
@@ -71,7 +72,7 @@ int main(int argc, char **argv)
 
 	// Renders image, calling above pixel() routine for each pixel
     renderImage(world, pixel, NULL);
-    dumpStats(stderr);
+    dumpStats(stderr, world);
     destroyWorld(world);
 
     return 0;

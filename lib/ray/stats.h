@@ -9,6 +9,7 @@
 #define LIB_RAY_STATS_H_
 
 #include <stdio.h>
-void dumpStats(FILE* fp);
+
+void dumpStats(FILE* fp, World* world);
 
 #endif /* LIB_RAY_STATS_H_ */

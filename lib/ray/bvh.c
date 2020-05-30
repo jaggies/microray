@@ -38,9 +38,9 @@ static void initialize_BVH_parameters()
 }
 
 #ifdef PROFILE
-static int total_treed = 0;
+static size_t total_treed = 0;
 static time_t previous;
-static int bvh_level_counts[MAX_MAX_BVH_DEPTH];
+static size_t bvh_level_counts[MAX_MAX_BVH_DEPTH];
 /* Each element N of this array is the number of leafs with N children */
 size_t bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT + 1];
 size_t bvh_node_count = 0;
@@ -49,17 +49,20 @@ size_t bvh_leaf_count = 0;
 
 void print_tree_stats()
 {
+    size_t i;
+    size_t largest_leaf_count;
+
     fprintf(stderr, "%lu bvh nodes\n", bvh_node_count);
     fprintf(stderr, "%lu of those are leaves\n", bvh_leaf_count);
-    for(int i = 0; i < bvh_max_depth + 1; i++) {
-        fprintf(stderr, "bvh level %2d: %6d nodes\n", i, bvh_level_counts[i]);
+    for(i = 0; i < bvh_max_depth + 1; i++) {
+        fprintf(stderr, "bvh level %2ld: %6ld nodes\n", i, bvh_level_counts[i]);
     }
-    int largest_leaf_count = MAX_LEAF_SIZE_COUNT;
+    largest_leaf_count = MAX_LEAF_SIZE_COUNT;
     while((largest_leaf_count > 0) && (bvh_leaf_size_counts[largest_leaf_count]) == 0)
         largest_leaf_count--;
 
-    for(int i = 0; i <= largest_leaf_count; i++) {
-        fprintf(stderr, "%2d shapes in %6lu leaves\n", i, bvh_leaf_size_counts[i]);
+    for(i = 0; i <= largest_leaf_count; i++) {
+        fprintf(stderr, "%2ld shapes in %6lu leaves\n", i, bvh_leaf_size_counts[i]);
     }
     if(bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT] > 0)
         fprintf(stderr, "%d or more shapes in %6lu leaves\n", MAX_LEAF_SIZE_COUNT, bvh_leaf_size_counts[MAX_LEAF_SIZE_COUNT]);
@@ -121,7 +124,7 @@ Shape* make_tree(Shape** shapes, int nShapes, int level)
 
 #ifdef PROFILE
     if(time(NULL) > previous) {
-        fprintf(stderr, "total treed = %d\n", total_treed);
+        fprintf(stderr, "total treed = %ld\n", total_treed);
         previous = time(NULL);
     }
 #endif /* PROFILE */

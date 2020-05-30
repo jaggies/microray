@@ -51,9 +51,6 @@ World* createWorld();
 // Destroy and free all resources
 void destroyWorld(World*);
 
-// Dump profile metrics to given file or stream
-void dumpStats(FILE* fp);
-
 // Returns the index position of the item stored or -1 if it fails.
 size_t addLight(World* world, Light* light);
 size_t addShape(World* world, Shape* shape);
